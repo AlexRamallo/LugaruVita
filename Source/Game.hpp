@@ -40,7 +40,7 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 #include "Utils/ImageIO.hpp"
 #include "Utils/binio.h"
 
-#include <SDL.h>
+#include "SDL2.h"
 #include <fstream>
 
 #define NB_CAMPAIGN_MENU_ITEM 7

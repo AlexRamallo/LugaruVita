@@ -23,14 +23,23 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 #include "Game.hpp"
 #include "Utils/Folders.hpp"
 
+extern "C" {
+    extern size_t BinIOFormatByteCount(const char *format);
+}
+
 std::vector<Animation> Animation::animations;
 
 void Animation::loadAll()
 {
 #define DECLARE_ANIM(id, file, height, attack, ...) \
-    if (id < loadable_anim_end)                     \
-        animations.emplace_back(file, height, attack);
+    if (id < loadable_anim_end){                     \
+        animations.emplace_back(file, height, attack);\
+    }
+    try {
 #include "Animation.def"
+    } catch (const exception &e) {
+        LOG("Animation::loadAll EXCEPTION: %s", e.what());
+    }
 #undef DECLARE_ANIM
 }
 
@@ -91,21 +100,31 @@ Animation::Animation(const std::string& filename, anim_height_type aheight, anim
 
     LOGFUNC;
 
+
     // Changing the filename into something the OS can understand
     std::string filepath = Folders::getResourcePath("Animations/" + filename);
 
-    LOG(std::string("Loading animation...") + filepath);
+    //LOG(std::string("Loading animation...") + filepath);
 
     height = aheight;
     attack = aattack;
 
-    Game::LoadingScreen();
+    //Game::LoadingScreen();
 
     // read file in binary mode
     tfile = Folders::openMandatoryFile(filepath, "rb");
 
     // read numframes, joints to know how much memory to allocate
+
+    //LOG("ABOUT TO CALL funpackf(%s)\n", filepath.c_str());
+
     funpackf(tfile, "Bi Bi", &numframes, &numjoints);
+    /*
+    LOG("Animation: %s\n", filename.c_str());
+    LOG("\tnumjoints: %d\n", (int) numjoints);
+    LOG("\tnumframes: %d\n", (int) numframes);
+    LOG("\tframes.size: %d\n", (int) frames.size());
+    */
 
     // allocate memory for everything
 

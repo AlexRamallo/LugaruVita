@@ -66,9 +66,52 @@ extern float accountcampaigntime[10];
 extern int accountcampaignchoicesmade[10];
 extern int accountcampaignchoices[10][5000];
 
-void LOG(const std::string&, ...)
-{
-    // !!! FIXME: write me.
+static bool log_enabled = false;
+
+void vLOG(const std::string &fmt, va_list args);
+
+void LOG_TOGGLE(char set){
+    log_enabled = set;
+}
+
+void LOG(const std::string &fmt, ...)
+{  
+    if(!log_enabled) return;
+    //stolen from https://en.cppreference.com/w/cpp/utility/variadic    
+    va_list args;
+    va_start(args, fmt);
+    bool is_fmt = false;
+    for(char c: fmt){
+        if(is_fmt){
+            is_fmt = false;
+            if (c == 'd') {
+                int i = va_arg(args, int);
+                std::cout << i;
+            } else if (c == 'c') {
+                // note automatic conversion to integral type
+                int c = va_arg(args, int);
+                std::cout << static_cast<char>(c);
+            } else if (c == 'f') {
+                double d = va_arg(args, double);
+                std::cout << d;
+            } else if(c == 's') {
+                char *s = va_arg(args, char*);
+                std::cout << s;
+            } else if(c == '%') {
+                std::cout << '%';
+            } else{
+                std::cout << '%' << c;
+            }
+        }else{
+            if(c == '%'){
+                is_fmt = true;
+            }else{
+                std::cout << c;
+            }
+        }
+    }
+    std::cout << std::endl;
+    va_end(args);
 }
 
 void Dispose()
@@ -411,7 +454,9 @@ void FadeLoadingScreen(float howmuch)
     glMatrixMode(GL_MODELVIEW);
     glPushMatrix();
     glLoadIdentity();
+
     glTranslatef(screenwidth / 2, screenheight / 2, 0);
+
     glScalef((float)screenwidth / 2, (float)screenheight / 2, 1);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glDisable(GL_BLEND);
@@ -435,17 +480,28 @@ void FadeLoadingScreen(float howmuch)
     glPopMatrix();
     glDisable(GL_BLEND);
     glDepthMask(1);
+
+    LOG("\tE");
+
     //Text
     swap_gl_buffers();
+
+    LOG("\tF");
 }
 
 void Game::InitGame()
 {
+    LOG_TOGGLE(true);
+    std::cout << "InitGame A\n";
+
     LOGFUNC;
 
     numchallengelevels = 14;
 
     Account::loadFile(Folders::getUserSavePath());
+
+    std::cout << "InitGame B\n";
+
 
     whichjointstartarray[0] = righthip;
     whichjointendarray[0] = rightfoot;
@@ -525,19 +581,35 @@ void Game::InitGame()
     whichjointstartarray[25] = neck;
     whichjointendarray[25] = head;
 
+    std::cout << "InitGame C\n";
+
+    LOG("FadeLoadingScreen...");
+
     FadeLoadingScreen(0);
+
+    std::cout << "InitGame D\n";
 
     stillloading = 1;
 
     int temptexdetail = texdetail;
     texdetail = 1;
     text->LoadFontTexture("Textures/Font.png");
+    
+    std::cout << "InitGame E\n";
+
     text->BuildFont();
+
+    std::cout << "InitGame F\n";
+
     textmono->LoadFontTexture("Textures/FontMono.png");
     textmono->BuildFont();
     texdetail = temptexdetail;
 
+    std::cout << "InitGame G\n";    
+
     FadeLoadingScreen(10);
+
+    std::cout << "InitGame H\n";    
 
     if (detail == 2) {
         texdetail = 1;
@@ -594,16 +666,25 @@ void Game::InitGame()
 
     Menu::Load();
 
+    LOG("Loading all animations...");
+
     Animation::loadAll();
+
+    LOG("Loading PersonType...");
 
     PersonType::Load();
 
+    LOG("Creating Player...");
     Person::players.emplace_back(new Person());
+ 
+    LOG("InitGame Done!!");
+    LOG_TOGGLE(false);
 }
 
 void Game::LoadScreenTexture()
 {
-    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+    //VITAGL: TODO
+    //glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
     if (!Game::screentexture) {
         glGenTextures(1, &Game::screentexture);

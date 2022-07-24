@@ -2,8 +2,31 @@ project(lugaru)
 
 cmake_minimum_required(VERSION 3.5)
 
+set(VITA FALSE)
+
+add_compile_options("-fstack-protector-strong")
+#########
+# Vita
+if(VITA)
+    if(NOT DEFINED CMAKE_TOOLCHAIN_FILE)
+      if(DEFINED ENV{VITASDK})
+        set(CMAKE_TOOLCHAIN_FILE "$ENV{VITASDK}/share/vita.toolchain.cmake" CACHE PATH "toolchain file")
+      else()
+        message(FATAL_ERROR "Please define VITASDK to point to your SDK path!")
+      endif()
+    endif()
+
+    include("$ENV{VITASDK}/share/vita.cmake" REQUIRED)
+
+
+    set(VITA_APP_NAME "Lugaru")
+    set(VITA_TITLEID  "LUGARU069")
+    set(VITA_VERSION  "01.00")
+endif()
+#########
+
 include(FindPkgConfig)
-include(GNUInstallDirs)
+#include(GNUInstallDirs)
 
 
 ### Helpers
@@ -129,6 +152,7 @@ set(LUGARU_SRCS
     ${SRCDIR}/Utils/Folders.cpp
     ${SRCDIR}/Utils/ImageIO.cpp
     ${SRCDIR}/Utils/Input.cpp
+    ${SRCDIR}/Utils/PVRTexLoader.cpp
     ${SRCDIR}/Utils/pack.c
     ${SRCDIR}/Utils/private.c
     ${SRCDIR}/Utils/unpack.c
@@ -138,7 +162,7 @@ set(LUGARU_SRCS
     ${SRCDIR}/GameTick.cpp
     ${SRCDIR}/Globals.cpp
     ${SRCDIR}/Tutorial.cpp
-
+    #${SRCDIR}/GL/VitaGL_Extra.cpp
 )
 
 set(LUGARU_H
@@ -204,7 +228,7 @@ endif()
 
 # TODO: Work on supporting "GLVND" instead.
 set(OpenGL_GL_PREFERENCE LEGACY)
-find_package(OpenGL REQUIRED)
+#find_package(OpenGL REQUIRED)
 
 # Windows is funky about OpenAL detection
 if(WIN32)
@@ -214,8 +238,10 @@ else()
     find_package(OpenAL REQUIRED)
 endif()
 
-# macOS has problems with using pkgconfig to find SDL2
-if(APPLE)
+if(VITA)
+    find_package(SDL2 REQUIRED)
+elseif(APPLE)
+    # macOS has problems with using pkgconfig to find SDL2
     find_package(sdl2 REQUIRED)
 else()
     pkg_check_modules(SDL2 sdl2 REQUIRED)
@@ -231,7 +257,6 @@ include_directories(
     ${OPENAL_INCLUDE_DIR}
     ${JPEG_INCLUDE_DIR}
     ${PNG_INCLUDE_DIR}
-    ${OPENGL_INCLUDE_DIR}
     ${SDL2_INCLUDE_DIRS}
     ${VORBISFILE_INCLUDE_DIR}
     ${JSONCPP_INCLUDE_DIRS}
@@ -239,6 +264,45 @@ include_directories(
 )
 
 set(LUGARU_LIBS ${OPENAL_LIBRARY} ${PNG_LIBRARY} ${JPEG_LIBRARY} ${SDL2_LIBRARIES} ${OPENGL_gl_LIBRARY} ${OPENGL_glu_LIBRARY} ${VORBISFILE_LIBRARIES} ${JSONCPP_LIBRARIES} ${PLATFORM_LIBS})
+
+if(VITA)
+    add_definitions(-DDATA_DIR="app0:Data")
+
+    set(LUGARU_LIBS ${LUGARU_LIBS}
+        libvitaGL.a
+        vitashark
+        png
+        jpeg
+        z
+        m
+        mathneon
+        SceGxm_stub
+        SceDisplay_stub
+        SceAudio_stub
+        SceAudioIn_stub
+        SceSysmodule_stub
+        SceCommonDialog_stub
+        SceLibKernel_stub
+        SceKernelDmacMgr_stub
+        SceKernelThreadMgr_stub
+        SceCtrl_stub
+        SceMotion_stub
+        SceHid_stub
+        SceTouch_stub
+
+        SceShaccCg_stub
+        SceShaccCgExt
+
+        ScePvf_stub
+        SceAppMgr_stub
+        SceAppUtil_stub
+        ScePgf_stub
+        SceAudio_stub
+        pthread
+
+        taihen_stub
+    )
+endif()
 
 
 ### Definitions
@@ -252,6 +316,8 @@ if(WIN32)
         # An alternative would be to use _WIN32 consistently instead of WIN32
         add_definitions(-DWIN32)
     endif()
+elseif(VITA)
+    add_definitions(-DPLATFORM_VITA=1 -DPLATFORM_UNIX=1 -DBinIO_STDINT_HEADER=<stdint.h>)
 else()
     add_definitions(-DPLATFORM_LINUX=1 -DPLATFORM_UNIX=1 -DBinIO_STDINT_HEADER=<stdint.h>)
 endif()
@@ -345,3 +411,15 @@ install(FILES ${CMAKE_SOURCE_DIR}/AUTHORS
               ${CMAKE_SOURCE_DIR}/Docs/README.SevenTasks.txt
               ${CMAKE_SOURCE_DIR}/Docs/README.Temple.txt
         DESTINATION ${LUGARU_DOCDIR})
+
+if(VITA)
+    vita_create_self(${PROJECT_NAME}.self ${PROJECT_NAME})
+    vita_create_vpk(${PROJECT_NAME}.vpk ${VITA_TITLEID} ${PROJECT_NAME}.self
+      VERSION ${VITA_VERSION}
+      NAME ${VITA_APP_NAME}
+      FILE sce_sys/icon0.png sce_sys/icon0.png
+      FILE sce_sys/livearea/contents/bg.png sce_sys/livearea/contents/bg.png
+      FILE sce_sys/livearea/contents/startup.png sce_sys/livearea/contents/startup.png
+      FILE sce_sys/livearea/contents/template.xml sce_sys/livearea/contents/template.xml
+    )
+endif()

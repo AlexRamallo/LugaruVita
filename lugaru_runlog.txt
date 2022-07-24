@@ -1,0 +1,31 @@
+is big endian: 0
+--------------------------------------------------------------------------
+Lugaru HD: The Rabbit's Foot, by Wolfire Games and the OSS Lugaru project.
+
+Licensed under the GPL 2.0+ and CC-BY-SA 3.0 and 4.0 licenses.
+More information, updates and bug reports at http://osslugaru.gitlab.io
+
+Version 1.3-dev (git 6a58b62) -- Debug build
+--------------------------------------------------------------------------
+
+InitGame A
+InitGame B
+InitGame C
+FadeLoadingScreen...
+	E
+	F
+InitGame D
+InitGame E
+InitGame F
+InitGame G
+	E
+	F
+InitGame H
+Initializing sound system...
+	E
+	F
+Loading all animations...
+Loading PersonType...
+Creating Player...
+InitGame Done!!
+Player[2] patch X: 2147483647	Z: 2147483647

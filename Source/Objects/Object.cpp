@@ -340,12 +340,14 @@ void Object::draw()
         distance *= 1.2;
         hidden = !(distsqflat(&viewer, &position) > playerdist + 3 || (type != bushtype && type != treeleavestype));
         if (!hidden) {
-
+            /*
+            //VITAGL: TODO
             if (detail == 2 && distance > viewdistance * viewdistance / 4 && environment == desertenvironment) {
                 glTexEnvf(GL_TEXTURE_FILTER_CONTROL_EXT, GL_TEXTURE_LOD_BIAS_EXT, blurness);
             } else {
                 glTexEnvf(GL_TEXTURE_FILTER_CONTROL_EXT, GL_TEXTURE_LOD_BIAS_EXT, 0);
             }
+            */
             distance = (viewdistance * viewdistance - (distance - (viewdistance * viewdistance * fadestart)) * (1 / (1 - fadestart))) / viewdistance / viewdistance;
             if (distance > 1) {
                 distance = 1;
@@ -632,13 +634,17 @@ void Object::Draw()
         objects[i]->draw();
     }
 
-    glTexEnvf(GL_TEXTURE_FILTER_CONTROL_EXT, GL_TEXTURE_LOD_BIAS_EXT, 0);
+    //VITAGL: TODO
+    //glTexEnvf(GL_TEXTURE_FILTER_CONTROL_EXT, GL_TEXTURE_LOD_BIAS_EXT, 0);
     for (unsigned i = 0; i < objects.size(); i++) {
         objects[i]->drawSecondPass();
     }
+    /*
+    //VITAGL: TODO
     if (environment == desertenvironment) {
         glTexEnvf(GL_TEXTURE_FILTER_CONTROL_EXT, GL_TEXTURE_LOD_BIAS_EXT, 0);
     }
+    */
     glEnable(GL_ALPHA_TEST);
     SetUpLight(&light, 0);
 }

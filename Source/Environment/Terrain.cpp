@@ -1036,11 +1036,14 @@ void Terrain::draw(int layer)
                 glMatrixMode(GL_MODELVIEW);
                 glPushMatrix();
                 if (frustum.CubeInFrustum(i * patch_size + patch_size * .5, avgypatch[i][j], j * patch_size + patch_size * .5, heightypatch[i][j] / 2)) {
+                    /*
+                    //VITAGL: TODO
                     if (environment == desertenvironment && distance[i][j] > viewdistsquared / 4) {
                         glTexEnvf(GL_TEXTURE_FILTER_CONTROL_EXT, GL_TEXTURE_LOD_BIAS_EXT, blurness);
                     } else if (environment == desertenvironment) {
                         glTexEnvf(GL_TEXTURE_FILTER_CONTROL_EXT, GL_TEXTURE_LOD_BIAS_EXT, 0);
                     }
+                    */
                     if (!layer && textureness[i][j] != allsecond) {
                         drawpatch(i, j, opacity);
                     }
@@ -1055,9 +1058,12 @@ void Terrain::draw(int layer)
             }
         }
     }
+    /*
+    //VITAGL: TODO
     if (environment == desertenvironment) {
         glTexEnvf(GL_TEXTURE_FILTER_CONTROL_EXT, GL_TEXTURE_LOD_BIAS_EXT, 0);
     }
+    */
 }
 
 void Terrain::drawdecals()

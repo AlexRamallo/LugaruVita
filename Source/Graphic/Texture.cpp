@@ -22,10 +22,71 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "Utils/Folders.hpp"
 #include "Utils/ImageIO.hpp"
+#include <assert.h>
 
 using namespace std;
 
+extern PVRTexLoader *pvr_loader;
 extern bool trilinear;
+
+void TextureRes::uploadPVR(void *pTexture){
+    ImageRec *texture = (ImageRec*) pTexture;
+    assert(texture->is_pvr);
+
+    //datalen = texture->pvr_header.getImageSize();
+
+    glDeleteTextures(1, &id);
+    glGenTextures(1, &id);
+    glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+
+    glBindTexture(GL_TEXTURE_2D, id);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    if (hasMipmap) {
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, (trilinear ? GL_LINEAR_MIPMAP_LINEAR : GL_LINEAR_MIPMAP_NEAREST));
+    } else {
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    }
+
+    if (isSkin) {
+        /*TODO: decipher this
+        free(data);
+        const int nb = texture->sizeY * texture->sizeX * (texture->bpp / 8);
+        data = (GLubyte*)malloc(nb * sizeof(GLubyte));
+        datalen = 0;
+        for (int i = 0; i < nb; i++) {
+            if ((i + 1) % 4 || type == GL_RGB) {
+                data[datalen++] = texture->data[i];
+            }
+        }
+        glTexImage2D(GL_TEXTURE_2D, 0, type, texture->sizeX, texture->sizeY, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+        */
+    } else {
+        if(texture->pvr_header.isCompressed()){
+            glCompressedTexImage2D(
+                GL_TEXTURE_2D,
+                0,
+                texture->pvr_header.getGLInternalFormat(),
+                texture->pvr_header.Width,
+                texture->pvr_header.Height,
+                texture->pvr_header.getBorder(),
+                texture->pvr_header.getImageSize(),
+                texture->data
+            );
+        }else{
+            glTexImage2D(
+                GL_TEXTURE_2D,
+                0,
+                texture->pvr_header.getGLInternalFormat(),
+                texture->pvr_header.Width,
+                texture->pvr_header.Height,
+                texture->pvr_header.getBorder(),
+                texture->pvr_header.getGLPixelFormat(),
+                texture->pvr_header.getImageSize(),
+                texture->data
+            );
+        }
+    }
+}
 
 void TextureRes::load()
 {
@@ -37,40 +98,46 @@ void TextureRes::load()
         return;
     }
 
-    skinsize = texture.sizeX;
-    GLuint type = GL_RGBA;
-    if (texture.bpp == 24) {
-        type = GL_RGB;
-    }
-
-    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-
-    glDeleteTextures(1, &id);
-    glGenTextures(1, &id);
-    glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-
-    glBindTexture(GL_TEXTURE_2D, id);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    if (hasMipmap) {
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, (trilinear ? GL_LINEAR_MIPMAP_LINEAR : GL_LINEAR_MIPMAP_NEAREST));
-        glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE);
-    } else {
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    }
-
-    if (isSkin) {
-        free(data);
-        const int nb = texture.sizeY * texture.sizeX * (texture.bpp / 8);
-        data = (GLubyte*)malloc(nb * sizeof(GLubyte));
-        datalen = 0;
-        for (int i = 0; i < nb; i++) {
-            if ((i + 1) % 4 || type == GL_RGB) {
-                data[datalen++] = texture.data[i];
-            }
+    if(!texture.is_pvr){
+        skinsize = texture.sizeX;
+        GLuint type = GL_RGBA;
+        if (texture.bpp == 24) {
+            type = GL_RGB;
         }
-        glTexImage2D(GL_TEXTURE_2D, 0, type, texture.sizeX, texture.sizeY, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-    } else {
-        glTexImage2D(GL_TEXTURE_2D, 0, type, texture.sizeX, texture.sizeY, 0, type, GL_UNSIGNED_BYTE, texture.data);
+
+        //VITAGL: TODO
+        //glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
+        glDeleteTextures(1, &id);
+        glGenTextures(1, &id);
+        glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+
+        glBindTexture(GL_TEXTURE_2D, id);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        if (hasMipmap) {
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, (trilinear ? GL_LINEAR_MIPMAP_LINEAR : GL_LINEAR_MIPMAP_NEAREST));
+            //VITAGL: TODO
+            //glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE);
+        } else {
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        }
+
+        if (isSkin) {
+            free(data);
+            const int nb = texture.sizeY * texture.sizeX * (texture.bpp / 8);
+            data = (GLubyte*)malloc(nb * sizeof(GLubyte));
+            datalen = 0;
+            for (int i = 0; i < nb; i++) {
+                if ((i + 1) % 4 || type == GL_RGB) {
+                    data[datalen++] = texture.data[i];
+                }
+            }
+            glTexImage2D(GL_TEXTURE_2D, 0, type, texture.sizeX, texture.sizeY, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+        } else {
+            glTexImage2D(GL_TEXTURE_2D, 0, type, texture.sizeX, texture.sizeY, 0, type, GL_UNSIGNED_BYTE, texture.data);
+        }
+    }else{
+        uploadPVR((void*)&texture);
     }
 }
 
@@ -109,7 +176,14 @@ TextureRes::TextureRes(const string& _filename, bool _hasMipmap, GLubyte* array,
 
 TextureRes::~TextureRes()
 {
-    free(data);
+    if(data != NULL){
+        if(is_pvr){
+            pvr_loader->freeTexture(data);
+        }else{
+            free(data);
+        }
+    }
+    data = NULL;
     glDeleteTextures(1, &id);
 }
 

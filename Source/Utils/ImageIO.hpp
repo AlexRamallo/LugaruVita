@@ -39,14 +39,23 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 #include "Graphic/gamegl.hpp"
 #endif
 
+#include "Utils/PVRTexLoader.hpp"
+
 /**> DATA STRUCTURES <**/
 class ImageRec
 {
 public:
-    GLubyte* data; // Image Data (Up To 32 Bits)
-    GLuint bpp;    // Image Color Depth In Bits Per Pixel.
-    GLuint sizeX;
-    GLuint sizeY;
+	bool is_pvr;
+	GLubyte* data; // Image Data (Up To 32 Bits)
+	union {
+		struct {
+			GLuint sizeX;
+			GLuint sizeY;
+			GLuint bpp;    // Image Color Depth In Bits Per Pixel.
+		};
+		PVRHeader pvr_header;
+	};
+
     ImageRec();
     ~ImageRec();
 
@@ -55,8 +64,10 @@ private:
     ImageRec(ImageRec const&);
     ImageRec& operator=(ImageRec const&);
 };
-
-bool load_image(const char* fname, ImageRec& tex);
+/*
+	force_pvr will ignore the file extension and load the image as a PVR file
+*/
+bool load_image(const char* fname, ImageRec& tex, bool force_pvr = true);
 bool save_screenshot(const char* fname);
 
 #endif

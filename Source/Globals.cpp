@@ -22,7 +22,7 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 #include "Math/XYZ.hpp"
 #include "Objects/Weapons.hpp"
 
-#include <SDL.h>
+#include "SDL2.h"
 #include <string>
 
 bool visibleloading = false;
@@ -46,7 +46,11 @@ int difficulty = 0;
 float multiplier = 0;
 float realmultiplier = 0;
 float screenwidth = 0, screenheight = 0;
+#if PLATFORM_VITA
+float minscreenwidth = 960, minscreenheight = 544;
+#else
 float minscreenwidth = 640, minscreenheight = 480;
+#endif
 float maxscreenwidth = 3000, maxscreenheight = 3000;
 bool fullscreen = 0;
 float viewdistance = 0;

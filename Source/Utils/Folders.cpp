@@ -75,6 +75,8 @@ std::string Folders::getConfigFilePath()
     std::string configFolder;
 #if defined(_WIN32) || (defined(__APPLE__) && defined(__MACH__))
     configFolder = getUserDataPath();
+#elif PLATFORM_VITA
+    configFolder = "ux0:data/lugaru";
 #else // Linux
     configFolder = getGenericDirectory("XDG_CONFIG_HOME", ".config");
     makeDirectory(configFolder);
@@ -82,7 +84,7 @@ std::string Folders::getConfigFilePath()
     return configFolder + "/config.txt";
 }
 
-#if PLATFORM_LINUX
+#if PLATFORM_LINUX || PLATFORM_VITA
 /* Generic code for XDG ENVVAR test and fallback */
 std::string Folders::getGenericDirectory(const char* ENVVAR, const std::string& fallback)
 {
@@ -105,15 +107,19 @@ std::string Folders::getGenericDirectory(const char* ENVVAR, const std::string& 
 #if PLATFORM_UNIX
 const char* Folders::getHomeDirectory()
 {
-    const char* homedir = getenv("HOME");
-    if (homedir != NULL) {
-        return homedir;
-    }
-    struct passwd* pw = getpwuid(getuid());
-    if (pw != NULL) {
-        return pw->pw_dir;
-    }
-    return NULL;
+    #if PLATFORM_VITA
+        return "ux0:data/lugaru";
+    #else
+        const char* homedir = getenv("HOME");
+        if (homedir != NULL) {
+            return homedir;
+        }
+        struct passwd* pw = getpwuid(getuid());
+        if (pw != NULL) {
+            return pw->pw_dir;
+        }
+        return NULL;
+    #endif
 }
 #endif
 

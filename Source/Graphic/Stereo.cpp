@@ -84,7 +84,8 @@ void InitStereo(StereoMode mode)
             glPushMatrix();
             glLoadIdentity();
             glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
-            glDisable(GL_LINE_SMOOTH);
+            //VITAGL: TODO
+            //glDisable(GL_LINE_SMOOTH);
 
             // Add 0.5 to the coordinates, because OpenGL considers a pixel should be
             // turned on when a line passes through the center of it.

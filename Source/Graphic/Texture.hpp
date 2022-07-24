@@ -38,8 +38,11 @@ private:
     int skinsize;
     GLubyte* data;
     int datalen;
+    bool is_pvr;
 
     void load();
+
+    void uploadPVR(void *texture);
 
 public:
     TextureRes(const string& filename, bool hasMipmap);

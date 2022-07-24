@@ -29,11 +29,13 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <fstream>
 #include <iostream>
+#include <ostream>
 #include <math.h>
 #include <set>
 #include <stdio.h>
 #include <string.h>
 #include <time.h>
+#include <assert.h>
 
 using namespace Game;
 
@@ -42,6 +44,20 @@ using namespace Game;
 #include <windows.h>
 #else
 #include <unistd.h>
+#endif
+
+#if PLATFORM_VITA
+
+extern "C" {
+    //unsigned int _newlib_heap_size_user = 300 * 1024 * 1024;
+    unsigned int _newlib_heap_size_user = 216 * 1024 * 1024;
+}
+
+#include <vitaGL.h>
+
+#include "Utils/PVRTexLoader.hpp"
+
+PVRTexLoader *pvr_loader = nullptr;
 #endif
 
 extern float multiplier;
@@ -80,6 +96,7 @@ void initGL()
 {
     glClear(GL_COLOR_BUFFER_BIT);
     swap_gl_buffers();
+    glMatrixMode(GL_PROJECTION);
 
     // clear all states
     glDisable(GL_ALPHA_TEST);
@@ -87,9 +104,12 @@ void initGL()
     glDisable(GL_DEPTH_TEST);
     glDisable(GL_FOG);
     glDisable(GL_LIGHTING);
+    glDisable(GL_TEXTURE_2D);
+
+    /*
+    VITAGL: TODO
     glDisable(GL_LOGIC_OP);
     glDisable(GL_TEXTURE_1D);
-    glDisable(GL_TEXTURE_2D);
     glPixelTransferi(GL_MAP_COLOR, GL_FALSE);
     glPixelTransferi(GL_RED_SCALE, 1);
     glPixelTransferi(GL_RED_BIAS, 0);
@@ -99,6 +119,9 @@ void initGL()
     glPixelTransferi(GL_BLUE_BIAS, 0);
     glPixelTransferi(GL_ALPHA_SCALE, 1);
     glPixelTransferi(GL_ALPHA_BIAS, 0);
+    glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
+    glEnable(GL_DITHER);
+    */
 
     // set initial rendering states
     glShadeModel(GL_SMOOTH);
@@ -106,11 +129,9 @@ void initGL()
     glDepthFunc(GL_LEQUAL);
     glDepthMask(GL_TRUE);
     glEnable(GL_DEPTH_TEST);
-    glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
     glCullFace(GL_FRONT);
     glEnable(GL_CULL_FACE);
     glEnable(GL_LIGHTING);
-    glEnable(GL_DITHER);
     glEnable(GL_COLOR_MATERIAL);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -196,11 +217,13 @@ bool SetUp()
         SaveSettings();
     }
 
+    /*
     if (SDL_GL_LoadLibrary(NULL) == -1) {
         fprintf(stderr, "SDL_GL_LoadLibrary() failed: %s\n", SDL_GetError());
         SDL_Quit();
         return false;
     }
+    */
 
     for (int displayIdx = 0; displayIdx < SDL_GetNumVideoDisplays(); ++displayIdx) {
         for (int i = 0; i < SDL_GetNumDisplayModes(displayIdx); ++i) {
@@ -276,8 +299,9 @@ bool SetUp()
         return false;
     }
 
-    SDL_GL_MakeCurrent(sdlwindow, glctx);
+    SDL_GL_MakeCurrent(sdlwindow, glctx); 
 
+    /*
     int dblbuf = 0;
     if ((SDL_GL_GetAttribute(SDL_GL_DOUBLEBUFFER, &dblbuf) == -1) || (!dblbuf)) {
         fprintf(stderr, "Failed to get a double-buffered context.\n");
@@ -288,6 +312,7 @@ bool SetUp()
     if (SDL_GL_SetSwapInterval(-1) == -1) { // try swap_tear first.
         SDL_GL_SetSwapInterval(1);
     }
+    */
 
     SDL_ShowCursor(0);
     if (!commandLineOptions[NOMOUSEGRAB].last()->type()) {
@@ -306,6 +331,7 @@ bool SetUp()
     newdetail = detail;
     newscreenwidth = screenwidth;
     newscreenheight = screenheight;
+
 
     /* If saved resolution is not in the list, add it to the list (so that it’s selectable in the options) */
     pair<int, int> startresolution(width, height);
@@ -475,6 +501,10 @@ void CleanUp(void)
 {
     LOGFUNC;
 
+    #if PLATFORM_VITA
+    vglEnd();
+    #endif
+
     delete[] commandLineOptionsBuffer;
 
     SDL_Quit();
@@ -611,8 +641,12 @@ const option::Descriptor usage[] =
 option::Option commandLineOptions[commandLineOptionsNumber];
 option::Option* commandLineOptionsBuffer;
 
-int main(int argc, char** argv)
+int _main(int argc, char** argv)
 {
+    #if PLATFORM_VITA
+        pvr_loader = new PVRTexLoader();
+    #endif
+
     argc -= (argc > 0);
     argv += (argc > 0); // skip program name argv[0] if present
     option::Stats stats(true, usage, argc, argv);
@@ -748,4 +782,27 @@ int main(int argc, char** argv)
         return -1;
     }
 #endif
+}
+
+const int i =1;
+#define is_bigendian()((*(char*)&i) == 0 )
+
+int main(int argc, char** argv){
+    std::ofstream ofs{"ux0:data/lugaru_runlog.txt"}; 
+    std::cout.rdbuf(ofs.rdbuf());
+    std::cerr.rdbuf(ofs.rdbuf());
+    std::cout.setf( std::ios_base::unitbuf );
+
+    freopen("ux0:data/lugaru_runlog.txt", "a", stdout);
+    freopen("ux0:data/lugaru_runlog.txt", "a", stderr);
+    //Account::add("VitaMasterRace");
+    //Account::saveFile("ux0:data/lugaru1.acct");
+    Account::loadFile("ux0:data/lugaru1.acct");
+
+    std::cout << "is big endian: " << (bool)(is_bigendian()) << std::endl;
+
+    int rc = _main(argc, argv);
+    std::cout << "Main returned with code: " << rc << std::endl;
+
+    return rc;
 }

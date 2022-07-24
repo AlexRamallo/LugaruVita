@@ -19,6 +19,7 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include "Utils/ImageIO.hpp"
+#include "Utils/PVRTexLoader.hpp"
 
 #include "Game.hpp"
 #include "Utils/Folders.hpp"
@@ -26,6 +27,7 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 #include <jpeglib.h>
 #include <png.h>
 #include <stdio.h>
+#include <assert.h>
 
 #ifndef WIN32
 #include <unistd.h>
@@ -34,36 +36,48 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 /* These two are needed for screenshot */
 extern int kContextWidth;
 extern int kContextHeight;
+extern PVRTexLoader *pvr_loader;
 
 static bool load_png(const char* fname, ImageRec& tex);
 static bool load_jpg(const char* fname, ImageRec& tex);
+static bool load_pvr(const char* fname, ImageRec& tex);
 static bool save_screenshot_png(const char* fname);
 
 ImageRec::ImageRec()
 {
-    data = (GLubyte*)malloc(1024 * 1024 * 4);
+    data = NULL;
 }
 
 ImageRec::~ImageRec()
 {
-    free(data);
+    if(is_pvr){
+        pvr_loader->freeTexture(data);
+    }else{
+        free(data);
+    }
     data = NULL;
 }
 
-bool load_image(const char* file_name, ImageRec& tex)
+bool load_image(const char* file_name, ImageRec& tex, bool force_pvr)
 {
     Game::LoadingScreen();
 
-    if (tex.data == NULL) {
-        return false;
-    }
-
     const char* ptr = strrchr((char*)file_name, '.');
     if (ptr) {
-        if (strcasecmp(ptr + 1, "png") == 0) {
-            return load_png(file_name, tex);
-        } else if (strcasecmp(ptr + 1, "jpg") == 0) {
-            return load_jpg(file_name, tex);
+        if(force_pvr){
+            tex.is_pvr = true;
+            return load_pvr(file_name, tex);
+        }else{
+            if (strcasecmp(ptr + 1, "png") == 0) {
+                tex.is_pvr = false;
+                return load_png(file_name, tex);
+            } else if (strcasecmp(ptr + 1, "jpg") == 0) {
+                tex.is_pvr = false;
+                return load_jpg(file_name, tex);
+            } else if (strcasecmp(ptr + 1, "pvr") == 0) {
+                tex.is_pvr = true;
+                return load_pvr(file_name, tex);
+            }
         }
     }
 
@@ -84,6 +98,10 @@ bool save_screenshot(const char* file_name)
     return false;
 }
 
+static bool load_pvr(const char* file_name, ImageRec& tex){
+    return pvr_loader->loadTexture(file_name, &tex.data, &tex.pvr_header);
+}
+
 struct my_error_mgr
 {
     struct jpeg_error_mgr pub; /* "public" fields */
@@ -100,6 +118,10 @@ static void my_error_exit(j_common_ptr cinfo)
 /* stolen from public domain example.c code in libjpg distribution. */
 static bool load_jpg(const char* file_name, ImageRec& tex)
 {
+    //TODO: calcluate how much we actually need
+    assert(tex.data == NULL);
+    tex.data = (GLubyte*)malloc(1024 * 1024 * 4);
+
     struct jpeg_decompress_struct cinfo;
     struct my_error_mgr jerr;
     JSAMPROW buffer[1]; /* Output row buffer */
@@ -150,6 +172,10 @@ static bool load_jpg(const char* file_name, ImageRec& tex)
 /* stolen from public domain example.c code in libpng distribution. */
 static bool load_png(const char* file_name, ImageRec& tex)
 {
+    //TODO: calcluate how much we actually need
+    assert(tex.data == NULL);
+    tex.data = (GLubyte*)malloc(1024 * 1024 * 4);
+
     bool hasalpha = false;
     png_structp png_ptr = NULL;
     png_infop info_ptr = NULL;
@@ -161,7 +187,7 @@ static bool load_png(const char* file_name, ImageRec& tex)
     FILE* fp = fopen(file_name, "rb");
 
     if (fp == NULL) {
-        perror((std::string("Couldn't open file ") + file_name).c_str());
+        LOG((std::string("Couldn't open file ") + file_name).c_str());
         return false;
     }
 

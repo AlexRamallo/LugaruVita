@@ -113,6 +113,10 @@ void DrawMenu();
 /*********************> DrawGLScene() <*****/
 int Game::DrawGLScene(StereoSide side)
 {
+    LOG("DrawGLScene(%d)", (int) side);
+
+    LOG("\t1");
+
     static float texcoordwidth, texcoordheight;
     static float texviewwidth, texviewheight;
     static XYZ checkpoint;
@@ -120,6 +124,8 @@ int Game::DrawGLScene(StereoSide side)
     float tutorialopac;
     std::string string;
     static int drawmode = 0;
+
+    LOG("\t2");
 
     if (stereomode == stereoAnaglyph) {
         switch (side) {
@@ -141,12 +147,17 @@ int Game::DrawGLScene(StereoSide side)
         }
     }
 
+    LOG("\t3");
+
     if (freeze || winfreeze || (mainmenu && gameon) || (!gameon && gamestarted)) {
         tempmult = multiplier;
         multiplier = 0;
     }
 
+    LOG("\t4");
+
     if (!mainmenu) {
+        LOG("\t\tA");
         if (editorenabled) {
             numboundaries = mapradius * 2;
             if (numboundaries > 360) {
@@ -159,11 +170,13 @@ int Game::DrawGLScene(StereoSide side)
             }
         }
 
+        LOG("\t\tB");
         SetUpLighting();
 
         static int changed;
         changed = 0;
 
+        LOG("\t\tC");
         int olddrawmode = drawmode;
         if (ismotionblur && !loading) {
             if ((findLengthfast(&Person::players[0]->velocity) > 200) && velocityblur && !cameramode) {
@@ -177,6 +190,7 @@ int Game::DrawGLScene(StereoSide side)
             }
         }
 
+        LOG("\t\tD");
         if (slomo && !loading) {
             if (ismotionblur) {
                 drawmode = motionblurmode;
@@ -189,6 +203,7 @@ int Game::DrawGLScene(StereoSide side)
             camerashake = 0;
             changed = 1;
         }
+        LOG("\t\tE");
         if ((!changed && !slomo) || loading) {
             drawmode = normalmode;
             if (ismotionblur && (/*fps>100||*/ alwaysblur)) {
@@ -205,6 +220,7 @@ int Game::DrawGLScene(StereoSide side)
             }
         }
 
+        LOG("\t\tF");
         if (freeze || winfreeze || (mainmenu && gameon) || (!gameon && gamestarted)) {
             drawmode = normalmode;
         }
@@ -240,6 +256,7 @@ int Game::DrawGLScene(StereoSide side)
             }
         }
 
+        LOG("\t\tG");
         glDrawBuffer(GL_BACK);
         glReadBuffer(GL_BACK);
 
@@ -250,6 +267,7 @@ int Game::DrawGLScene(StereoSide side)
         } else {
             glViewport(0, 0, texviewwidth, texviewheight);
         }
+        LOG("\t\tH");
         glDepthFunc(GL_LEQUAL);
         glDepthMask(1);
         glAlphaFunc(GL_GREATER, 0.0001f);
@@ -257,14 +275,17 @@ int Game::DrawGLScene(StereoSide side)
         glClearColor(0.25f, 0.25f, 0.25f, 1.0f);
         glClear(GL_DEPTH_BUFFER_BIT);
 
+        LOG("\t\tI");
         glMatrixMode(GL_MODELVIEW);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         glLoadIdentity();
 
+        LOG("\t\tJ");
         // Move the camera for the current eye's point of view.
         // Reverse the movement if we're reversing stereo
         glTranslatef((stereoseparation / 2) * side * (stereoreverse ? -1 : 1), 0, 0);
 
+        LOG("\t\tK");
         //camera effects
         if (!cameramode && !freeze && !winfreeze) {
             //shake
@@ -273,18 +294,23 @@ int Game::DrawGLScene(StereoSide side)
             glRotatef(pitch + sin(woozy / 2) * (Person::players[0]->damage / Person::players[0]->damagetolerance) * 5, 1, 0, 0);
             glRotatef(yaw + sin(woozy) * (Person::players[0]->damage / Person::players[0]->damagetolerance) * 5, 0, 1, 0);
         }
+        LOG("\t\tL");
         if (cameramode || freeze || winfreeze) {
             glRotatef(pitch, 1, 0, 0);
             glRotatef(yaw, 0, 1, 0);
         }
 
+        LOG("\t\tM");
         if (environment == desertenvironment) {
             glRotatef((float)(abs(Random() % 100)) / 3000 - 1, 1, 0, 0);
             glRotatef((float)(abs(Random() % 100)) / 3000 - 1, 0, 1, 0);
         }
+        LOG("\t\tN");
         SetUpLight(&light, 0);
+        LOG("\t\tO");
         glPushMatrix();
 
+        LOG("\t\tP");
         //heat blur effect in desert
         if (abs(blurness - targetblurness) < multiplier * 10 || abs(blurness - targetblurness) > 2) {
             blurness = targetblurness;
@@ -296,19 +322,29 @@ int Game::DrawGLScene(StereoSide side)
             blurness -= multiplier * 5;
         }
 
+        LOG("\t\tQ");
         if (environment == desertenvironment) {
+            /*
+            //VITAGL: TODO
             if (detail == 2) {
                 glTexEnvf(GL_TEXTURE_FILTER_CONTROL, GL_TEXTURE_LOD_BIAS, blurness + .4);
             }
+            */
             glRotatef((float)(abs(Random() % 100)) / 1000, 1, 0, 0);
             glRotatef((float)(abs(Random() % 100)) / 1000, 0, 1, 0);
         }
+        LOG("\t\tR");
         skybox->draw();
+        /*
+        //VITAGL: TODO
         glTexEnvf(GL_TEXTURE_FILTER_CONTROL, GL_TEXTURE_LOD_BIAS, 0);
+        */
+        LOG("\t\tS");
         glPopMatrix();
         glTranslatef(-viewer.x, -viewer.y, -viewer.z);
         frustum.GetFrustum();
 
+        LOG("\t\tT");
         //make shadow decals on terrain and Object::objects
         static XYZ point;
         static float size, opacity, rotation;
@@ -377,6 +413,7 @@ int Game::DrawGLScene(StereoSide side)
                 }
             }
 
+            LOG_TOGGLE(true);
             if (!Person::players[k]->playerdetail) {
                 if (frustum.SphereInFrustum(Person::players[k]->coords.x, Person::players[k]->coords.y, Person::players[k]->coords.z, Person::players[k]->scale * 5)) {
                     point = Person::players[k]->coords;
@@ -384,7 +421,10 @@ int Game::DrawGLScene(StereoSide side)
                     opacity = .4 - (Person::players[k]->coords.y - terrain.getHeight(Person::players[k]->coords.x, Person::players[k]->coords.z)) / 5;
                     terrain.MakeDecal(shadowdecal, point, size, opacity * .7, rotation);
                     for (unsigned int l = 0; l < terrain.patchobjects[Person::players[k]->whichpatchx][Person::players[k]->whichpatchz].size(); l++) {
-                        unsigned int j = terrain.patchobjects[Person::players[k]->whichpatchx][Person::players[k]->whichpatchz][l];
+                        int patchx = Person::players[k]->whichpatchx;
+                        int patchz = Person::players[k]->whichpatchz;
+                        LOG("Player[%d] patch X: %d\tZ: %d", (int)k, patchx, patchz);
+                        unsigned int j = terrain.patchobjects[patchx][patchz][l];
                         point = DoRotation(Person::players[k]->coords - Object::objects[j]->position, 0, -Object::objects[j]->yaw, 0);
                         size = .7;
                         opacity = .4f;
@@ -392,8 +432,10 @@ int Game::DrawGLScene(StereoSide side)
                     }
                 }
             }
+            LOG_TOGGLE(false);
         }
 
+        LOG("\t\tU");
         //Terrain
         glEnable(GL_TEXTURE_2D);
         glDepthMask(1);
@@ -406,9 +448,11 @@ int Game::DrawGLScene(StereoSide side)
         terrain.draw(0);
         terraintexture2.bind();
         terrain.draw(1);
+        LOG("\t\tV");
 
         terrain.drawdecals();
 
+        LOG("\t\tW");
         //Model
         glEnable(GL_CULL_FACE);
         glEnable(GL_LIGHTING);
@@ -416,8 +460,10 @@ int Game::DrawGLScene(StereoSide side)
         glEnable(GL_TEXTURE_2D);
         glDepthMask(1);
 
+        LOG("\t\tX");
         glEnable(GL_COLOR_MATERIAL);
 
+        LOG("\t\tY");
         if (!cellophane) {
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
             glEnable(GL_CULL_FACE);
@@ -458,17 +504,20 @@ int Game::DrawGLScene(StereoSide side)
             }
         }
 
+        LOG("\t\tZ");
         if (!cameramode && musictype == stream_fighttheme) {
             playerdist = distsqflat(&Person::players[0]->coords, &viewer);
         } else {
             playerdist = -100;
         }
+        LOG("\t\tAA");
         glPushMatrix();
         glCullFace(GL_BACK);
         glEnable(GL_TEXTURE_2D);
         Object::Draw();
         glPopMatrix();
 
+        LOG("\t\tAB");
         //draw hawk
         glPushMatrix();
         if (frustum.SphereInFrustum(realhawkcoords.x + hawk.boundingspherecenter.x, realhawkcoords.y + hawk.boundingspherecenter.y, realhawkcoords.z + hawk.boundingspherecenter.z, 2)) {
@@ -491,10 +540,12 @@ int Game::DrawGLScene(StereoSide side)
         }
         glPopMatrix();
 
+        LOG("\t\tAC");
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         glEnable(GL_CULL_FACE);
         glCullFace(GL_FRONT);
         glDepthMask(1);
+        LOG("\t\tAD");
         for (unsigned k = 0; k < Person::players.size(); k++) {
             if (!(k == 0 || !Tutorial::active)) {
                 glEnable(GL_BLEND);
@@ -528,6 +579,7 @@ int Game::DrawGLScene(StereoSide side)
                 }
             }
         }
+        LOG("\t\tAE");
 
         glPushMatrix();
         glEnable(GL_TEXTURE_2D);
@@ -535,15 +587,20 @@ int Game::DrawGLScene(StereoSide side)
         glPopMatrix();
         glCullFace(GL_BACK);
 
+        LOG("\t\tAF");
         glDisable(GL_COLOR_MATERIAL);
 
+        LOG("\t\tAG");
         glDisable(GL_LIGHTING);
         glDisable(GL_TEXTURE_2D);
 
+        LOG("\t\tAH");
         glDepthMask(0);
 
+        LOG("\t\tAI");
         Sprite::Draw();
 
+        LOG("\t\tAJ");
         //waypoints, pathpoints in editor
         if (editorenabled) {
             glEnable(GL_BLEND);
@@ -584,8 +641,10 @@ int Game::DrawGLScene(StereoSide side)
 
         //Text
 
+        LOG("\t\tAK");
         glEnable(GL_TEXTURE_2D);
         glColor4f(.5, .5, .5, 1);
+        LOG("\t\tAL");
         if (!console) {
             if (!Tutorial::active) {
                 if (bonus > 0 && bonustime < 1 && !winfreeze && !Dialog::inDialog()) {
@@ -929,6 +988,7 @@ int Game::DrawGLScene(StereoSide side)
             }
         }
 
+        LOG("\t\tAM");
         if (drawmode == glowmode) {
             glDisable(GL_DEPTH_TEST);
             glDisable(GL_CULL_FACE);
@@ -962,6 +1022,7 @@ int Game::DrawGLScene(StereoSide side)
             glDepthMask(1);
         }
 
+        LOG("\t\tAN");
         if ((((blackout && damageeffects) || (Person::players[0]->bloodloss > 0 && damageeffects && Person::players[0]->blooddimamount > 0) || Person::players[0]->dead) && !cameramode) || console) {
             glDisable(GL_DEPTH_TEST);
             glDisable(GL_CULL_FACE);
@@ -1016,6 +1077,7 @@ int Game::DrawGLScene(StereoSide side)
             glDepthMask(1);
         }
 
+        LOG("\t\tAO");
         if (flashamount > 0 && damageeffects) {
             if (flashamount > 1) {
                 flashamount = 1;
@@ -1058,6 +1120,7 @@ int Game::DrawGLScene(StereoSide side)
             glDepthMask(1);
         }
 
+        LOG("\t\tAP");
         if (difficulty < 2 && !Dialog::inDialog()) { // minimap
             float mapviewdist = 20000;
 
@@ -1211,6 +1274,7 @@ int Game::DrawGLScene(StereoSide side)
             glDepthMask(1);
         }
 
+        LOG("\t\tAQ");
         if (loading && !stealthloading && (!campaign || Person::players[0]->dead)) {
             glDisable(GL_DEPTH_TEST);
             glDisable(GL_CULL_FACE);
@@ -1261,6 +1325,7 @@ int Game::DrawGLScene(StereoSide side)
             drawmode = normalmode;
         }
 
+        LOG("\t\tAR");
         if (winfreeze && !campaign) {
             glDisable(GL_DEPTH_TEST);
             glDisable(GL_CULL_FACE);
@@ -1329,6 +1394,7 @@ int Game::DrawGLScene(StereoSide side)
             }
         }
 
+        LOG("\t\tAS");
         if (drawmode != normalmode) {
             glEnable(GL_TEXTURE_2D);
             glFinish();
@@ -1352,7 +1418,10 @@ int Game::DrawGLScene(StereoSide side)
                     glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 0, 0, texviewwidth, texviewheight);
                 }
                 if (!screentexture2) {
+                    /*
+                    //VITAGL: TODO
                     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+                    */
 
                     glGenTextures(1, &screentexture2);
                     glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
@@ -1367,10 +1436,14 @@ int Game::DrawGLScene(StereoSide side)
             }
         }
 
+        LOG("\t\tAT");
         glClear(GL_DEPTH_BUFFER_BIT);
+        LOG("\t\tAU");
         Game::ReSizeGLScene(90, .1f);
+        LOG("\t\tAV");
         glViewport(0, 0, screenwidth, screenheight);
 
+        LOG("\t\tAW");
         if (drawmode != normalmode) {
             glDisable(GL_DEPTH_TEST);
             if (drawmode == motionblurmode) {
@@ -1579,6 +1652,7 @@ int Game::DrawGLScene(StereoSide side)
             glDepthMask(1);
         }
 
+        LOG("\t\tAX");
         if (console) {
             glEnable(GL_TEXTURE_2D);
             glColor4f(1, 1, 1, 1);
@@ -1594,45 +1668,59 @@ int Game::DrawGLScene(StereoSide side)
                 textmono->glPrint(30 - offset * 10, 30 + i * 20, consoletext[i], 0, 1, 1024, 768);
             }
         }
+        LOG("\t\tAY");
     }
 
+    LOG("\t5");
     if (freeze || winfreeze || (mainmenu && gameon) || (!gameon && gamestarted)) {
         multiplier = tempmult;
     }
 
+    LOG("\t6");
     if (mainmenu) {
         DrawMenu();
     }
 
+    LOG("\t7");
     if (freeze || winfreeze || (mainmenu && gameon) || (!gameon && gamestarted)) {
         tempmult = multiplier;
         multiplier = 0;
     }
 
+    LOG("\t8");
     if (side == stereoRight || side == stereoCenter) {
         if (drawmode != motionblurmode || mainmenu) {
             swap_gl_buffers();
         }
     }
 
+    LOG("\t9");
     glDrawBuffer(GL_BACK);
     glReadBuffer(GL_BACK);
 
+    LOG("\t10");
     weapons.DoStuff();
 
+    LOG("\t11");
     if (drawtoggle == 2) {
         drawtoggle = 0;
     }
 
+    LOG("\t12");
     if (freeze || winfreeze || (mainmenu && gameon) || (!gameon && gamestarted)) {
         multiplier = tempmult;
     }
+    LOG("\t13");
     //Jordan fixed your warning!
     return 0;
 }
 
 void DrawMenu()
 {
+    LOG("DrawMenu()");
+
+    LOG("\t1");
+
     // !!! FIXME: hack: clamp framerate in menu so text input works correctly on fast systems.
     SDL_Delay(15);
 
@@ -1641,6 +1729,7 @@ void DrawMenu()
     glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
     Game::ReSizeGLScene(90, .1f);
 
+    LOG("\t2");
     //draw menu background
     glClear(GL_DEPTH_BUFFER_BIT);
     glEnable(GL_ALPHA_TEST);
@@ -1694,6 +1783,8 @@ void DrawMenu()
     glPopMatrix();
     glMatrixMode(GL_MODELVIEW);
 
+    LOG("\t3");
+
     glMatrixMode(GL_PROJECTION);
     glPushMatrix();
     glLoadIdentity();
@@ -1703,14 +1794,17 @@ void DrawMenu()
     glLoadIdentity();
     glEnable(GL_TEXTURE_2D);
 
+    LOG("\t4");
     Menu::drawItems();
 
+    LOG("\t5");
     //draw mouse cursor
     glMatrixMode(GL_PROJECTION);
     glPopMatrix();
     glMatrixMode(GL_MODELVIEW);
     glPopMatrix();
 
+    LOG("\t6");
     glMatrixMode(GL_PROJECTION);
     glPushMatrix();
     glLoadIdentity();
@@ -1728,6 +1822,7 @@ void DrawMenu()
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
     glPopMatrix();
+    LOG("\t7");
     if (!Game::waiting) { // hide the cursor while waiting for a key
         glPushMatrix();
         glTranslatef(Game::mousecoordh - screenwidth / 2, Game::mousecoordv * -1 + screenheight / 2, 0);
@@ -1750,9 +1845,11 @@ void DrawMenu()
         glPopMatrix();
         glPopMatrix();
     }
+    LOG("\t8");
     glPopMatrix();
     glMatrixMode(GL_PROJECTION);
     glPopMatrix();
+    LOG("\t9");
 
     //draw screen flash
     if (flashamount > 0) {
@@ -1797,4 +1894,5 @@ void DrawMenu()
         glDisable(GL_BLEND);
         glDepthMask(1);
     }
+    LOG("\t10");
 }

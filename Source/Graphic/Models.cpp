@@ -885,7 +885,7 @@ void Model::draw()
     glEnableClientState(GL_NORMAL_ARRAY);
     glEnableClientState(GL_VERTEX_ARRAY);
     glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-
+    
     if (color) {
         glInterleavedArrays(GL_T2F_C3F_V3F, 8 * sizeof(GLfloat), &vArray[0]);
     } else {
