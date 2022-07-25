@@ -99,6 +99,8 @@ def build(bld):
 	#Data folder processing (see below)
 	build_assets(bld)
 
+	bld.add_group()
+
 	defs = [
 		"DEBUG",
 		"_DEBUG",
@@ -211,7 +213,7 @@ def build_assets(bld):
 	
 	#Copy other assets
 	for ass in other:
-		bld(rule = do_copy, source = ass)
+		tg = bld(rule = do_copy, source = ass)
 		#Ensure files are reprocessed if we modify the rules file
 		tg.post()
 		for task in tg.tasks:
@@ -227,10 +229,12 @@ def do_copy(task):
 
 def do_encode_pvrtc(task):
 	default_opts = {
-		'format': 'PVRTCII_2BPP,US,sRGB',
-		'quality': 'pvrtcfastest',
-		'dither': True,
+		'format': 'PVRTCII_4BPP,UBN,sRGB',
+		'quality': 'pvrtcnormal',
+		'dither': False,
 		'premultiply': False,
+		'flip_x': False,
+		'flip_y': True,
 	}
 	cmd = task.env.PVRTT
 	for n in task.inputs:
@@ -239,8 +243,10 @@ def do_encode_pvrtc(task):
 			'-f', get_rule(n, "format", default_opts["format"]),
 			'-q', get_rule(n, "quality", default_opts["quality"])
 		]
-		if get_rule(n, "dither", False): nopts.append('-dither')
-		if get_rule(n, "premultiply", False): nopts.append('-p')
+		if get_rule(n, "dither", default_opts["dither"]): nopts.append('-dither')
+		if get_rule(n, "premultiply", default_opts["premultiply"]): nopts.append('-p')
+		if get_rule(n, "flip_x", default_opts['flip_x']): nopts.extend(['-flip', 'x'])
+		if get_rule(n, "flip_y", default_opts['flip_y']): nopts.extend(['-flip', 'y'])
 
 		size = get_size(n)
 
@@ -255,7 +261,7 @@ def do_encode_pvrtc(task):
 				h = parseint(sp[1])
 				out_size = (w, h)
 		else:
-			out_size = get_constrained_pot(size, 8, 128)
+			out_size = get_constrained_pot(size, 8, 512)
 
 		if out_size != None:
 			nopts.extend(['-r', '%d,%d' % out_size])

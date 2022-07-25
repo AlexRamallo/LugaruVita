@@ -241,6 +241,7 @@ GLint PVRHeader::getBorder(int side) {
 GLuint PVRHeader::getGLPixelFormat(){
 	uint8_t order[4], rate[4];
 	if(getUncompressedChannelOrder(order, rate)){
+		assert(0);
 		return parse_gl_pixel_format(order, rate);
 	}else{
 		switch(PixelFormat){
@@ -293,6 +294,7 @@ GLuint PVRHeader::getGLInternalFormat(){
 	//TODO: test this
 	uint8_t order[4], rate[4];
 	if(getUncompressedChannelOrder(order, rate)){
+		assert(0);
 		return parse_gl_pixel_format(order, rate);
 	}else{
 		switch(PixelFormat){

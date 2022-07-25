@@ -67,7 +67,7 @@ private:
 /*
 	force_pvr will ignore the file extension and load the image as a PVR file
 */
-bool load_image(const char* fname, ImageRec& tex, bool force_pvr = true);
+bool load_image(const char* fname, ImageRec& tex, bool force_pvr = false);
 bool save_screenshot(const char* fname);
 
 #endif

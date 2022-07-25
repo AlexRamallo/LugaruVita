@@ -1,5 +1,37 @@
 {
+	
 	"Textures/HeightMap.png": {
 		"convert": false 
-	}
+	},
+
+    "Textures/FurBrown.jpg": {
+    	"convert": false
+    },
+    "Textures/FurWhite.jpg": {
+    	"convert": false
+    },
+    "Textures/FurBlack.jpg": {
+    	"convert": false
+    },
+    "Textures/FurLynx.jpg": {
+    	"convert": false
+    },
+    "Textures/FurOtter.jpg": {
+    	"convert": false
+    },
+    "Textures/FurOpal.jpg": {
+    	"convert": false
+    },
+    "Textures/FurSable.jpg": {
+    	"convert": false
+    },
+    "Textures/FurChocolate.jpg": {
+    	"convert": false
+    },
+    "Textures/FurBlackWhite.jpg": {
+    	"convert": false
+    },
+    "Textures/FurBrownWhite.jpg": {
+    	"convert": false
+    }
 }

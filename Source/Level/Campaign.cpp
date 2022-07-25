@@ -22,6 +22,7 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "Game.hpp"
 #include "Utils/Folders.hpp"
+#include "Utils/Log.h"
 
 #include <dirent.h>
 
@@ -50,6 +51,7 @@ std::vector<std::string> ListCampaigns()
             continue;
         }
         if (!name.compare(name.length() - 4, 4, ".txt")) {
+            LOG("Found campaign: %s", name.c_str());
             campaignNames.push_back(name.substr(0, name.length() - 4));
         }
     }
@@ -59,6 +61,7 @@ std::vector<std::string> ListCampaigns()
 
 void LoadCampaign()
 {
+    LOG("LoadCampaign called! cur campaign: %s", Account::active().getCurrentCampaign().c_str());
     if (!Account::hasActive()) {
         return;
     }

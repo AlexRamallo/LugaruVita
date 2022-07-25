@@ -629,8 +629,9 @@ void Menu::Tick()
             case 1:
             case 2:
                 switch (selected) {
-                    case 1:
+                    case 1: //Main menu
                         if (gameon) { //resume
+                            LOG("<<RESUME>>");
                             mainmenu = 0;
                             pause_sound(stream_menutheme);
                             resume_stream(leveltheme);
@@ -644,6 +645,7 @@ void Menu::Tick()
                         }
                         break;
                     case 2: //options
+                        LOG("<<OPTIONS>>");
                         fireSound();
                         flash();
                         mainmenu = 3;
@@ -670,16 +672,18 @@ void Menu::Tick()
                         fireSound();
                         flash();
                         if (gameon) { //end game
+                            LOG("<<END GAME>>");
                             gameon = 0;
                             mainmenu = 1;
                         } else { //quit
+                            LOG("<<QUIT GAME>>");
                             tryquit = 1;
                             pause_sound(stream_menutheme);
                         }
                         break;
                 }
                 break;
-            case 3:
+            case 3: //Options
                 fireSound();
                 switch (selected) {
                     case 0:
@@ -785,6 +789,7 @@ void Menu::Tick()
                 updateControlsMenu();
                 break;
             case 5:
+                LOG("<<Game Menu Selected(%d)>>", selected);
                 fireSound();
                 flash();
                 if ((selected - NB_CAMPAIGN_MENU_ITEM >= Account::active().getCampaignChoicesMade())) {
@@ -809,7 +814,7 @@ void Menu::Tick()
                     pause_sound(stream_menutheme);
                 }
                 switch (selected) {
-                    case 1:
+                    case 1: //Tutorial
                         startbonustotal = 0;
 
                         loading = 2;
@@ -826,19 +831,19 @@ void Menu::Tick()
                         gameon = 1;
                         pause_sound(stream_menutheme);
                         break;
-                    case 2:
+                    case 2: //Challenge
                         mainmenu = 9;
                         break;
-                    case 3:
+                    case 3: //Delete user
                         mainmenu = 6;
                         break;
-                    case 4:
+                    case 4: //Main menu
                         mainmenu = (gameon ? 2 : 1);
                         break;
-                    case 5:
+                    case 5: //Change user
                         mainmenu = 7;
                         break;
-                    case 6:
+                    case 6: //Campaign
                         vector<string> campaigns = ListCampaigns();
                         vector<string>::iterator c;
                         if ((c = find(campaigns.begin(), campaigns.end(), Account::active().getCurrentCampaign())) == campaigns.end()) {

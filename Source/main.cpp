@@ -157,6 +157,15 @@ void toggleFullscreen()
     SDL_SetWindowFullscreen(sdlwindow, flags);
 }
 
+static int rstick_deadzone = 8000;
+static float rstick_x = 0;
+static float rstick_y = 0;
+
+void update_analog_sticks(){
+    deltah += rstick_x * 8;
+    deltav += rstick_y * 8;
+}
+
 SDL_bool sdlEventProc(const SDL_Event& e)
 {
     switch (e.type) {
@@ -174,6 +183,20 @@ SDL_bool sdlEventProc(const SDL_Event& e)
             deltav += e.motion.yrel;
             break;
 
+        case SDL_CONTROLLERAXISMOTION:
+            switch(e.caxis.axis){
+                default: break;
+                case SDL_CONTROLLER_AXIS_RIGHTX:
+                    rstick_x = (float) (abs(e.caxis.value) < rstick_deadzone ? 0 : e.caxis.value) / 32767.0f;
+                    break;
+                case SDL_CONTROLLER_AXIS_RIGHTY:
+                    rstick_y = (float) (abs(e.caxis.value) < rstick_deadzone ? 0 : e.caxis.value) / 32767.0f;
+                    break;
+
+                //TODO: left joystick for movement
+            }
+            break;
+
         case SDL_KEYDOWN:
             if ((e.key.keysym.scancode == SDL_SCANCODE_G) &&
                 (e.key.keysym.mod & KMOD_CTRL)) {
@@ -188,6 +211,7 @@ SDL_bool sdlEventProc(const SDL_Event& e)
             }
             break;
     }
+
     return SDL_TRUE;
 }
 
@@ -206,12 +230,29 @@ bool SetUp()
 
     DefaultSettings();
 
-    if (!SDL_WasInit(SDL_INIT_VIDEO)) {
+    if (!SDL_WasInit(SDL_INIT_VIDEO | SDL_INIT_GAMECONTROLLER)) {
         if (SDL_Init(SDL_INIT_VIDEO) == -1) {
             fprintf(stderr, "SDL_Init() failed: %s\n", SDL_GetError());
             return false;
         }
+        if (SDL_Init(SDL_INIT_GAMECONTROLLER) == -1) {
+            fprintf(stderr, "SDL_Init() failed: %s\n", SDL_GetError());
+            return false;
+        }
     }
+
+    SDL_GameController *controller = NULL;
+    for (int i = 0; i < SDL_NumJoysticks(); ++i) {
+        if (SDL_IsGameController(i)) {
+            controller = SDL_GameControllerOpen(i);
+            if (controller) {
+                break;
+            } else {
+                fprintf(stderr, "Could not open gamecontroller %d: %s\n", i, SDL_GetError());
+            }
+        }
+    }
+
     if (!LoadSettings()) {
         fprintf(stderr, "Failed to load config, creating default\n");
         SaveSettings();
@@ -747,6 +788,8 @@ int _main(int argc, char** argv)
                             }
                         }
                     }
+
+                    update_analog_sticks();
 
                     // game
                     DoUpdate();

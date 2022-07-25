@@ -58,26 +58,89 @@ ImageRec::~ImageRec()
     data = NULL;
 }
 
+int get_filetype(const char *filename){
+    static const uint8_t png[8] = {137,80,78,71,13,10,26,10};
+    static const uint8_t pvr[3] = {'P', 'V', 'R'};
+
+    FILE *file = fopen(filename, "rb");
+    if(file == NULL){
+        return -1;
+    }
+
+    uint8_t buf[8];
+    memset(buf, 0, 8);
+    if(fread(buf, 1, 8, file) != 8){
+        fclose(file);
+        return -1;
+    }
+    fclose(file);
+
+    bool is_pvr = true;
+    for(int i = 0; i < 3; i++){
+        if(buf[i] != pvr[i]){
+            is_pvr = false;
+            break;
+        }
+    }
+    if(is_pvr){
+        return 1;
+    }
+
+    bool is_png = true;
+    for(int i = 0; i < 8; i++){
+        if(buf[i] != png[i]){
+            is_png = false;
+            break;
+        }
+    }
+    if(is_png){
+        return 2;
+    }
+
+    //just assume JPEG
+    return 3;
+}
+
 bool load_image(const char* file_name, ImageRec& tex, bool force_pvr)
 {
     Game::LoadingScreen();
 
     const char* ptr = strrchr((char*)file_name, '.');
     if (ptr) {
+        int type;
         if(force_pvr){
-            tex.is_pvr = true;
-            return load_pvr(file_name, tex);
+            type = 1;
         }else{
+            /*
             if (strcasecmp(ptr + 1, "png") == 0) {
-                tex.is_pvr = false;
-                return load_png(file_name, tex);
+                type = 2;
             } else if (strcasecmp(ptr + 1, "jpg") == 0) {
-                tex.is_pvr = false;
-                return load_jpg(file_name, tex);
+                type = 3;
             } else if (strcasecmp(ptr + 1, "pvr") == 0) {
+                type = 1;
+            }
+            */
+            type = get_filetype(file_name);
+        }
+
+        switch(type){
+            default:
+                return false;
+
+            case 1: //PVR
+                //LOG("Loading PVR %s", file_name);
                 tex.is_pvr = true;
                 return load_pvr(file_name, tex);
-            }
+
+            case 2: //PNG
+                //LOG("Loading PNG %s", file_name);
+                tex.is_pvr = false;
+                return load_png(file_name, tex);
+
+            case 3: //JPEG
+                //LOG("Loading JPEG %s", file_name);
+                tex.is_pvr = false;
+                return load_jpg(file_name, tex);
         }
     }
 

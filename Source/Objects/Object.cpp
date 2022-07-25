@@ -78,7 +78,7 @@ Object::Object(object_type _type, XYZ _position, float _yaw, float _pitch, float
     position = _position;
     yaw = _yaw;
     pitch = _pitch;
-
+    LOG_TOGGLE(false);
     switch (type) {
         case boxtype:
             model.loaddecal("Models/Box.solid");

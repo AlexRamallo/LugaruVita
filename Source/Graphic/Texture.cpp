@@ -137,6 +137,11 @@ void TextureRes::load()
             glTexImage2D(GL_TEXTURE_2D, 0, type, texture.sizeX, texture.sizeY, 0, type, GL_UNSIGNED_BYTE, texture.data);
         }
     }else{
+        if(isSkin){
+            LOG_TOGGLE(true);
+            LOG("FOUND PVR SKIN: %s", filename.c_str());
+            assert(false && "PVR Skin not supported!");
+        }
         uploadPVR((void*)&texture);
     }
 }

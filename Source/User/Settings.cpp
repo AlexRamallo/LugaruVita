@@ -53,7 +53,7 @@ void DefaultSettings()
     volume = 0.8f;
     ambientsound = 1;
     devtools = 0;
-
+    
     crouchkey = SDL_SCANCODE_LSHIFT;
     jumpkey = SDL_SCANCODE_SPACE;
     leftkey = SDL_SCANCODE_A;
