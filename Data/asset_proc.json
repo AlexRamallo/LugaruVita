@@ -2,6 +2,12 @@
 	"Textures/HeightMap.png": {
 		"convert": false 
 	},
+    "Textures/Font.png": {
+		"convert": false
+    },
+    "Textures/FontMono.png": {
+		"convert": false
+    },
 
     "Textures/Fur.jpg": {
 		"format": "r8g8b8a8,UBN,sRGB"

@@ -54,8 +54,6 @@ void TextureRes::uploadPVR(void *pTexture){
     skinsize = sizeX;
 
     if (isSkin) {
-        LOG_TOGGLE(true);
-
         if(texture->pvr_header.isCompressed()){
             LOG("ERROR: Compressed PVR skin texture found");
             return;

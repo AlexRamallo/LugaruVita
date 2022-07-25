@@ -24,12 +24,12 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 
 void Text::LoadFontTexture(const std::string& fileName)
 {   
-    /*
     LOGFUNC;
 
-    LOG(std::string("Loading font texture...") + fileName);
+    LOG("Loading font texture... %s", fileName.c_str());
 
     FontTexture.load(fileName, false);
+    /*
     if (base) {
         glDeleteLists(base, 512);
         base = 0;
@@ -84,7 +84,6 @@ void Text::BuildFont() // Build Our Font Display List
 
 void Text::_glPrint(float x, float y, const std::string& string, int set, float size, float width, float height, int start, int end, int offset) // Where The Printing Happens
 {
-    /*
     if (set > 1) {
         set = 1;
     }
@@ -103,15 +102,46 @@ void Text::_glPrint(float x, float y, const std::string& string, int set, float 
     glLoadIdentity();
     glTranslated(x, y, 0);
     glScalef(size, size, 1);
-    glListBase(base - 32 + (128 * set) + offset);      // Choose The Font Set (0 or 1)
-    glCallLists(end - start, GL_BYTE, &string[start]); // Write The Text To The Screen
+    //glListBase(base - 32 + (128 * set) + offset);      // Choose The Font Set (0 or 1)
+    //glCallLists(end - start, GL_BYTE, &string[start]); // Write The Text To The Screen
+
+    //vitaGL drawlists don't work right...
+    
+    int off = base - 32 + (128 * set) + offset;
+    float cx;
+    float cy;
+    for (int i = 0; i < string.size(); i++) {
+        int Ch = string[i] + off;
+        if (Ch < 256) {
+            cx = float(Ch % 16) / 16.0f;
+            cy = float(Ch / 16) / 16.0f;
+        } else {
+            cx = float((Ch - 256) % 16) / 16.0f;
+            cy = float((Ch - 256) / 16) / 16.0f;
+        }
+        glBegin(GL_QUADS);
+        glTexCoord2f(cx, 1 - cy - 0.0625f + .001);
+        glVertex2i(0, 0);
+        glTexCoord2f(cx + 0.0625f, 1 - cy - 0.0625f + .001);
+        glVertex2i(16, 0);
+        glTexCoord2f(cx + 0.0625f, 1 - cy - .001);
+        glVertex2i(16, 16);
+        glTexCoord2f(cx, 1 - cy - +.001);
+        glVertex2i(0, 16);
+        glEnd();
+        if (Ch < 256) {
+            glTranslated(10, 0, 0);
+        } else {
+            glTranslated(8, 0, 0);
+        }
+    }
+
     glMatrixMode(GL_PROJECTION);
     glPopMatrix();
     glMatrixMode(GL_MODELVIEW);
     glPopMatrix();
     glEnable(GL_DEPTH_TEST);
     glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-    */
 }
 
 void Text::glPrint(float x, float y, const std::string& string, int set, float size, float width, float height, int start, int end)
@@ -137,12 +167,10 @@ void Text::glPrintOutlined(float x, float y, const std::string& string, int set,
 
 void Text::glPrintOutlined(float r, float g, float b, float a, float x, float y, const std::string& string, int set, float size, float width, float height, int start, int end)
 {
-    /*
     glColor4f(0, 0, 0, a);
     glPrintOutline(x - 2 * size, y - 2 * size, string, set, size * 2.5 / 2, width, height, start, end);
     glColor4f(r, g, b, a);
     glPrint(x, y, string, set, size, width, height, start, end);
-    */
 }
 
 Text::Text()
@@ -151,7 +179,7 @@ Text::Text()
 }
 
 Text::~Text()
-{
+{   
     /*
     if (base) {
         glDeleteLists(base, 512);

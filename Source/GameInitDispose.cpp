@@ -682,7 +682,7 @@ void Game::InitGame()
     Person::players.emplace_back(player);
  
     LOG("InitGame Done!!");
-    //LOG_TOGGLE(false);
+    LOG_TOGGLE(false);
 }
 
 void Game::LoadScreenTexture()

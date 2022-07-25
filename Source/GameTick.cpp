@@ -724,12 +724,6 @@ bool Game::LoadLevel(const std::string& name, bool tutorial)
         Person::players[0]->clothestintb.push_back(tintb);
     }
 
-    LOG_TOGGLE(true);
-    LOG("Player[0] clothes:");
-    for(int i = 0; i < Person::players[0]->clothes.size(); i++){
-        LOG("\t%d: %s", i, Person::players[0]->clothes[i].c_str());
-    }
-
     funpackf(tfile, "Bi", &environment);
 
     if (environment != oldenvironment) {
