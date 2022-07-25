@@ -158,12 +158,30 @@ void toggleFullscreen()
 }
 
 static int rstick_deadzone = 8000;
+static int lstick_deadzone = 8000;
 static float rstick_x = 0;
 static float rstick_y = 0;
+static float lstick_x = 0;
+static float lstick_y = 0;
+
+static float deltah_vel = 0.0f;
+static float deltav_vel = 0.0f;
 
 void update_analog_sticks(){
-    deltah += rstick_x * 8;
-    deltav += rstick_y * 8;
+    deltah_vel += rstick_x;
+    deltav_vel += rstick_y;
+
+    deltah += deltah_vel * 7;
+    deltav += deltav_vel * 5;
+
+    deltah_vel *= 0.6f;
+    deltav_vel *= 0.6f;
+
+    if(fabsf(deltah_vel) < 0.15) deltah_vel = 0.0f;
+    if(fabsf(deltav_vel) < 0.15) deltav_vel = 0.0f;
+
+    analog_lh = lstick_x;
+    analog_lv = lstick_y;
 }
 
 SDL_bool sdlEventProc(const SDL_Event& e)
@@ -192,8 +210,12 @@ SDL_bool sdlEventProc(const SDL_Event& e)
                 case SDL_CONTROLLER_AXIS_RIGHTY:
                     rstick_y = (float) (abs(e.caxis.value) < rstick_deadzone ? 0 : e.caxis.value) / 32767.0f;
                     break;
-
-                //TODO: left joystick for movement
+                case SDL_CONTROLLER_AXIS_LEFTX:
+                    lstick_x = (float) (abs(e.caxis.value) < lstick_deadzone ? 0 : e.caxis.value) / 32767.0f;
+                    break;
+                case SDL_CONTROLLER_AXIS_LEFTY:
+                    lstick_y = (float) (abs(e.caxis.value) < lstick_deadzone ? 0 : e.caxis.value) / 32767.0f;
+                    break;
             }
             break;
 

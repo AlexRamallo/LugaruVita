@@ -1,9 +1,7 @@
 {
-	
 	"Textures/HeightMap.png": {
 		"convert": false 
 	},
-
     "Textures/FurBrown.jpg": {
     	"convert": false
     },

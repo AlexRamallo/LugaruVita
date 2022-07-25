@@ -69,11 +69,26 @@ void Input::Tick()
 	handle_key(Game::backkey, SDL_CONTROLLER_BUTTON_DPAD_DOWN);
 
 	handle_key(Game::jumpkey, SDL_CONTROLLER_BUTTON_A);
-	handle_key(Game::crouchkey, SDL_CONTROLLER_BUTTON_B);
+	handle_key(Game::crouchkey, SDL_CONTROLLER_BUTTON_RIGHTSHOULDER);
 	handle_key(Game::drawkey, SDL_CONTROLLER_BUTTON_Y);
 	handle_key(Game::attackkey, SDL_CONTROLLER_BUTTON_X);
-	handle_key(Game::throwkey, SDL_CONTROLLER_BUTTON_RIGHTSHOULDER);
+	handle_key(Game::throwkey, SDL_CONTROLLER_BUTTON_B);
 
+	if(Game::analog_lh > 0.25){
+		keyDown[Game::leftkey] = false;
+		keyDown[Game::rightkey] = true;
+	}else if(Game::analog_lh < -0.25){
+		keyDown[Game::leftkey] = true;
+		keyDown[Game::rightkey] = false;
+	}
+
+	if(Game::analog_lv > 0.25){
+		keyDown[Game::forwardkey] = false;
+		keyDown[Game::backkey] = true;
+	}else if(Game::analog_lv < -0.25){
+		keyDown[Game::forwardkey] = true;
+		keyDown[Game::backkey] = false;
+	}
 }
 
 bool Input::isKeyDown(int k)

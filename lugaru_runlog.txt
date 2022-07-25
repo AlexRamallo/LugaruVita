@@ -67,4 +67,3 @@ Loading (S)...Textures/BloodFur.png
 	Y
 Loading level...Lugaru1.json
  Setting environment...
-FOUND PVR SKIN: app0:Data/Textures/FurBrownWhite.jpg

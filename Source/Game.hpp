@@ -67,6 +67,7 @@ extern int newscreenheight;
 
 extern bool gameon;
 extern float deltah, deltav;
+extern float analog_lh, analog_lv;
 extern int mousecoordh, mousecoordv;
 extern int oldmousecoordh, oldmousecoordv;
 extern float yaw, pitch;

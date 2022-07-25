@@ -28,11 +28,13 @@ using namespace Game;
 
 void DefaultSettings()
 {
-    detail = 2;
-    ismotionblur = 1;
+    detail = 0;
+    ismotionblur = 0;
+    //detail = 2;
+    //ismotionblur = 1;
     usermousesensitivity = 1;
-    newscreenwidth = kContextWidth = 1024;
-    newscreenheight = kContextHeight = 768;
+    newscreenwidth = kContextWidth = 960;
+    newscreenheight = kContextHeight = 544;
     fullscreen = 0;
     floatjump = 0;
     autoslomo = 1;
