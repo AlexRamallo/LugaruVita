@@ -113,8 +113,6 @@ void DrawMenu();
 /*********************> DrawGLScene() <*****/
 int Game::DrawGLScene(StereoSide side)
 {
-    LOG_TOGGLE(false);
-
     static float texcoordwidth, texcoordheight;
     static float texviewwidth, texviewheight;
     static XYZ checkpoint;

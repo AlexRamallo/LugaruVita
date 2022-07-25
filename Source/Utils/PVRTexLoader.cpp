@@ -63,22 +63,21 @@ static bool read_metadata_block(PVRHeader *header, PVRMetaData *meta, FILE *fd){
 				break;
 
 			case 6: //ChannelType overrides
-				uint8_t ch[4];
-				get8(&ch[0]);
-				get8(&ch[1]);
-				get8(&ch[2]);
-				get8(&ch[3]);
-				//fail if there are any actual overrides
-				for(int i = 0; i < 4; i++){
-					uint32_t chi = (uint32_t) ch[i];
-					if(chi != header->ChannelType){
-						LOG("ChannelType overrides aren't supported\n\tHeader: %d\n\tch: %d, %d, %d, %d",
-							(int) header->ChannelType,
-							(int) ch[0], (int) ch[1], (int) ch[2], (int) ch[3]
-						);
-						goto fail;
-					}
+				memset(header->chtype, 0, 4);
+				get8(&header->chtype[0]);
+				get8(&header->chtype[1]);
+				get8(&header->chtype[2]);
+				get8(&header->chtype[3]);
+
+				if(
+					header->chtype[1] == header->chtype[0] &&
+					header->chtype[2] == header->chtype[0] &&
+					header->chtype[3] == header->chtype[0] ){
+					header->ChannelType = header->chtype[0];
+				}else{
+					header->ChannelType = -1;
 				}
+
 				break;
 		}
 	}
@@ -111,10 +110,6 @@ static bool read_header(PVRHeader *header, FILE *fd){
 	get32(&header->Flags);
 	
 	get64(&header->PixelFormat);
-	if(header->PixelFormat > 5){
-		LOG("Unsupported pixel format: %d", header->PixelFormat);
-		goto fail;
-	}
 
 	get32(&header->ColorSpace);
 	get32(&header->ChannelType);
@@ -168,6 +163,25 @@ static bool read_header(PVRHeader *header, FILE *fd){
 		return false;
 }
 
+static int get_pvr_channel_size(int type){
+	switch(type){
+		case 0:  return 1; //Unsigned Byte Normalised
+		case 1:  return 1; //Signed Byte Normalised
+		case 2:  return 1; //Unsigned Byte
+		case 3:  return 1; //Signed Byte
+		case 4:  return 2; //Unsigned Short Normalised
+		case 5:  return 2; //Signed Short Normalised
+		case 6:  return 2; //Unsigned Short
+		case 7:  return 2; //Signed Short
+		case 8:  return 4; //Unsigned Integer Normalised
+		case 9:  return 4; //Signed Integer Normalised
+		case 10: return 4; //Unsigned Integer
+		case 11: return 4; //Signed Integer
+		case 12: return 4; //Signed Float
+		case 13: return 4; //Unsigned Float
+	}
+}
+
 bool PVRTexLoader::loadTexture(const char *filename, uint8_t **data, PVRHeader *header){
 	FILE *fd = fopen(filename, "rb");
 	if(fd == NULL){
@@ -208,15 +222,31 @@ bool PVRTexLoader::loadTexture(const char *filename, uint8_t **data, PVRHeader *
 	fclose(fd);
 	return true;
 }
-
+/**
+ * In a "Pixel Transfer" operation, the format specifies:
+ * 
+ * 	- data 'type', such as: color, depth, stencil, or depth/stencil
+ *  - component order
+ *  - (only for color data) whether to convert values to/from floating point
+ * 
+ * This returns the type and order for color types only
+ * */
 static GLuint parse_gl_pixel_format(uint8_t order[4], uint8_t rate[4]){
-	//no GL_LUMINANCE or GL_LUMINANCE_ALPHA
-	if(order[1] == order[2] == order[3] == 0){
+	//LOG("\tparse_gl_pixel_format()\n\t\torder: %c %c %c %c\n\t\trate: %d %d %d %d",
+	//	(char)order[0], (char)order[1], (char)order[2], (char)order[3],
+	//	(int)rate[0], (int)rate[1], (int)rate[2], (int)rate[3]
+	//);
+	if((order[1] + order[2] + order[3]) == 0){
 		switch(order[0]){
 			case 'r': return GL_RED;
 			case 'g': return GL_GREEN;
 			case 'b': return GL_BLUE;
 			case 'a': return GL_ALPHA;
+			case 'l': return 0; //luminance (?)
+			case 'i': return 0; //?
+			case 'd': return 0; //depth
+			case 's': return 0; //stencil
+			case 'x': return 0; //?
 		}
 	}else if(order[0] == 'r' && order[1] == 'g' && order[2] == 'b'){
 		if(order[3] == 'a'){
@@ -241,21 +271,127 @@ GLint PVRHeader::getBorder(int side) {
 GLuint PVRHeader::getGLPixelFormat(){
 	uint8_t order[4], rate[4];
 	if(getUncompressedChannelOrder(order, rate)){
-		assert(0);
 		return parse_gl_pixel_format(order, rate);
-	}else{
-		switch(PixelFormat){
-			default:
-				return 0;
-			case 0:
+	}
+	return 0;
+}
+
+GLenum get_channel_gl_unitype_ratio(uint32_t unitype, uint8_t order[4], uint8_t rate[4]){
+	switch(unitype){
+		case 0:
+		case 2:
+			if(rate[0] == 3 && rate[1] == 3 && rate[2] == 2){
+				//return GL_UNSIGNED_BYTE_3_3_2;
+				return 0; //VITAGL: TODO
+			}else if(rate[0] == 2 && rate[1] == 2 && rate[2] == 3){
+				//don't use _REV suffix since `parse_gl_pixel_format` already encodes the order
+				//return GL_UNSIGNED_BYTE_3_3_2;
+				return 0; //VITAGL: TODO
+			}else{
+				return GL_UNSIGNED_BYTE;
+			}
+
+		case 4:
+		case 6:
+			if(rate[0] == 5 && rate[1] == 6 && rate[2] == 5){
+				return GL_UNSIGNED_SHORT_5_6_5;
+			}else if(rate[0] == 4 && rate[1] == 4 && rate[2] == 4 && rate[3] == 4){
+				return GL_UNSIGNED_SHORT_4_4_4_4;
+			}else if(rate[0] == 5 && rate[1] == 5 && rate[2] == 5 && rate[3] == 1){
+				return GL_UNSIGNED_SHORT_5_5_5_1;
+			} if(rate[0] == 1 && rate[1] == 5 && rate[2] == 5 && rate[3] == 5){
+				return GL_UNSIGNED_SHORT_5_5_5_1;
+			}else{
+				return GL_UNSIGNED_SHORT;
+			}
+
+		case 8:
+		case 10:
+			if(rate[0] == 8 && rate[1] == 8 && rate[2] == 8 && rate[3] == 8){
+				//return GL_UNSIGNED_INT_8_8_8_8;
+				return 0; //VITAGL: TODO
+			}else if(rate[0] == 10 && rate[1] == 10 && rate[2] == 10 && rate[3] == 2){
+				//return GL_UNSIGNED_INT_10_10_10_2;
+				return 0; //VITAGL: TODO
+			}else{
+				return GL_UNSIGNED_INT;
+			}
+
+		//signed types
+		case 12:
+		case 13:
+		case 9:
+		case 11:
+		case 5:
+		case 7:
+		case 1:
+		case 3:
+			return unitype;
+
+		default: 
+			return 0;
+	}
+}
+
+/**
+ * 	Only call this for uncompressed PixelFormats
+ * 
+ * This returns the pixel type in a pixel transfer operation, but only
+ * for uniform-rate pixel formats. If rates are not uniform, pass the
+ * output of this function to `get_channel_gl_unitype_ratio`
+ * */
+GLenum get_channel_gl_unitype(uint32_t ChannelType){
+	//Only works if all channels are the same type
+	if(ChannelType != -1){
+		switch(ChannelType){
+			case 0: //normalized
 			case 2:
-				return GL_RGB;
-			case 1:
+				return GL_UNSIGNED_BYTE;
+			case 1: //normalized
 			case 3:
-			case 4:
-			case 5:
-				return GL_RGBA;
+				return GL_BYTE;
+			case 4: //normalized
+			case 6:
+				return GL_UNSIGNED_SHORT;
+			case 5: //normalized
+			case 7:
+				return GL_SHORT;
+			case 8: //normalized
+			case 10:
+				return GL_UNSIGNED_INT;
+			case 9: //normalized
+			case 11:
+				return GL_INT;
+			case 12:
+			case 13://unsigned(?)
+				return GL_FLOAT;
 		}
+	}else{
+		return 0;//Mixed channel types not supported
+	}
+}
+
+GLsizei PVRHeader::getBitsPerPixel(){
+	uint8_t order[4], rate[4];
+	if(getUncompressedChannelOrder(order, rate)){
+		GLsizei ret = 0;
+		for(int i = 0; i < 4; i++){
+			ret += rate[i];
+		}
+		return ret;
+	}else{
+		return 0;
+	}
+}
+
+GLenum PVRHeader::getGLPixelType(){
+	GLenum ut = get_channel_gl_unitype(ChannelType);
+	if(ChannelType != -1){
+		return ut;
+	}else{
+		uint8_t order[4], rate[4];
+		getUncompressedChannelOrder(order, rate);
+		return get_channel_gl_unitype_ratio(ut, order, rate);
 	}
 }
 
@@ -269,32 +405,39 @@ bool PVRHeader::isCompressed(){
 }
 
 bool PVRHeader::getUncompressedChannelOrder(uint8_t order[4], uint8_t rate[4]){
-	//TODO: test this
-	uint32_t msb = PixelFormat & 0xFFFFFFFF00000000;
+	/**
+	 * Notes:
+	 * 
+	 * 	order values are chars specifying the channel type, and these can be:
+	 * 		- 'r', 'g', 'b', 'a', 'l', 'i', 'd', 's', 'x', 0
+	 * 		- a value of zero means that channel is missing
+	 * 
+	 *  rate values specify how many bits are allocated to that channel per pixel
+	 * 
+	 * */
+	uint32_t msb = (PixelFormat & 0xFFFFFFFF00000000L) >> 32;
 	if(msb){
 		if(order != NULL){
-			uint32_t lsb = PixelFormat & 0x00000000FFFFFFFF;
-			order[0] = (PixelFormat >> 0) & 0xFF;
-			order[1] = (PixelFormat >> 1) & 0xFF;
-			order[2] = (PixelFormat >> 2) & 0xFF;
-			order[3] = (PixelFormat >> 3) & 0xFF;
+			uint32_t lsb = PixelFormat & 0x00000000FFFFFFFFL;
+			order[0] = (lsb >> 0) & 0xFF;
+			order[1] = (lsb >> 8) & 0xFF;
+			order[2] = (lsb >> 16) & 0xFF;
+			order[3] = (lsb >> 24) & 0xFF;
 		}
 		if(rate != NULL){
-			rate[3] = (PixelFormat << 1) & 0xFF;
-			rate[2] = (PixelFormat << 2) & 0xFF;
-			rate[1] = (PixelFormat << 3) & 0xFF;
-			rate[0] = (PixelFormat << 4) & 0xFF;
+			rate[0] = (msb >> 0) & 0xFF;
+			rate[1] = (msb >> 8) & 0xFF;
+			rate[2] = (msb >> 16) & 0xFF;
+			rate[3] = (msb >> 24) & 0xFF;
 		}
 		return true;
 	}
 	return false;
 }
-
 GLuint PVRHeader::getGLInternalFormat(){
 	//TODO: test this
 	uint8_t order[4], rate[4];
 	if(getUncompressedChannelOrder(order, rate)){
-		assert(0);
 		return parse_gl_pixel_format(order, rate);
 	}else{
 		switch(PixelFormat){

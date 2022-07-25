@@ -185,32 +185,24 @@ void Menu::handleFadeEffect()
 
 void Menu::drawItems()
 {
-    LOG("Menu::drawItems()");
-    LOG("\t1");
     handleFadeEffect();
-    LOG("\t2");
     glEnable(GL_TEXTURE_2D);
     glEnable(GL_ALPHA_TEST);
     glEnable(GL_BLEND);
-    LOG("\t3");
     for (vector<MenuItem>::iterator it = items.begin(); it != items.end(); it++) {
         switch (it->type) {
             case MenuItem::IMAGE:
             case MenuItem::IMAGEBUTTON:
             case MenuItem::MAPMARKER:
-                LOG("\t\tA");
                 glColor4f(it->r, it->g, it->b, 1);
                 glPushMatrix();
-                LOG("\t\t\t1");
                 if (it->type == MenuItem::MAPMARKER) {
                     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
                     glTranslatef(2.5, -4.5, 0); //from old code
                 } else {
                     glBlendFunc(GL_SRC_ALPHA, GL_ONE);
                 }
-                LOG("\t\t\t2");
                 it->texture.bind();
-                LOG("\t\t\t3");
                 glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
                 glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
                 glBegin(GL_QUADS);
@@ -223,7 +215,6 @@ void Menu::drawItems()
                 glTexCoord2f(0, 1);
                 glVertex3f(it->x, it->y + it->h, 0);
                 glEnd();
-                LOG("\t\t\t4");
                 if (it->type != MenuItem::IMAGE) {
                     //mouseover highlight
                     for (int i = 0; i < 10; i++) {
@@ -242,18 +233,13 @@ void Menu::drawItems()
                         }
                     }
                 }
-                LOG("\t\t\t5");
                 glPopMatrix();
-                LOG("\t\t\t6");
                 break;
             case MenuItem::LABEL:
             case MenuItem::BUTTON:
-                LOG("\t\tB");
                 glColor4f(it->r, it->g, it->b, 1);
                 glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-                LOG("\t\t\t1");
                 Game::text->glPrint(it->x, it->y, it->text.c_str(), 0, 1, 640, 480);
-                LOG("\t\t\t2");
                 if (it->type != MenuItem::LABEL) {
                     //mouseover highlight
                     glBlendFunc(GL_SRC_ALPHA, GL_ONE);
@@ -264,39 +250,28 @@ void Menu::drawItems()
                         }
                     }
                 }
-                LOG("\t\t\t3");
                 break;
             case MenuItem::MAPLABEL:
-                LOG("\t\tC");
                 Game::text->glPrintOutlined(0.9, 0, 0, 1, it->x, it->y, it->text.c_str(), 0, 0.6, 640, 480);
-                LOG("\t\t\t1");
                 break;
             case MenuItem::MAPLINE: {
-                LOG("\t\tD");
                 XYZ linestart;
                 linestart.x = it->x;
                 linestart.y = it->y;
                 linestart.z = 0;
-                LOG("\t\t\t1");
                 XYZ lineend;
                 lineend.x = it->x + it->w;
                 lineend.y = it->y + it->h;
                 lineend.z = 0;
-                LOG("\t\t\t2");
                 XYZ offset = lineend - linestart;
                 XYZ fac = offset;
-                LOG("\t\t\t3");
                 Normalise(&fac);
-                LOG("\t\t\t4");
                 offset = DoRotation(offset, 0, 0, 90);
-                LOG("\t\t\t5");
                 Normalise(&offset);
 
-                LOG("\t\t\t6");
                 linestart += fac * 4 * it->linestartsize;
                 lineend -= fac * 4 * it->lineendsize;
 
-                LOG("\t\t\t7");
                 glDisable(GL_TEXTURE_2D);
                 glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
                 glColor4f(it->r, it->g, it->b, 1);
@@ -310,15 +285,12 @@ void Menu::drawItems()
                 glEnd();
                 glPopMatrix();
                 glEnable(GL_TEXTURE_2D);
-                LOG("\t\t\t8");
             } break;
             default:
             case MenuItem::NONE:
-                LOG("\t\tE");
                 break;
         }
     }
-    LOG("\t4");
 }
 
 void Menu::updateSettingsMenu()

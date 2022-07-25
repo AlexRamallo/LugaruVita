@@ -682,7 +682,7 @@ void Game::InitGame()
     Person::players.emplace_back(player);
  
     LOG("InitGame Done!!");
-    LOG_TOGGLE(false);
+    //LOG_TOGGLE(false);
 }
 
 void Game::LoadScreenTexture()
@@ -707,13 +707,11 @@ void Game::LoadScreenTexture()
 /* Loads models and textures which only needs to be loaded once */
 void Game::LoadStuff()
 {
-    LOG_TOGGLE(true);
+    LOG_TOGGLE(false);
     LOG("Game::LoadStuff()");
     float temptexdetail;
     float viewdistdetail;
     float megascale = 1;
-
-    LOG("\tA");
 
     LOGFUNC;
 
@@ -733,7 +731,6 @@ void Game::LoadStuff()
     textmono->BuildFont();
     texdetail = temptexdetail;
 
-    LOG("\tB");
     viewdistdetail = 2;
     viewdistance = 50 * megascale * viewdistdetail;
 
@@ -750,22 +747,17 @@ void Game::LoadStuff()
 
     realtexdetail = texdetail;
 
-    LOG("\tC");
     Weapon::Load();
 
-    LOG("\tD");
     terrain.shadowtexture.load("Textures/Shadow.png", 0);
     terrain.bloodtexture.load("Textures/Blood.png", 0);
     terrain.breaktexture.load("Textures/Break.png", 0);
     terrain.bloodtexture2.load("Textures/Blood.png", 0);
 
-    LOG("\tE");
-
     terrain.footprinttexture.load("Textures/Footprint.png", 0);
     terrain.bodyprinttexture.load("Textures/Bodyprint.png", 0);
     hawktexture.load("Textures/Hawk.png", 0);
 
-    LOG("\tF");
     Sprite::cloudtexture.load("Textures/Cloud.png", 1);
     Sprite::cloudimpacttexture.load("Textures/CloudImpact.png", 1);
     Sprite::bloodtexture.load("Textures/BloodParticle.png", 1);
@@ -778,12 +770,10 @@ void Game::LoadStuff()
     Sprite::leaftexture.load("Textures/Leaf.png", 1);
     Sprite::toothtexture.load("Textures/Tooth.png", 1);
 
-    LOG("\tG");
     yaw = 0;
     pitch = 0;
     ReSizeGLScene(90, .01);
 
-    LOG("\tH");
     viewer = 0;
 
     //Set up distant light
@@ -798,13 +788,10 @@ void Game::LoadStuff()
     light.location.z = -.2;
     Normalise(&light.location);
 
-    LOG("\tI");
     LoadingScreen();
 
-    LOG("\tJ");
     SetUpLighting();
 
-    LOG("\tK");
     fadestart = .6;
     gravity = -10;
 
@@ -814,7 +801,6 @@ void Game::LoadStuff()
     viewer.x = terrain.size / 2 * terrain.scale;
     viewer.z = terrain.size / 2 * terrain.scale;
 
-    LOG("\tL");
     hawk.load("Models/Hawk.solid");
     hawk.Scale(.03, .03, .03);
     hawk.Rotate(90, 1, 1);
@@ -824,26 +810,21 @@ void Game::LoadStuff()
     hawkcoords.z = terrain.size / 2 * terrain.scale - 5 - 7;
     hawkcoords.y = terrain.getHeight(hawkcoords.x, hawkcoords.z) + 25;
 
-    LOG("\tM");
     eye.load("Models/Eye.solid");
     eye.Scale(.03, .03, .03);
     eye.CalculateNormals(0);
 
-    LOG("\tN");
     cornea.load("Models/Cornea.solid");
     cornea.Scale(.03, .03, .03);
     cornea.CalculateNormals(0);
 
-    LOG("\tO");
     iris.load("Models/Iris.solid");
     iris.Scale(.03, .03, .03);
     iris.CalculateNormals(0);
 
-    LOG("\tP");
     LoadSave("Textures/WolfBloodFur.png", &PersonType::types[wolftype].bloodText[0]);
     LoadSave("Textures/BloodFur.png", &PersonType::types[rabbittype].bloodText[0]);
 
-    LOG("\tQ");
     oldenvironment = -4;
 
     gameon = 1;
@@ -861,20 +842,16 @@ void Game::LoadStuff()
         }
     }
 
-    LOG("\tR");
     LoadingScreen();
 
-    LOG("\tS");
     for (unsigned i = 0; i < Person::players[0]->skeleton.joints.size(); i++) {
         for (unsigned j = 0; j < Animation::animations[knifesneakattackedanim].frames.size(); j++) {
             Animation::animations[knifesneakattackedanim].frames[j].joints[i].position += moveamount;
         }
     }
 
-    LOG("\tT");
     LoadingScreen();
 
-    LOG("\tU");
     for (unsigned i = 0; i < Person::players[0]->skeleton.joints.size(); i++) {
         Animation::animations[dead1anim].frames[1].joints[i].position = Animation::animations[dead1anim].frames[0].joints[i].position;
         Animation::animations[dead2anim].frames[1].joints[i].position = Animation::animations[dead2anim].frames[0].joints[i].position;
@@ -891,7 +868,6 @@ void Game::LoadStuff()
     Animation::animations[dead3anim].frames[1].speed = 0.001;
     Animation::animations[dead4anim].frames[1].speed = 0.001;
 
-    LOG("\tV");
     for (unsigned i = 0; i < Person::players[0]->skeleton.joints.size(); i++) {
         for (unsigned j = 0; j < Animation::animations[swordsneakattackanim].frames.size(); j++) {
             Animation::animations[swordsneakattackanim].frames[j].joints[i].position += moveamount;
@@ -910,7 +886,6 @@ void Game::LoadStuff()
         }
     }
 
-    LOG("\tW");
     LoadingScreen();
 
     if (!screentexture) {
@@ -921,12 +896,10 @@ void Game::LoadStuff()
         emit_sound_at(fireendsound);
     }
 
-    LOG("\tX");
     stillloading = 0;
     loading = 0;
     changedelay = 1;
 
     visibleloading = false;
     firstLoadDone = true;
-    LOG("\tY");
 }

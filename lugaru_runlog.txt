@@ -29,41 +29,221 @@ Loading PersonType...
 Creating Player...
 Player(INIT) patch X: 0	Z: 0
 InitGame Done!!
-Game::LoadStuff()
-	A
-	B
-	C
-Loading weapon data...
-Loading model...Models/ThrowingKnife.solid
-Loading model...Models/Sword.solid
-Loading model...Models/Staff.solid
-	D
-	E
-	F
-	G
-	H
-	I
-	J
-	K
-	L
-Loading model...Models/Hawk.solid
-	M
-Loading model...Models/Eye.solid
-	N
-Loading model...Models/Cornea.solid
-	O
-Loading model...Models/Iris.solid
-	P
-Loading (S)...Textures/WolfBloodFur.png
-Loading (S)...Textures/BloodFur.png
-	Q
-	R
-	S
-	T
-	U
-	V
-	W
-	X
-	Y
-Loading level...Lugaru1.json
- Setting environment...
+<<NEW GAME>>
+LoadCampaign called! cur campaign: main
+<<Game Menu Selected(7)>>
+Person::addClothes(0)
+	tint (0, 0, 512)
+	size: 512, 4
+	bpp: 16
+Loading model...Models/Body.solid
+Loading model...Models/BodyLow.solid
+Loading model...Models/Belt.solid
+Person::addClothes(0)
+	tint (0, 0, 512)
+	size: 512, 4
+	bpp: 16
+Person::addClothes(0)
+	tint (0, 0, 512)
+	size: 512, 4
+	bpp: 16
+Loading model...Models/Body.solid
+Loading model...Models/BodyLow.solid
+Loading model...Models/Belt.solid
+Person::addClothes(0)
+	tint (0, 0, 512)
+	size: 512, 4
+	bpp: 16
+Person::addClothes(0)
+	tint (0, 0, 512)
+	size: 512, 4
+	bpp: 16
+Loading model...Models/Body.solid
+Loading model...Models/BodyLow.solid
+Loading model...Models/Belt.solid
+Person::addClothes(0)
+	tint (0, 0, 512)
+	size: 512, 4
+	bpp: 16
+Person::addClothes(0)
+	tint (0, 0, 512)
+	size: 512, 4
+	bpp: 16
+Loading model...Models/Body.solid
+Loading model...Models/BodyLow.solid
+Loading model...Models/Belt.solid
+Person::addClothes(0)
+	tint (0, 0, 512)
+	size: 512, 4
+	bpp: 16
+Person::addClothes(0)
+	tint (0, 0, 512)
+	size: 512, 4
+	bpp: 16
+Loading model...Models/Body.solid
+Loading model...Models/BodyLow.solid
+Loading model...Models/Belt.solid
+Person::addClothes(1)
+	tint (0, 0, 512)
+	size: 512, 4
+	bpp: 16
+Person::addClothes(0)
+	tint (0, 0, 512)
+	size: 512, 4
+	bpp: 16
+Loading model...Models/Body.solid
+Loading model...Models/BodyLow.solid
+Loading model...Models/Belt.solid
+Person::addClothes(0)
+	tint (0, 0, 512)
+	size: 512, 4
+	bpp: 16
+Starting background music...
+LoadCampaign called! cur campaign: main
+Loading json level... Lugaru2.json
+Loading model...Models/Body.solid
+Loading model...Models/BodyLow.solid
+Loading model...Models/Belt.solid
+Person::addClothes(0)
+	tint (0, 0, 512)
+	size: 512, 4
+	bpp: 16
+Loading model...Models/Body.solid
+Loading model...Models/BodyLow.solid
+Loading model...Models/Belt.solid
+Person::addClothes(0)
+	tint (0, 0, 512)
+	size: 512, 4
+	bpp: 16
+Starting background music...
+LoadCampaign called! cur campaign: main
+Loading json level... Lugaru3.json
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading decal...app0:Data/Models/Wall.solid
+Loading decal...app0:Data/Models/Box.solid
+Loading decal...app0:Data/Models/Box.solid
+Loading decal...app0:Data/Models/Box.solid
+Loading decal...app0:Data/Models/Box.solid
+Loading decal...app0:Data/Models/Rock.solid
+Loading decal...app0:Data/Models/Rock.solid
+Loading decal...app0:Data/Models/Rock.solid
+Loading decal...app0:Data/Models/Rock.solid
+Loading decal...app0:Data/Models/Rock.solid
+Loading decal...app0:Data/Models/Rock.solid
+Loading decal...app0:Data/Models/Rock.solid
+Loading decal...app0:Data/Models/Rock.solid
+Loading decal...app0:Data/Models/Rock.solid
+Loading decal...app0:Data/Models/Rock.solid
+Loading model...Models/Bush.solid
+Loading model...Models/Bush.solid
+Loading model...Models/Bush.solid
+Loading model...Models/Bush.solid
+Loading model...Models/Bush.solid
+Loading model...Models/Bush.solid
+Loading model...Models/Bush.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/TreeTrunk.solid
+Loading decal...app0:Data/Models/Box.solid
+Loading decal...app0:Data/Models/Box.solid
+Loading decal...app0:Data/Models/Box.solid
+Loading decal...app0:Data/Models/Box.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/Bush.solid
+Loading model...Models/Bush.solid
+Loading model...Models/Bush.solid
+Loading model...Models/Bush.solid
+Loading model...Models/Bush.solid
+Loading model...Models/Bush.solid
+Loading model...Models/Bush.solid
+Loading model...Models/Bush.solid
+Loading model...Models/Bush.solid
+Loading model...Models/Bush.solid
+Loading model...Models/Bush.solid
+Loading model...Models/Bush.solid
+Loading model...Models/Bush.solid
+Loading model...Models/Bush.solid
+Loading model...Models/Bush.solid
+Loading model...Models/Bush.solid
+Loading model...Models/Bush.solid
+Loading model...Models/Bush.solid
+Loading model...Models/Bush.solid
+Loading model...Models/Bush.solid
+Loading decal...app0:Data/Models/Rock.solid
+Loading decal...app0:Data/Models/Rock.solid
+Loading decal...app0:Data/Models/Rock.s

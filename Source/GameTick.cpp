@@ -568,7 +568,7 @@ bool Game::LoadLevel(const std::string& name, bool tutorial)
     }
     const std::string level_path = Folders::getResourcePath("Maps/" + name);
     if (!Folders::file_exists(level_path)) {
-        perror(std::string("LoadLevel: Could not open file '" + level_path).c_str());
+        LOG("LoadLevel: Could not open file: %s", level_path.c_str());
         return false;
     }
 
@@ -578,7 +578,7 @@ bool Game::LoadLevel(const std::string& name, bool tutorial)
 
     LOGFUNC;
 
-    LOG(std::string("Loading level...") + name);
+    LOG("Loading level... %s", + name.c_str());
 
     if (!gameon) {
         visibleloading = true;
@@ -722,6 +722,12 @@ bool Game::LoadLevel(const std::string& name, bool tutorial)
         Person::players[0]->clothestintr.push_back(tintr);
         Person::players[0]->clothestintg.push_back(tintg);
         Person::players[0]->clothestintb.push_back(tintb);
+    }
+
+    LOG_TOGGLE(true);
+    LOG("Player[0] clothes:");
+    for(int i = 0; i < Person::players[0]->clothes.size(); i++){
+        LOG("\t%d: %s", i, Person::players[0]->clothes[i].c_str());
     }
 
     funpackf(tfile, "Bi", &environment);
@@ -951,13 +957,13 @@ bool Game::LoadJsonLevel(const std::string& name, bool tutorial)
 {
     const std::string level_path = Folders::getResourcePath("Maps/" + name + ".json");
     if (!Folders::file_exists(level_path)) {
-        perror(std::string("LoadLevel: Could not open file '" + level_path).c_str());
+        LOG("LoadLevel: Could not open file: %s", level_path.c_str());
         return false;
     }
 
     LOGFUNC;
 
-    LOG(std::string("Loading level...") + name + ".json");
+    LOG("Loading json level... %s.json", name.c_str());
 
     if (!gameon) {
         visibleloading = true;

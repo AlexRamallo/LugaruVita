@@ -7254,8 +7254,7 @@ void Person::addClothes()
             addClothes(i);
         }
         DoMipmaps();
-    }
-}
+    }}
 
 bool Person::addClothes(const int& clothesId)
 {
@@ -7265,8 +7264,9 @@ bool Person::addClothes(const int& clothesId)
     GLubyte* array = &skeleton.skinText[0];
 
     //Load Image
-    ImageRec texture;
-    bool opened = load_image(Folders::getResourcePath(fileName).c_str(), texture);
+    ImageRec texture; 
+    std::string fname = Folders::getResourcePath(fileName);
+    bool opened = load_image(fname.c_str(), texture);
 
     float alphanum;
     //Is it valid?
@@ -7295,11 +7295,27 @@ bool Person::addClothes(const int& clothesId)
             tintb = 0;
         }
 
-        int bytesPerPixel = texture.bpp / 8;
+        int bytesPerPixel;
+        int sizeX;
+        int sizeY;
+        if(texture.is_pvr){
+            if(texture.pvr_header.isCompressed()){
+                LOG("ERROR: found compressed clothing texture (%s)", fname.c_str());
+                return 0;
+            }else{
+                sizeX = texture.pvr_header.Width + texture.pvr_header.getBorder(0);
+                sizeY = texture.pvr_header.Height + texture.pvr_header.getBorder(1);
+                bytesPerPixel = texture.pvr_header.getBitsPerPixel() / 8;
+            }
+        }else{
+            sizeX = texture.sizeX;
+            sizeY = texture.sizeY;
+            bytesPerPixel = texture.bpp / 8;
+        }
 
         int tempnum = 0;
         alphanum = 255;
-        for (int i = 0; i < (int)(texture.sizeY * texture.sizeX * bytesPerPixel); i++) {
+        for (int i = 0; i < (int)(sizeY * sizeX * bytesPerPixel); i++) {
             if (bytesPerPixel == 3) {
                 alphanum = 255;
             } else if ((i + 1) % 4 == 0) {
@@ -7321,6 +7337,7 @@ bool Person::addClothes(const int& clothesId)
         }
         return 1;
     } else {
+        LOG("Person::addClothes(%d) FAILED TO OPEN: '%s'", (int)clothesId, fname.c_str());
         return 0;
     }
 }

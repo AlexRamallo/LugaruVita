@@ -46,11 +46,41 @@ void TextureRes::uploadPVR(void *pTexture){
     } else {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     }
+    
+    assert(texture->pvr_header.getBorder(0) == texture->pvr_header.getBorder(1) && "PVR texture has uneven borders");
+    
+    int sizeBorder = texture->pvr_header.getBorder();
+    int sizeX = texture->pvr_header.Width + sizeBorder;
+    skinsize = sizeX;
 
     if (isSkin) {
-        /*TODO: decipher this
+        LOG_TOGGLE(true);
+
+        if(texture->pvr_header.isCompressed()){
+            LOG("ERROR: Compressed PVR skin texture found");
+            return;
+        }
+
         free(data);
-        const int nb = texture->sizeY * texture->sizeX * (texture->bpp / 8);
+        int sizeY = texture->pvr_header.Height + sizeBorder;
+        GLsizei bpp = texture->pvr_header.getBitsPerPixel();
+
+        GLuint type = 0;
+        if(bpp == 24){
+            type = GL_RGB;
+        }else if(bpp == 32){
+            type = GL_RGBA;
+        }
+
+        const int nb = sizeX * sizeY * (bpp / 8);
+        assert(nb == texture->pvr_header.getImageSize());
+
+        //LOG("PVR Skin\n\tborder: %d\n\tsizeX: %d\n\tsizeY: %d\n\tbpp: %d\n\ttype: %d\n\tnb: %d\timgSize: %d",
+        //    sizeBorder, sizeX, sizeY, (int) bpp, (int) type, nb, (int) texture->pvr_header.getImageSize()
+        //);
+
+        assert(type > 0);
+
         data = (GLubyte*)malloc(nb * sizeof(GLubyte));
         datalen = 0;
         for (int i = 0; i < nb; i++) {
@@ -58,13 +88,12 @@ void TextureRes::uploadPVR(void *pTexture){
                 data[datalen++] = texture->data[i];
             }
         }
-        glTexImage2D(GL_TEXTURE_2D, 0, type, texture->sizeX, texture->sizeY, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-        */
+        glTexImage2D(GL_TEXTURE_2D, 0, type, sizeX, sizeY, sizeBorder, GL_RGB, GL_UNSIGNED_BYTE, data);
     } else {
         if(texture->pvr_header.isCompressed()){
             glCompressedTexImage2D(
                 GL_TEXTURE_2D,
-                0,
+                0, //TODO
                 texture->pvr_header.getGLInternalFormat(),
                 texture->pvr_header.Width,
                 texture->pvr_header.Height,
@@ -75,13 +104,13 @@ void TextureRes::uploadPVR(void *pTexture){
         }else{
             glTexImage2D(
                 GL_TEXTURE_2D,
-                0,
+                0, //TODO
                 texture->pvr_header.getGLInternalFormat(),
-                texture->pvr_header.Width,
-                texture->pvr_header.Height,
+                texture->pvr_header.Width + texture->pvr_header.getBorder(0),
+                texture->pvr_header.Height + texture->pvr_header.getBorder(1),
                 texture->pvr_header.getBorder(),
                 texture->pvr_header.getGLPixelFormat(),
-                texture->pvr_header.getImageSize(),
+                texture->pvr_header.getGLPixelType(),
                 texture->data
             );
         }
@@ -137,11 +166,6 @@ void TextureRes::load()
             glTexImage2D(GL_TEXTURE_2D, 0, type, texture.sizeX, texture.sizeY, 0, type, GL_UNSIGNED_BYTE, texture.data);
         }
     }else{
-        if(isSkin){
-            LOG_TOGGLE(true);
-            LOG("FOUND PVR SKIN: %s", filename.c_str());
-            assert(false && "PVR Skin not supported!");
-        }
         uploadPVR((void*)&texture);
     }
 }

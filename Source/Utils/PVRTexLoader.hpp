@@ -53,12 +53,18 @@ struct PVRHeader {
 	GLuint getGLInternalFormat();
 	GLsizei getImageSize();	
 	GLint getBorder(int side = 0);
+	
 	//only if not compressed
 	GLuint getGLPixelFormat();
+	GLenum getGLPixelType();
+
+	//returns number of bits per pixel
+	GLsizei getBitsPerPixel();
 
 	//there aren't part of the standard PVR header
 	GLsizei img_size;
 	GLint border[3];
+	GLbyte chtype[4]; //overrides
 private:
 	bool getUncompressedChannelOrder(uint8_t order[4], uint8_t rate[4]);
 };
