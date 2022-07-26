@@ -22,6 +22,7 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 #include "Utils/PVRTexLoader.hpp"
 
 #include "Game.hpp"
+#include "Thirdparty/microprofile/microprofile.h"
 #include "Utils/Folders.hpp"
 
 #include <jpeglib.h>
@@ -103,6 +104,7 @@ int get_filetype(const char *filename){
 
 bool load_image(const char* file_name, ImageRec& tex, bool force_pvr)
 {
+    MICROPROFILE_SCOPEI("ImageIO", "load_image", 0xffff3456);
     Game::LoadingScreen();
 
     const char* ptr = strrchr((char*)file_name, '.');
@@ -162,6 +164,7 @@ bool save_screenshot(const char* file_name)
 }
 
 static bool load_pvr(const char* file_name, ImageRec& tex){
+    MICROPROFILE_SCOPEI("ImageIO", "load_pvr", 0xffff3456);
     return pvr_loader->loadTexture(file_name, &tex.data, &tex.pvr_header);
 }
 
@@ -181,6 +184,7 @@ static void my_error_exit(j_common_ptr cinfo)
 /* stolen from public domain example.c code in libjpg distribution. */
 static bool load_jpg(const char* file_name, ImageRec& tex)
 {
+    MICROPROFILE_SCOPEI("ImageIO", "load_jpg", 0xffff3456);
     //TODO: calcluate how much we actually need
     assert(tex.data == NULL);
     tex.data = (GLubyte*)malloc(1024 * 1024 * 4);
@@ -235,6 +239,7 @@ static bool load_jpg(const char* file_name, ImageRec& tex)
 /* stolen from public domain example.c code in libpng distribution. */
 static bool load_png(const char* file_name, ImageRec& tex)
 {
+    MICROPROFILE_SCOPEI("ImageIO", "load_png", 0xffff3456);
     //TODO: calcluate how much we actually need
     assert(tex.data == NULL);
     tex.data = (GLubyte*)malloc(1024 * 1024 * 4);

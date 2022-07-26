@@ -19,6 +19,7 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include "Game.hpp"
+#include "Thirdparty/microprofile/microprofile.h"
 
 #include "Audio/openal_wrapper.hpp"
 #include "Level/Awards.hpp"
@@ -113,6 +114,8 @@ void DrawMenu();
 /*********************> DrawGLScene() <*****/
 int Game::DrawGLScene(StereoSide side)
 {
+    MICROPROFILE_SCOPEI("Game", "DrawGLScene", 0x008fff);
+
     static float texcoordwidth, texcoordheight;
     static float texviewwidth, texviewheight;
     static XYZ checkpoint;
@@ -153,8 +156,10 @@ int Game::DrawGLScene(StereoSide side)
     
 
     if (!mainmenu) {
-        
+        MICROPROFILE_SCOPEI("DrawGLScene", "gameplay", 0xb500ff);  
+
         if (editorenabled) {
+            MICROPROFILE_SCOPEI("DrawGLScene", "editor", 0xb500ff);
             numboundaries = mapradius * 2;
             if (numboundaries > 360) {
                 numboundaries = 360;
@@ -174,6 +179,8 @@ int Game::DrawGLScene(StereoSide side)
 
         
         int olddrawmode = drawmode;
+{MICROPROFILE_SCOPEI("DrawGLScene", "slomo-blur-calc", 0xb500ff);
+
         if (ismotionblur && !loading) {
             if ((findLengthfast(&Person::players[0]->velocity) > 200) && velocityblur && !cameramode) {
                 drawmode = motionblurmode;
@@ -249,11 +256,15 @@ int Game::DrawGLScene(StereoSide side)
             }
         }
 
+}//MICROPROFILE
         glDrawBuffer(GL_BACK);
         glReadBuffer(GL_BACK);
 
         static XYZ terrainlight;
         static float distance;
+
+{MICROPROFILE_SCOPEI("DrawGLScene", "view-matrix", 0xb500ff);
+
         if (drawmode == normalmode) {
             Game::ReSizeGLScene(90, .1f);
         } else {
@@ -293,7 +304,9 @@ int Game::DrawGLScene(StereoSide side)
         }
         SetUpLight(&light, 0);
         glPushMatrix();
+}//MICROPROFILE
 
+{MICROPROFILE_SCOPEI("DrawGLScene", "skybox", 0xb500ff);
         //heat blur effect in desert
         if (abs(blurness - targetblurness) < multiplier * 10 || abs(blurness - targetblurness) > 2) {
             blurness = targetblurness;
@@ -316,6 +329,7 @@ int Game::DrawGLScene(StereoSide side)
             glRotatef((float)(abs(Random() % 100)) / 1000, 0, 1, 0);
         }
         skybox->draw();
+
         /*
         //VITAGL: TODO
         glTexEnvf(GL_TEXTURE_FILTER_CONTROL, GL_TEXTURE_LOD_BIAS, 0);
@@ -324,6 +338,9 @@ int Game::DrawGLScene(StereoSide side)
         glTranslatef(-viewer.x, -viewer.y, -viewer.z);
         frustum.GetFrustum();
 
+}//MICROPROFILE
+
+{MICROPROFILE_SCOPEI("DrawGLScene", "shadow-decal", 0xb500ff);
         //make shadow decals on terrain and Object::objects
         static XYZ point;
         static float size, opacity, rotation;
@@ -410,7 +427,9 @@ int Game::DrawGLScene(StereoSide side)
                 }
             }
         }
+}//MICROPROFILE
 
+{MICROPROFILE_SCOPEI("DrawGLScene", "terrain", 0xb500ff);
         //Terrain
         glEnable(GL_TEXTURE_2D);
         glDepthMask(1);
@@ -425,7 +444,9 @@ int Game::DrawGLScene(StereoSide side)
         terrain.draw(1);
 
         terrain.drawdecals();
+}//MICROPROFILE
 
+{MICROPROFILE_SCOPEI("DrawGLScene", "models", 0xb500ff);
         //Model
         glEnable(GL_CULL_FACE);
         glEnable(GL_LIGHTING);
@@ -487,6 +508,10 @@ int Game::DrawGLScene(StereoSide side)
         Object::Draw();
         glPopMatrix();
 
+}//MICROPROFILE
+
+
+{MICROPROFILE_SCOPEI("DrawGLScene", "hawk", 0xb500ff);
         //draw hawk
         glPushMatrix();
         if (frustum.SphereInFrustum(realhawkcoords.x + hawk.boundingspherecenter.x, realhawkcoords.y + hawk.boundingspherecenter.y, realhawkcoords.z + hawk.boundingspherecenter.z, 2)) {
@@ -546,12 +571,18 @@ int Game::DrawGLScene(StereoSide side)
                 }
             }
         }
+}//MICROPROFILE
+
+{MICROPROFILE_SCOPEI("DrawGLScene", "weapons", 0xb500ff);
 
         glPushMatrix();
         glEnable(GL_TEXTURE_2D);
         weapons.Draw();
         glPopMatrix();
         glCullFace(GL_BACK);
+}//MICROPROFILE
+
+{MICROPROFILE_SCOPEI("DrawGLScene", "sprites", 0xb500ff);
 
         glDisable(GL_COLOR_MATERIAL);
 
@@ -561,9 +592,12 @@ int Game::DrawGLScene(StereoSide side)
         glDepthMask(0);
 
         Sprite::Draw();
+}//MICROPROFILE
 
         //waypoints, pathpoints in editor
         if (editorenabled) {
+            MICROPROFILE_SCOPEI("DrawGLScene", "editor-waypoints", 0xb500ff);
+
             glEnable(GL_BLEND);
             glDisable(GL_LIGHTING);
             glDisable(GL_TEXTURE_2D);
@@ -601,6 +635,7 @@ int Game::DrawGLScene(StereoSide side)
         }
 
         //Text
+{MICROPROFILE_SCOPEI("DrawGLScene", "text", 0xb500ff);
 
         glEnable(GL_TEXTURE_2D);
         glColor4f(.5, .5, .5, 1);
@@ -946,8 +981,10 @@ int Game::DrawGLScene(StereoSide side)
                 text->glPrint(10, 240, string, 0, .8, 1024, 768);
             }
         }
-
+}//MICROPROFILE
         if (drawmode == glowmode) {
+            MICROPROFILE_SCOPEI("DrawGLScene", "glowmode", 0xb500ff);
+
             glDisable(GL_DEPTH_TEST);
             glDisable(GL_CULL_FACE);
             glDisable(GL_LIGHTING);
@@ -981,6 +1018,8 @@ int Game::DrawGLScene(StereoSide side)
         }
 
         if ((((blackout && damageeffects) || (Person::players[0]->bloodloss > 0 && damageeffects && Person::players[0]->blooddimamount > 0) || Person::players[0]->dead) && !cameramode) || console) {
+            MICROPROFILE_SCOPEI("DrawGLScene", "blackout", 0xb500ff);
+            
             glDisable(GL_DEPTH_TEST);
             glDisable(GL_CULL_FACE);
             glDisable(GL_LIGHTING);
@@ -1035,6 +1074,8 @@ int Game::DrawGLScene(StereoSide side)
         }
 
         if (flashamount > 0 && damageeffects) {
+            MICROPROFILE_SCOPEI("DrawGLScene", "flash", 0xb500ff);
+
             if (flashamount > 1) {
                 flashamount = 1;
             }
@@ -1077,6 +1118,7 @@ int Game::DrawGLScene(StereoSide side)
         }
 
         if (difficulty < 2 && !Dialog::inDialog()) { // minimap
+            MICROPROFILE_SCOPEI("DrawGLScene", "minimap", 0xb500ff);
             float mapviewdist = 20000;
 
             glDisable(GL_DEPTH_TEST);
@@ -1230,6 +1272,8 @@ int Game::DrawGLScene(StereoSide side)
         }
 
         if (loading && !stealthloading && (!campaign || Person::players[0]->dead)) {
+            MICROPROFILE_SCOPEI("DrawGLScene", "dead-loadingscr", 0xb500ff);
+
             glDisable(GL_DEPTH_TEST);
             glDisable(GL_CULL_FACE);
             glDisable(GL_LIGHTING);
@@ -1280,6 +1324,8 @@ int Game::DrawGLScene(StereoSide side)
         }
 
         if (winfreeze && !campaign) {
+            MICROPROFILE_SCOPEI("DrawGLScene", "noncampaign-winscr", 0xb500ff);
+
             glDisable(GL_DEPTH_TEST);
             glDisable(GL_CULL_FACE);
             glDisable(GL_LIGHTING);
@@ -1348,6 +1394,8 @@ int Game::DrawGLScene(StereoSide side)
         }
 
         if (drawmode != normalmode) {
+            MICROPROFILE_SCOPEI("DrawGLScene", "motionblur", 0xb500ff);
+
             glEnable(GL_TEXTURE_2D);
             glFinish();
             if (!drawtoggle || drawmode != realmotionblurmode || (drawtoggle == 2 || change == 1)) {
@@ -1388,11 +1436,17 @@ int Game::DrawGLScene(StereoSide side)
             }
         }
 
+{MICROPROFILE_SCOPEI("DrawGLScene", "resize2", 0xb500ff);
+
         glClear(GL_DEPTH_BUFFER_BIT);
         Game::ReSizeGLScene(90, .1f);
         glViewport(0, 0, screenwidth, screenheight);
 
+}//MICROPROFILE
+
         if (drawmode != normalmode) {
+            MICROPROFILE_SCOPEI("DrawGLScene", "drawmode", 0xb500ff);
+
             glDisable(GL_DEPTH_TEST);
             if (drawmode == motionblurmode) {
                 glDrawBuffer(GL_FRONT);
@@ -1601,6 +1655,8 @@ int Game::DrawGLScene(StereoSide side)
         }
 
         if (console) {
+            MICROPROFILE_SCOPEI("DrawGLScene", "console", 0xb500ff);
+
             glEnable(GL_TEXTURE_2D);
             glColor4f(1, 1, 1, 1);
             int offset = 0;
@@ -1616,6 +1672,8 @@ int Game::DrawGLScene(StereoSide side)
             }
         }
     }
+
+{MICROPROFILE_SCOPEI("DrawGLScene", "final", 0xb500ff);
 
     if (freeze || winfreeze || (mainmenu && gameon) || (!gameon && gamestarted)) {
         multiplier = tempmult;
@@ -1648,12 +1706,15 @@ int Game::DrawGLScene(StereoSide side)
     if (freeze || winfreeze || (mainmenu && gameon) || (!gameon && gamestarted)) {
         multiplier = tempmult;
     }
+}//MICROPROFILE
     //Jordan fixed your warning!
     return 0;
 }
 
 void DrawMenu()
 {
+    MICROPROFILE_SCOPEI("Game", "DrawMenu", 0x008fff);
+
     // !!! FIXME: hack: clamp framerate in menu so text input works correctly on fast systems.
     SDL_Delay(15);
 

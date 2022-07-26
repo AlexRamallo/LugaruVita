@@ -26,6 +26,8 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 #include "Menu/Menu.hpp"
 #include "Utils/Folders.hpp"
 
+#include "Thirdparty/microprofile/microprofile.h"
+
 extern float screenwidth, screenheight;
 extern float viewdistance;
 extern XYZ viewer;
@@ -707,6 +709,8 @@ void Game::LoadScreenTexture()
 /* Loads models and textures which only needs to be loaded once */
 void Game::LoadStuff()
 {
+    MICROPROFILE_SCOPEI("Game", "LoadStuff", 0xffff3456);
+
     LOG_TOGGLE(false);
     LOG("Game::LoadStuff()");
     float temptexdetail;

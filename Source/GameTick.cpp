@@ -22,6 +22,7 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 #define _USE_MATH_DEFINES
 
 #include "Game.hpp"
+#include "Thirdparty/microprofile/microprofile.h"
 
 #include "Animation/Animation.hpp"
 #include "Audio/openal_wrapper.hpp"
@@ -194,6 +195,7 @@ inline float stepTowardf(float from, float to, float by)
 
 void Game::playdialoguescenesound()
 {
+    MICROPROFILE_SCOPEI("Game", "playdialoguescenesound", 0xff008f);
     XYZ temppos;
     temppos = Person::players.at(Dialog::currentScene().participantfocus)->coords;
     temppos = temppos - viewer;
@@ -277,6 +279,7 @@ void Game::playdialoguescenesound()
 
 int Game::findClosestPlayer()
 {
+    MICROPROFILE_SCOPEI("Game", "findClosestPlayer", 0xff008f);
     int closest = -1;
     float closestdist = std::numeric_limits<float>::max();
 
@@ -292,6 +295,7 @@ int Game::findClosestPlayer()
 
 static int findClosestObject()
 {
+    MICROPROFILE_SCOPEI("Game", "findClosestObject", 0xff008f);
     int closest = -1;
     float closestdist = std::numeric_limits<float>::max();
 
@@ -308,6 +312,7 @@ static int findClosestObject()
 
 void Game::cmd_dispatch(const string cmd)
 {
+    MICROPROFILE_SCOPEI("Game", "cmd_dispatch", 0xff008f);
     int i, n_cmds = sizeof(cmd_names) / sizeof(cmd_names[0]);
 
     for (i = 0; i < n_cmds; i++) {
@@ -335,6 +340,7 @@ void Screenshot(void)
 
 void Game::SetUpLighting()
 {
+    MICROPROFILE_SCOPEI("Game", "SetUpLighting", 0xff008f);
     if (environment == snowyenvironment) {
         light.setColors(.65, .65, .7, .4, .4, .44);
     }
@@ -359,6 +365,7 @@ void Game::SetUpLighting()
 
 void Setenvironment(int which)
 {
+    MICROPROFILE_SCOPEI("Game", "Setenvironment", 0xff008f);
     LOGFUNC;
 
     LOG(" Setting environment...");
@@ -478,6 +485,7 @@ void Setenvironment(int which)
 
 bool Game::LoadLevel(int which)
 {
+    MICROPROFILE_SCOPEI("Game", "LoadLevel", 0xff008f);
     stealthloading = 0;
     whichlevel = which;
 
@@ -494,6 +502,7 @@ bool Game::LoadLevel(int which)
 
 void Game::ResetBeforeLevelLoad(bool tutorial)
 {
+    MICROPROFILE_SCOPEI("Game", "ResetBeforeLevelLoad", 0xff008f);
     Tutorial::active = tutorial;
 
     if (Tutorial::active) {
@@ -1185,6 +1194,7 @@ bool Game::LoadJsonLevel(const std::string& name, bool tutorial)
  */
 void Game::ProcessInput()
 {
+    MICROPROFILE_SCOPEI("Game", "ProcessInput", 0xff008f);
     /* Pump SDL input events */
     Input::Tick();
 
@@ -1890,6 +1900,7 @@ void Game::ProcessDevInput()
 
 void doJumpReversals()
 {
+    MICROPROFILE_SCOPEI("Game", "doJumpReversals", 0xff008f);
     for (unsigned k = 0; k < Person::players.size(); k++) {
         for (unsigned i = k + 1; i < Person::players.size(); i++) {
             if (Person::players[k]->skeleton.free == 0 &&
@@ -1991,6 +2002,7 @@ void doJumpReversals()
 
 void doAerialAcrobatics()
 {
+    MICROPROFILE_SCOPEI("Game", "doAerialAcrobatics", 0xff008f);
     static XYZ facing, flatfacing;
     for (unsigned k = 0; k < Person::players.size(); k++) {
         Person::players[k]->turnspeed = 500;
@@ -2394,6 +2406,7 @@ void doAerialAcrobatics()
 
 void doAttacks()
 {
+    MICROPROFILE_SCOPEI("Game", "doAttacks", 0xff008f);
     static int randattack;
     static bool playerrealattackkeydown = 0;
 
@@ -2956,6 +2969,7 @@ void doAttacks()
 
 void doPlayerCollisions()
 {
+    MICROPROFILE_SCOPEI("Game", "doPlayerCollisions", 0xff008f);
     static XYZ rotatetarget;
     static float collisionradius;
     if (Person::players.size() > 1) {
@@ -3183,6 +3197,7 @@ void doPlayerCollisions()
 
 void Game::Tick()
 {
+    MICROPROFILE_SCOPEI("Game", "Tick", 0xff008f);
     static XYZ facing, flatfacing;
     static int target;
 
@@ -4685,6 +4700,7 @@ void Game::Tick()
 
 void Game::TickOnce()
 {
+    MICROPROFILE_SCOPEI("Game", "TickOnce", 0xff008f);
     if (mainmenu) {
         yaw += multiplier * 5;
     } else if (Dialog::directing || !Dialog::inDialog()) {
@@ -4705,6 +4721,7 @@ void Game::TickOnce()
 
 void Game::TickOnceAfter()
 {
+    MICROPROFILE_SCOPEI("Game", "TickOnceAfter", 0xff008f);
     static XYZ colviewer;
     static XYZ coltarget;
     static XYZ target;

@@ -21,6 +21,7 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 #include "Graphic/Sprite.hpp"
 
 #include "Game.hpp"
+#include "Thirdparty/microprofile/microprofile.h"
 #include "Objects/Person.hpp"
 
 extern XYZ viewer;
@@ -57,6 +58,7 @@ vector<std::unique_ptr<Sprite> > Sprite::sprites = vector<std::unique_ptr<Sprite
 //Functions
 void Sprite::Draw()
 {
+    MICROPROFILE_SCOPEI("Sprite", "Draw", 0x008fff);
     int k;
     static float M[16];
     static XYZ point;
@@ -461,11 +463,13 @@ void Sprite::Draw()
 
 void Sprite::DeleteSprite(int i)
 {
+    MICROPROFILE_SCOPEI("Sprite", "DeleteSprite", 0x008fff);
     sprites.erase(sprites.begin() + i);
 }
 
 void Sprite::MakeSprite(int atype, XYZ where, XYZ avelocity, float red, float green, float blue, float asize, float aopacity)
 {
+    MICROPROFILE_SCOPEI("Sprite", "MakeSprite", 0x008fff);
     if (sprites.size() < max_sprites - 1) {
         sprites.push_back(std::unique_ptr<Sprite>(new Sprite()));
         if ((atype != bloodsprite && atype != bloodflamesprite) || bloodtoggle) {

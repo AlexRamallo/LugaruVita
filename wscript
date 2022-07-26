@@ -83,9 +83,13 @@ def configure(conf):
 
 	if 'release' in conf.variant:
 		conf.env.append_unique('CFLAGS', '-O3')
+		conf.env.append_unique('DEFINES', 'MICROPROFILE_ENABLED=0');
+		conf.env.append_unique('DEFINES', 'MICROPROFILE_WEBSERVER=0');
 	else:
 		conf.env.append_unique('CFLAGS', '-g')
 		conf.env.append_unique('CFLAGS', '-O0')
+		conf.env.append_unique('DEFINES', 'MICROPROFILE_ENABLED=1');
+		conf.env.append_unique('DEFINES', 'MICROPROFILE_WEBSERVER=0');
 
 	conf.env.CXXFLAGS = conf.env.CFLAGS + [
 		"--std=gnu++11",

@@ -21,6 +21,7 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 #include "Graphic/Text.hpp"
 
 #include "Game.hpp"
+#include "Thirdparty/microprofile/microprofile.h"
 
 void Text::LoadFontTexture(const std::string& fileName)
 {   
@@ -84,6 +85,7 @@ void Text::BuildFont() // Build Our Font Display List
 
 void Text::_glPrint(float x, float y, const std::string& string, int set, float size, float width, float height, int start, int end, int offset) // Where The Printing Happens
 {
+    MICROPROFILE_SCOPEI("Text", "_glPrint", 0x008fff);
     if (set > 1) {
         set = 1;
     }

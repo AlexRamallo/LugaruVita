@@ -20,6 +20,7 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "Graphic/Texture.hpp"
 
+#include "Thirdparty/microprofile/microprofile.h"
 #include "Utils/Folders.hpp"
 #include "Utils/ImageIO.hpp"
 #include <assert.h>
@@ -30,6 +31,7 @@ extern PVRTexLoader *pvr_loader;
 extern bool trilinear;
 
 void TextureRes::uploadPVR(void *pTexture){
+    MICROPROFILE_SCOPEI("TextureRes", "uploadPVR", 0x008fff);
     ImageRec *texture = (ImageRec*) pTexture;
     assert(texture->is_pvr);
 

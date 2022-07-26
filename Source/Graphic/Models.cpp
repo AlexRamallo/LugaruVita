@@ -21,6 +21,7 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 #include "Graphic/Models.hpp"
 
 #include "Game.hpp"
+#include "Thirdparty/microprofile/microprofile.h"
 #include "Utils/Folders.hpp"
 
 extern float multiplier;
@@ -421,6 +422,7 @@ void Model::UpdateVertexArrayNoTexNoNorm()
 
 bool Model::loadnotex(const std::string& filename)
 {
+    MICROPROFILE_SCOPEI("Model", "loadnotex", 0x008fff);
     FILE* tfile;
     long i;
     short triangleNum;
@@ -483,6 +485,7 @@ bool Model::loadnotex(const std::string& filename)
 
 bool Model::load(const std::string& filename)
 {
+    MICROPROFILE_SCOPEI("Model", "load", 0x008fff);
     FILE* tfile;
     long i;
     short triangleNum;
@@ -555,6 +558,7 @@ bool Model::load(const std::string& filename)
 
 bool Model::loaddecal(const std::string& filename)
 {
+    MICROPROFILE_SCOPEI("Model", "loaddecal", 0x008fff);
     FILE* tfile;
     long i, j;
     short triangleNum;
@@ -625,6 +629,7 @@ bool Model::loaddecal(const std::string& filename)
 
 bool Model::loadraw(const std::string& filename)
 {
+    MICROPROFILE_SCOPEI("Model", "loadraw", 0x008fff);
     FILE* tfile;
     long i;
     short triangleNum;
@@ -840,6 +845,7 @@ void Model::CalculateNormals(bool facenormalise)
 
 void Model::drawimmediate()
 {
+    MICROPROFILE_SCOPEI("Model", "drawimmediate", 0x008fff);
     textureptr.bind();
     glBegin(GL_TRIANGLES);
     for (unsigned int i = 0; i < Triangles.size(); i++) {
@@ -878,6 +884,8 @@ void Model::drawimmediate()
 
 void Model::draw()
 {
+    MICROPROFILE_SCOPEI("Model", "draw", 0x008fff);
+
     if (type != normaltype && type != decalstype) {
         return;
     }
@@ -906,6 +914,7 @@ void Model::draw()
 
 void Model::drawdifftex(Texture texture)
 {
+    MICROPROFILE_SCOPEI("Model", "drawdifftex", 0x008fff);
     glEnableClientState(GL_NORMAL_ARRAY);
     glEnableClientState(GL_VERTEX_ARRAY);
     glEnableClientState(GL_TEXTURE_COORD_ARRAY);
@@ -932,6 +941,7 @@ void Model::drawdifftex(Texture texture)
 
 void Model::drawdecals(Texture shadowtexture, Texture bloodtexture, Texture bloodtexture2, Texture breaktexture)
 {
+    MICROPROFILE_SCOPEI("Model", "drawdecals", 0x008fff);
     if (decalstoggle) {
         if (type != decalstype) {
             return;

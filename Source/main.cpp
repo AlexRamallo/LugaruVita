@@ -37,6 +37,9 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 #include <time.h>
 #include <assert.h>
 
+#define MICROPROFILE_IMPL 1
+#include "Thirdparty/microprofile/microprofile.h"
+
 using namespace Game;
 
 #ifdef WIN32
@@ -243,6 +246,8 @@ static Point gMidPoint;
 
 bool SetUp()
 {
+    MICROPROFILE_SCOPEI("main", "SetUp", 0xffff3456);
+
     LOGFUNC;
 
     cellophane = 0;
@@ -261,6 +266,10 @@ bool SetUp()
             fprintf(stderr, "SDL_Init() failed: %s\n", SDL_GetError());
             return false;
         }
+
+        #if MICROPROFILE_ENABLED
+        //TODO: use SDL_net to implement missing networking stuff?
+        #endif
     }
 
     SDL_GameController *controller = NULL;
@@ -556,6 +565,8 @@ void DoUpdate()
         DrawGLScene(stereoLeft);
         DrawGLScene(stereoRight);
     }
+
+    MicroProfileFlip();
 }
 
 // --------------------------------------------------------------------------
@@ -707,6 +718,9 @@ option::Option* commandLineOptionsBuffer;
 int _main(int argc, char** argv)
 {
     #if PLATFORM_VITA
+        MicroProfileSetForceEnable(true);
+        MicroProfileSetEnableAllGroups(true);
+        MicroProfileSetForceMetaCounters(true);
         pvr_loader = new PVRTexLoader();
     #endif
 
@@ -792,7 +806,16 @@ int _main(int argc, char** argv)
                 }
             }
 
+            int fr = 0;
             while (!gameDone && !tryquit) {
+                fr++;
+                if(fr > 600){
+                    const char *dest = "ux0:data/microprofile_dump.html";
+                    LOG("Dumping last %d frames of profiling data to %s", fr, dest);
+                    MicroProfileDumpFile(dest, MicroProfileDumpTypeHtml, fr);
+                    SDL_Delay(500);
+                    fr = 0;
+                }
                 if (IsFocused()) {
                     gameFocused = true;
 
@@ -831,6 +854,7 @@ int _main(int argc, char** argv)
         }
 
         CleanUp();
+        MicroProfileShutdown();
 
         return 0;
 #ifdef NDEBUG
@@ -853,6 +877,7 @@ const int i =1;
 #define is_bigendian()((*(char*)&i) == 0 )
 
 int main(int argc, char** argv){
+    MicroProfileOnThreadCreate("MainThread");
     std::ofstream ofs{"ux0:data/lugaru_runlog.txt"}; 
     std::cout.rdbuf(ofs.rdbuf());
     std::cerr.rdbuf(ofs.rdbuf());
@@ -860,6 +885,8 @@ int main(int argc, char** argv){
 
     freopen("ux0:data/lugaru_runlog.txt", "a", stdout);
     freopen("ux0:data/lugaru_runlog.txt", "a", stderr);
+
+
     //Account::add("VitaMasterRace");
     //Account::saveFile("ux0:data/lugaru1.acct");
     Account::loadFile("ux0:data/lugaru1.acct");

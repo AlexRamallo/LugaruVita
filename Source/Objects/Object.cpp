@@ -19,6 +19,7 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include "Objects/Object.hpp"
+#include "Thirdparty/microprofile/microprofile.h"
 
 extern XYZ viewer;
 extern float viewdistance;
@@ -164,6 +165,7 @@ Object::Object(object_type _type, XYZ _position, float _yaw, float _pitch, float
 
 void Object::handleFire()
 {
+    MICROPROFILE_SCOPEI("Object", "handleFire", 0x008fff);
     if (type == firetype) {
         onfire = 1;
     }
@@ -197,6 +199,7 @@ void Object::handleFire()
 
 void Object::doShadows(XYZ lightloc)
 {
+    MICROPROFILE_SCOPEI("Object", "doShadows", 0x008fff);
     XYZ testpoint, testpoint2, terrainpoint, col;
     int patchx, patchz;
     if (type != treeleavestype && type != treetrunktype && type != bushtype && type != firetype) {
@@ -327,6 +330,7 @@ void Object::handleRot(int divide)
 
 void Object::draw()
 {
+    MICROPROFILE_SCOPEI("Object", "draw", 0x008fff);
     static float distance;
     static XYZ moved, terrainlight;
     bool hidden;
@@ -457,6 +461,7 @@ void Object::draw()
 
 void Object::drawSecondPass()
 {
+    MICROPROFILE_SCOPEI("Object", "drawSecondPass", 0x008fff);
     static float distance;
     static XYZ moved, terrainlight;
     bool hidden;
@@ -554,6 +559,7 @@ void Object::ComputeRadius()
 
 void Object::LoadObjectsFromFile(FILE* tfile, bool skip)
 {
+    MICROPROFILE_SCOPEI("Object", "LoadObjectsFromFile", 0x008fff);
     int numobjects;
     int type;
     XYZ position;
@@ -577,6 +583,7 @@ void Object::LoadObjectsFromFile(FILE* tfile, bool skip)
 
 void Object::LoadObjectsFromJson(Json::Value values)
 {
+    MICROPROFILE_SCOPEI("Object", "LoadObjectsFromJson", 0x008fff);
     objects.clear();
     float lastscale = 1.0f;
     for (unsigned i = 0; i < values.size(); i++) {
@@ -587,6 +594,7 @@ void Object::LoadObjectsFromJson(Json::Value values)
 
 void Object::addToTerrain(unsigned id)
 {
+    MICROPROFILE_SCOPEI("Object", "addToTerrain", 0x008fff);
     if ((type != treeleavestype) && (type != bushtype) && (type != firetype)) {
         terrain.AddObject(position + DoRotation(model.boundingspherecenter, 0, yaw, 0), model.boundingsphereradius, id);
     }
@@ -604,6 +612,7 @@ void Object::addToTerrain(unsigned id)
 
 void Object::AddObjectsToTerrain()
 {
+    MICROPROFILE_SCOPEI("Object", "AddObjectsToTerrain", 0x008fff);
     for (unsigned i = 0; i < objects.size(); i++) {
         objects[i]->addToTerrain(i);
     }
@@ -611,6 +620,7 @@ void Object::AddObjectsToTerrain()
 
 void Object::SphereCheckPossible(XYZ* p1, float radius)
 {
+    MICROPROFILE_SCOPEI("Object", "SphereCheckPossible", 0x008fff);
     int whichpatchx = p1->x / (terrain.size / subdivision * terrain.scale);
     int whichpatchz = p1->z / (terrain.size / subdivision * terrain.scale);
 
@@ -629,6 +639,7 @@ void Object::SphereCheckPossible(XYZ* p1, float radius)
 
 void Object::Draw()
 {
+    MICROPROFILE_SCOPEI("Object", "Draw", 0x008fff);
     for (unsigned i = 0; i < objects.size(); i++) {
         objects[i]->draw();
     }
@@ -656,6 +667,7 @@ void Object::DeleteObject(int which)
 
 void Object::MakeObject(int atype, XYZ where, float ayaw, float apitch, float ascale)
 {
+    MICROPROFILE_SCOPEI("Object", "MakeObject", 0x008fff);
     if ((atype != treeleavestype && atype != bushtype) || foliage == 1) {
         unsigned nextid = objects.size();
         objects.emplace_back(new Object(object_type(atype), where, ayaw, apitch, ascale));
@@ -665,6 +677,7 @@ void Object::MakeObject(int atype, XYZ where, float ayaw, float apitch, float as
 
 void Object::DoStuff()
 {
+    MICROPROFILE_SCOPEI("Object", "DoStuff", 0x008fff);
     for (unsigned i = 0; i < objects.size(); i++) {
         objects[i]->handleFire();
     }
@@ -672,6 +685,7 @@ void Object::DoStuff()
 
 void Object::DoShadows()
 {
+    MICROPROFILE_SCOPEI("Object", "DoShadows", 0x008fff);
     XYZ lightloc;
     lightloc = light.location;
     if (!skyboxtexture) {
@@ -721,6 +735,7 @@ int Object::checkcollide(XYZ startpoint, XYZ endpoint, int what)
 
 int Object::checkcollide(XYZ startpoint, XYZ endpoint, int what, float minx, float miny, float minz, float maxx, float maxy, float maxz)
 {
+    MICROPROFILE_SCOPEI("Object", "checkcollide", 0x008fff);
     XYZ colpoint, colviewer, coltarget;
 
     if (what == 1000) {
