@@ -380,7 +380,7 @@ GLsizei PVRHeader::getBitsPerPixel(){
 		}
 		return ret;
 	}else{
-		return 0;
+		return 0; //TODO
 	}
 }
 
@@ -400,8 +400,7 @@ GLsizei PVRHeader::getImageSize(){
 }
 
 bool PVRHeader::isCompressed(){
-	uint8_t order[4], rate[4];
-	return !getUncompressedChannelOrder(order, rate);
+	return PixelFormat < (uint64_t) PVRPixelFormat::COMPRESSED_END;
 }
 
 bool PVRHeader::getUncompressedChannelOrder(uint8_t order[4], uint8_t rate[4]){
@@ -464,5 +463,77 @@ GLuint PVRHeader::getGLInternalFormat(){
 			default:
 				return 0;
 		}
+	}
+}
+
+#define CLAMP_MAX(v, m) ((v) > (m) ? (m) : (v))
+#define CLAMP_MIN(v, m) ((v) < (m) ? (m) : (v))
+
+static size_t calc_mipmap_offset(int level, size_t basesz, size_t minsz, size_t padding, size_t alignment) {
+	if(level == 0){
+		return 0;
+	}
+	size_t off = 0;
+	for(int i = 1; i <= level; i++){
+		int d = 2 << (((i-1) * 2) - 1);
+		size_t lsz = basesz / (d?d:1);
+		off += CLAMP_MIN(lsz, minsz) + padding;
+		if(alignment != 0){
+			size_t mod = off % alignment;
+			if(mod){
+				off += alignment - mod;
+			}
+		}
+	}
+	assert(!(off % alignment) && "bad alignment");
+	return off;
+}
+
+bool PVRHeader::getMipMap(int level, PVRMipMapLevel *mipmap){
+	assert(NumSurfaces == 1 && "Texture arrays are not supported");
+	assert(NumFaces == 1 && "Cube maps are not supported");
+	assert(Depth == 1 && "3D textures are not supported");
+	
+	if(level < 0 || level >= MipMapCount){
+		return false;
+	}
+
+	int base_denom = pow(2, level);
+	mipmap->Width = Width / base_denom;
+	mipmap->Height = Height / base_denom;
+	mipmap->Depth = 1;
+
+	if(!isCompressed()){
+		int bytes_per_pixel = getBitsPerPixel() / 8;
+		int basesz = Width * Height * bytes_per_pixel;
+		mipmap->size = basesz / base_denom;
+		mipmap->offset = calc_mipmap_offset(level, basesz, 0, 0, 0);
+		return true;
+	}else{
+		size_t basesz = 0, minsz = 0;
+		size_t alignment = 0, padding = 0;
+
+		switch((PVRPixelFormat)PixelFormat){
+			default: return false; //not implemented (yet)
+
+			case PVRPixelFormat::PVRTCII_2bpp:
+			case PVRPixelFormat::PVRTC_2bpp_RGBA:
+			case PVRPixelFormat::PVRTC_2bpp_RGB:
+				basesz = (Width * Height * 2) / 8;
+				minsz = 8;
+				mipmap->size = (CLAMP_MIN(mipmap->Width, 8) * CLAMP_MIN(mipmap->Height, 4) * 2) / 8;
+				break;
+
+			case PVRPixelFormat::PVRTCII_4bpp:
+			case PVRPixelFormat::PVRTC_4bpp_RGBA:
+			case PVRPixelFormat::PVRTC_4bpp_RGB:
+				basesz = (Width * Height * 4) / 8;
+				minsz = 8;
+				mipmap->size = (CLAMP_MIN(mipmap->Width, 4) * CLAMP_MIN(mipmap->Height, 4) * 4) / 8;
+		}
+
+		mipmap->size = CLAMP_MIN(mipmap->size, minsz);
+		mipmap->offset = calc_mipmap_offset(level, basesz, minsz, padding, alignment);
+		return true;
 	}
 }

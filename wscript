@@ -1,7 +1,7 @@
 """
-	This is a simple asset preprocessor that
-		1) downscales textures
-		2) re-encodes them all to compressed formats
+	This is a replacement for CMake which gives more flexibility in vita workflow,
+	and also includes a simple asset preprocessor for resizing and transcoding
+	textures.
 
 	Requires PVRTexTool and Python 'Pillow' library
 """
@@ -235,6 +235,7 @@ def do_encode_pvrtc(task):
 		'premultiply': False,
 		'flip_x': False,
 		'flip_y': True,
+		'mipmap': True,
 	}
 	cmd = task.env.PVRTT
 	for n in task.inputs:
@@ -247,6 +248,7 @@ def do_encode_pvrtc(task):
 		if get_rule(n, "premultiply", default_opts["premultiply"]): nopts.append('-p')
 		if get_rule(n, "flip_x", default_opts['flip_x']): nopts.extend(['-flip', 'x'])
 		if get_rule(n, "flip_y", default_opts['flip_y']): nopts.extend(['-flip', 'y'])
+		if get_rule(n, "mipmap", default_opts['mipmap']): nopts.append('-m')
 
 		size = get_size(n)
 

@@ -134,6 +134,7 @@ extern bool waiting;
 
 extern unsigned short crouchkey, jumpkey, forwardkey, backkey, leftkey, rightkey, drawkey, throwkey, attackkey;
 extern unsigned short consolekey;
+extern unsigned short startkey, selectkey;
 
 void newGame();
 void deleteGame();

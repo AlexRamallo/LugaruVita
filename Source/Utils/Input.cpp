@@ -73,6 +73,9 @@ void Input::Tick()
 	handle_key(Game::drawkey, SDL_CONTROLLER_BUTTON_Y);
 	handle_key(Game::attackkey, SDL_CONTROLLER_BUTTON_X);
 	handle_key(Game::throwkey, SDL_CONTROLLER_BUTTON_B);
+	
+	handle_key(Game::startkey, SDL_CONTROLLER_BUTTON_START);
+	handle_key(Game::selectkey, SDL_CONTROLLER_BUTTON_BACK);
 
 	if(Game::analog_lh > 0.25){
 		keyDown[Game::leftkey] = false;

@@ -50,7 +50,7 @@ void TextureRes::uploadPVR(void *pTexture){
     assert(texture->pvr_header.getBorder(0) == texture->pvr_header.getBorder(1) && "PVR texture has uneven borders");
     
     int sizeBorder = texture->pvr_header.getBorder();
-    int sizeX = texture->pvr_header.Width + sizeBorder;
+    int sizeX = texture->pvr_header.Width + (2 * sizeBorder);
     skinsize = sizeX;
 
     if (isSkin) {
@@ -89,20 +89,67 @@ void TextureRes::uploadPVR(void *pTexture){
         glTexImage2D(GL_TEXTURE_2D, 0, type, sizeX, sizeY, sizeBorder, GL_RGB, GL_UNSIGNED_BYTE, data);
     } else {
         if(texture->pvr_header.isCompressed()){
-            glCompressedTexImage2D(
-                GL_TEXTURE_2D,
-                0, //TODO
-                texture->pvr_header.getGLInternalFormat(),
-                texture->pvr_header.Width,
-                texture->pvr_header.Height,
-                texture->pvr_header.getBorder(),
-                texture->pvr_header.getImageSize(),
-                texture->data
-            );
+            PVRMipMapLevel mip;
+            for(int level = 0; level < texture->pvr_header.MipMapCount; level++){
+                assert(texture->pvr_header.getMipMap(level, &mip) && "Failed to get mipmap level");
+
+                /*
+                LOG("MIPMAP glCompressedTexImage2D\n\tlevel[%d]: %d, %d. size: %d, offset: %d",
+                    (int) level, (int) mip.Width, (int) mip.Height, (int) mip.size, (int) mip.offset
+                );
+                */
+
+                glCompressedTexImage2D(
+                    GL_TEXTURE_2D,
+                    level,
+                    texture->pvr_header.getGLInternalFormat(),
+                    mip.Width,
+                    mip.Height,
+                    0,
+                    mip.size,
+                    texture->data + mip.offset
+                );
+            }
+            /*
+            else{
+                LOG("compressed regular");
+                PVRMipMapLevel mip;
+                texture->pvr_header.getMipMap(0, &mip);
+
+                glCompressedTexImage2D(
+                    GL_TEXTURE_2D,
+                    0, //TODO
+                    texture->pvr_header.getGLInternalFormat(),
+                    texture->pvr_header.Width,
+                    texture->pvr_header.Height,
+                    texture->pvr_header.getBorder(),
+                    //texture->pvr_header.getImageSize(),
+                    mip.size,
+                    texture->data
+                );
+                LOG("\t\tOK");
+            }
+            //*/
         }else{
+            PVRMipMapLevel mip;
+            for(int level = 0; level < texture->pvr_header.MipMapCount; level++){
+                texture->pvr_header.getMipMap(level, &mip);
+                glTexImage2D(
+                    GL_TEXTURE_2D,
+                    level,
+                    texture->pvr_header.getGLInternalFormat(),
+                    mip.Width,
+                    mip.Height,
+                    0,
+                    texture->pvr_header.getGLPixelFormat(),
+                    texture->pvr_header.getGLPixelType(),
+                    texture->data + mip.offset
+                );
+            }
+            /*
             glTexImage2D(
                 GL_TEXTURE_2D,
-                0, //TODO
+                0,
                 texture->pvr_header.getGLInternalFormat(),
                 texture->pvr_header.Width + texture->pvr_header.getBorder(0),
                 texture->pvr_header.Height + texture->pvr_header.getBorder(1),
@@ -111,6 +158,7 @@ void TextureRes::uploadPVR(void *pTexture){
                 texture->pvr_header.getGLPixelType(),
                 texture->data
             );
+            */
         }
     }
 }
@@ -204,11 +252,7 @@ TextureRes::TextureRes(const string& _filename, bool _hasMipmap, GLubyte* array,
 TextureRes::~TextureRes()
 {
     if(data != NULL){
-        if(is_pvr){
-            pvr_loader->freeTexture(data);
-        }else{
-            free(data);
-        }
+        free(data);
     }
     data = NULL;
     glDeleteTextures(1, &id);

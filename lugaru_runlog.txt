@@ -24,6 +24,201 @@ InitGame G
 	F
 InitGame H
 Initializing sound system...
+<load_pvr(app0:Data/Textures/Cursor.png)>
+MIPMAP glCompressedTexImage2D
+	level[0]: 64, 64. size: 2048, offset: 2048
+MIPMAP glCompressedTexImage2D
+	level[1]: 32, 32. size: 512, offset: 2560
+MIPMAP glCompressedTexImage2D
+	level[2]: 16, 16. size: 128, offset: 2688
+MIPMAP glCompressedTexImage2D
+	level[3]: 8, 8. size: 32, offset: 2720
+MIPMAP glCompressedTexImage2D
+	level[4]: 4, 4. size: 8, offset: 2728
+MIPMAP glCompressedTexImage2D
+	level[5]: 2, 2. size: 8, offset: 2736
+MIPMAP glCompressedTexImage2D
+	level[6]: 1, 1. size: 8, offset: 2744
+<load_pvr(app0:Data/Textures/MapCircle.png)>
+MIPMAP glCompressedTexImage2D
+	level[0]: 64, 64. size: 2048, offset: 2048
+MIPMAP glCompressedTexImage2D
+	level[1]: 32, 32. size: 512, offset: 2560
+MIPMAP glCompressedTexImage2D
+	level[2]: 16, 16. size: 128, offset: 2688
+MIPMAP glCompressedTexImage2D
+	level[3]: 8, 8. size: 32, offset: 2720
+MIPMAP glCompressedTexImage2D
+	level[4]: 4, 4. size: 8, offset: 2728
+MIPMAP glCompressedTexImage2D
+	level[5]: 2, 2. size: 8, offset: 2736
+MIPMAP glCompressedTexImage2D
+	level[6]: 1, 1. size: 8, offset: 2744
+<load_pvr(app0:Data/Textures/MapBox.png)>
+MIPMAP glCompressedTexImage2D
+	level[0]: 64, 64. size: 2048, offset: 2048
+MIPMAP glCompressedTexImage2D
+	level[1]: 32, 32. size: 512, offset: 2560
+MIPMAP glCompressedTexImage2D
+	level[2]: 16, 16. size: 128, offset: 2688
+MIPMAP glCompressedTexImage2D
+	level[3]: 8, 8. size: 32, offset: 2720
+MIPMAP glCompressedTexImage2D
+	level[4]: 4, 4. size: 8, offset: 2728
+MIPMAP glCompressedTexImage2D
+	level[5]: 2, 2. size: 8, offset: 2736
+MIPMAP glCompressedTexImage2D
+	level[6]: 1, 1. size: 8, offset: 2744
+<load_pvr(app0:Data/Textures/MapArrow.png)>
+MIPMAP glCompressedTexImage2D
+	level[0]: 64, 64. size: 2048, offset: 2048
+MIPMAP glCompressedTexImage2D
+	level[1]: 32, 32. size: 512, offset: 2560
+MIPMAP glCompressedTexImage2D
+	level[2]: 16, 16. size: 128, offset: 2688
+MIPMAP glCompressedTexImage2D
+	level[3]: 8, 8. size: 32, offset: 2720
+MIPMAP glCompressedTexImage2D
+	level[4]: 4, 4. size: 8, offset: 2728
+MIPMAP glCompressedTexImage2D
+	level[5]: 2, 2. size: 8, offset: 2736
+MIPMAP glCompressedTexImage2D
+	level[6]: 1, 1. size: 8, offset: 2744
+<load_pvr(app0:Data/Textures/Lugaru.png)>
+MIPMAP glCompressedTexImage2D
+	level[0]: 512, 256. size: 65536, offset: 65536
+MIPMAP glCompressedTexImage2D
+	level[1]: 256, 128. size: 16384, offset: 81920
+MIPMAP glCompressedTexImage2D
+	level[2]: 128, 64. size: 4096, offset: 86016
+MIPMAP glCompressedTexImage2D
+	level[3]: 64, 32. size: 1024, offset: 87040
+MIPMAP glCompressedTexImage2D
+	level[4]: 32, 16. size: 256, offset: 87296
+MIPMAP glCompressedTexImage2D
+	level[5]: 16, 8. size: 64, offset: 87360
+MIPMAP glCompressedTexImage2D
+	level[6]: 8, 4. size: 16, offset: 87376
+MIPMAP glCompressedTexImage2D
+	level[7]: 4, 2. size: 8, offset: 87384
+MIPMAP glCompressedTexImage2D
+	level[8]: 2, 1. size: 8, offset: 87392
+MIPMAP glCompressedTexImage2D
+	level[9]: 1, 0. size: 8, offset: 87400
+<load_pvr(app0:Data/Textures/NewGame.png)>
+MIPMAP glCompressedTexImage2D
+	level[0]: 256, 64. size: 8192, offset: 8192
+MIPMAP glCompressedTexImage2D
+	level[1]: 128, 32. size: 2048, offset: 10240
+MIPMAP glCompressedTexImage2D
+	level[2]: 64, 16. size: 512, offset: 10752
+MIPMAP glCompressedTexImage2D
+	level[3]: 32, 8. size: 128, offset: 10880
+MIPMAP glCompressedTexImage2D
+	level[4]: 16, 4. size: 32, offset: 10912
+MIPMAP glCompressedTexImage2D
+	level[5]: 8, 2. size: 8, offset: 10920
+MIPMAP glCompressedTexImage2D
+	level[6]: 4, 1. size: 8, offset: 10928
+MIPMAP glCompressedTexImage2D
+	level[7]: 2, 0. size: 8, offset: 10936
+MIPMAP glCompressedTexImage2D
+	level[8]: 1, 0. size: 8, offset: 10944
+<load_pvr(app0:Data/Textures/Options.png)>
+MIPMAP glCompressedTexImage2D
+	level[0]: 256, 64. size: 8192, offset: 8192
+MIPMAP glCompressedTexImage2D
+	level[1]: 128, 32. size: 2048, offset: 10240
+MIPMAP glCompressedTexImage2D
+	level[2]: 64, 16. size: 512, offset: 10752
+MIPMAP glCompressedTexImage2D
+	level[3]: 32, 8. size: 128, offset: 10880
+MIPMAP glCompressedTexImage2D
+	level[4]: 16, 4. size: 32, offset: 10912
+MIPMAP glCompressedTexImage2D
+	level[5]: 8, 2. size: 8, offset: 10920
+MIPMAP glCompressedTexImage2D
+	level[6]: 4, 1. size: 8, offset: 10928
+MIPMAP glCompressedTexImage2D
+	level[7]: 2, 0. size: 8, offset: 10936
+MIPMAP glCompressedTexImage2D
+	level[8]: 1, 0. size: 8, offset: 10944
+<load_pvr(app0:Data/Textures/Quit.png)>
+MIPMAP glCompressedTexImage2D
+	level[0]: 128, 64. size: 4096, offset: 4096
+MIPMAP glCompressedTexImage2D
+	level[1]: 64, 32. size: 1024, offset: 5120
+MIPMAP glCompressedTexImage2D
+	level[2]: 32, 16. size: 256, offset: 5376
+MIPMAP glCompressedTexImage2D
+	level[3]: 16, 8. size: 64, offset: 5440
+MIPMAP glCompressedTexImage2D
+	level[4]: 8, 4. size: 16, offset: 5456
+MIPMAP glCompressedTexImage2D
+	level[5]: 4, 2. size: 8, offset: 5464
+MIPMAP glCompressedTexImage2D
+	level[6]: 2, 1. size: 8, offset: 5472
+MIPMAP glCompressedTexImage2D
+	level[7]: 1, 0. size: 8, offset: 5480
+<load_pvr(app0:Data/Textures/Eyelid.png)>
+MIPMAP glCompressedTexImage2D
+	level[0]: 512, 512. size: 131072, offset: 131072
+MIPMAP glCompressedTexImage2D
+	level[1]: 256, 256. size: 32768, offset: 163840
+MIPMAP glCompressedTexImage2D
+	level[2]: 128, 128. size: 8192, offset: 172032
+MIPMAP glCompressedTexImage2D
+	level[3]: 64, 64. size: 2048, offset: 174080
+MIPMAP glCompressedTexImage2D
+	level[4]: 32, 32. size: 512, offset: 174592
+MIPMAP glCompressedTexImage2D
+	level[5]: 16, 16. size: 128, offset: 174720
+MIPMAP glCompressedTexImage2D
+	level[6]: 8, 8. size: 32, offset: 174752
+MIPMAP glCompressedTexImage2D
+	level[7]: 4, 4. size: 8, offset: 174760
+MIPMAP glCompressedTexImage2D
+	level[8]: 2, 2. size: 8, offset: 174768
+MIPMAP glCompressedTexImage2D
+	level[9]: 1, 1. size: 8, offset: 174776
+<load_pvr(app0:Data/Textures/Resume.png)>
+MIPMAP glCompressedTexImage2D
+	level[0]: 256, 64. size: 8192, offset: 8192
+MIPMAP glCompressedTexImage2D
+	level[1]: 128, 32. size: 2048, offset: 10240
+MIPMAP glCompressedTexImage2D
+	level[2]: 64, 16. size: 512, offset: 10752
+MIPMAP glCompressedTexImage2D
+	level[3]: 32, 8. size: 128, offset: 10880
+MIPMAP glCompressedTexImage2D
+	level[4]: 16, 4. size: 32, offset: 10912
+MIPMAP glCompressedTexImage2D
+	level[5]: 8, 2. size: 8, offset: 10920
+MIPMAP glCompressedTexImage2D
+	level[6]: 4, 1. size: 8, offset: 10928
+MIPMAP glCompressedTexImage2D
+	level[7]: 2, 0. size: 8, offset: 10936
+MIPMAP glCompressedTexImage2D
+	level[8]: 1, 0. size: 8, offset: 10944
+<load_pvr(app0:Data/Textures/EndGame.png)>
+MIPMAP glCompressedTexImage2D
+	level[0]: 256, 64. size: 8192, offset: 8192
+MIPMAP glCompressedTexImage2D
+	level[1]: 128, 32. size: 2048, offset: 10240
+MIPMAP glCompressedTexImage2D
+	level[2]: 64, 16. size: 512, offset: 10752
+MIPMAP glCompressedTexImage2D
+	level[3]: 32, 8. size: 128, offset: 10880
+MIPMAP glCompressedTexImage2D
+	level[4]: 16, 4. size: 32, offset: 10912
+MIPMAP glCompressedTexImage2D
+	level[5]: 8, 2. size: 8, offset: 10920
+MIPMAP glCompressedTexImage2D
+	level[6]: 4, 1. size: 8, offset: 10928
+MIPMAP glCompressedTexImage2D
+	level[7]: 2, 0. size: 8, offset: 10936
+MIPMAP glCompressedTexImage2D
+	level[8]: 1, 0. size: 8, offset: 10944
 	E
 	F
 Loading all animations...

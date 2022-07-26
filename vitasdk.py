@@ -440,7 +440,7 @@ class create_param_sfo(Task.Task):
 		cmd = [
 			gen.bld.env.VITA_MKSFOEX[0],
 			'-s', 'TITLE_ID=%s' % self.title_id,
-			'-d', 'ATTRIBUTE2=12', #gives us more ram!
+			'-d', 'ATTRIBUTE2=28', #gives us more ram!
 			'%s' % self.title_string,
 			param_out.abspath()
 		]

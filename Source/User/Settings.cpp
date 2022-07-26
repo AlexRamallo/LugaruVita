@@ -66,6 +66,9 @@ void DefaultSettings()
     throwkey = SDL_SCANCODE_Q;
     attackkey = MOUSEBUTTON_LEFT;
     consolekey = SDL_SCANCODE_GRAVE;
+    
+    startkey = SDL_SCANCODE_ESCAPE;
+    selectkey = SDL_SCANCODE_TAB;
 
     newdetail = detail;
 }

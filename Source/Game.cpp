@@ -121,6 +121,7 @@ unsigned consoleselected = 0;
 
 unsigned short crouchkey = 0, jumpkey = 0, forwardkey = 0, backkey = 0, leftkey = 0, rightkey = 0, drawkey = 0, throwkey = 0, attackkey = 0;
 unsigned short consolekey = 0;
+unsigned short startkey = 0, selectkey = 0;
 
 int loading = 0;
 

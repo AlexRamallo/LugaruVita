@@ -546,7 +546,7 @@ void Menu::startChallengeLevel(int selected)
 void Menu::Tick()
 {
     //escape key pressed
-    if (Input::isKeyPressed(SDL_SCANCODE_ESCAPE) &&
+    if (Input::isKeyPressed(Game::startkey) &&
         (mainmenu >= 3) && (mainmenu != 8) && !((mainmenu == 7) && entername)) {
         selected = -1;
         //finished with settings menu
@@ -976,7 +976,7 @@ int setKeySelected_thread(void*)
                 break;
         }
     }
-    if (scancode != SDL_SCANCODE_ESCAPE) {
+    if (scancode != Game::startkey) {
         fireSound();
         switch (keyselect) {
             case 0:

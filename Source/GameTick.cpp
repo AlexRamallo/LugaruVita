@@ -1189,7 +1189,7 @@ void Game::ProcessInput()
     Input::Tick();
 
     /* Menu handling (main menu, leave game) */
-    if (Input::isKeyPressed(SDL_SCANCODE_ESCAPE) &&
+    if (Input::isKeyPressed(startkey) &&
         (gameon || mainmenu == 0)) {
         selected = -1;
         if (mainmenu == 0 && !winfreeze) {
@@ -1218,7 +1218,7 @@ void Game::ProcessInput()
             }
         }
 
-        if ((Input::isKeyDown(SDL_SCANCODE_ESCAPE)) && gameon) {
+        if ((Input::isKeyDown(startkey)) && gameon) {
             if (console) {
                 console = false;
                 freeze = 0;
@@ -1232,7 +1232,7 @@ void Game::ProcessInput()
     /* Tutorial mode hotkeys */
     if (Tutorial::active) {
         // Skip current tutorial stage
-        if (Input::isKeyPressed(SDL_SCANCODE_TAB)) {
+        if (Input::isKeyPressed(selectkey)) {
             if (Tutorial::stage != 51) {
                 Tutorial::stagetime = Tutorial::maxtime;
             }

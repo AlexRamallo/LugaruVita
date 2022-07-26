@@ -49,8 +49,8 @@ using namespace Game;
 #if PLATFORM_VITA
 
 extern "C" {
-    //unsigned int _newlib_heap_size_user = 300 * 1024 * 1024;
-    unsigned int _newlib_heap_size_user = 216 * 1024 * 1024;
+    unsigned int _newlib_heap_size_user = 217 * 1024 * 1024;
+    //unsigned int _newlib_heap_size_user = 216 * 1024 * 1024;
 }
 
 #include <vitaGL.h>
