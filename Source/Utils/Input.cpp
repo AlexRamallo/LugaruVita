@@ -22,6 +22,8 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 #include "SDL2.h"
 #include <assert.h>
 
+#include "Thirdparty/microprofile/microprofile.h"
+
 bool keyDown[SDL_NUM_SCANCODES + 6];
 bool keyPressed[SDL_NUM_SCANCODES + 6];
 
@@ -92,6 +94,26 @@ void Input::Tick()
 		keyDown[Game::forwardkey] = true;
 		keyDown[Game::backkey] = false;
 	}
+
+    #if MICROPROFILE_ENABLED
+    static int mpst = 0;
+
+    if(SDL_GameControllerGetButton(ctl, SDL_CONTROLLER_BUTTON_LEFTSHOULDER)
+    	&& SDL_GameControllerGetButton(ctl, SDL_CONTROLLER_BUTTON_Y)){
+    	if(mpst == 0){
+    		mpst = 1;
+    	}
+    }else{
+    	mpst = 0;
+    }
+
+    if(mpst == 1){
+    	mpst = 2;
+        const char *dest = "ux0:data/microprofile_dump.html";
+        MicroProfileDumpFile(dest, MicroProfileDumpTypeHtml, 100);
+        SDL_Delay(500);
+    }
+    #endif
 }
 
 bool Input::isKeyDown(int k)

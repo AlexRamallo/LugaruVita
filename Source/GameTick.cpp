@@ -785,12 +785,12 @@ bool Game::LoadLevel(const std::string& name, bool tutorial)
     }
     unsigned j = 1;
     for (int i = 1; i < numplayers; i++) {
-        try {
+        //try {
             Person::players.push_back(shared_ptr<Person>(new Person(tfile, mapvers, j)));
             j++;
-        } catch (InvalidPersonException &e) {
-            cerr << "Invalid Person found in " << name << endl;
-        }
+        //} catch (InvalidPersonException &e) {
+        //    cerr << "Invalid Person found in " << name << endl;
+        //}
     }
     Game::LoadingScreen();
 
@@ -1076,12 +1076,12 @@ bool Game::LoadJsonLevel(const std::string& name, bool tutorial)
     Person::players.clear();
     unsigned j = 0;
     for (unsigned i = 0; i < map_data["map"]["players"].size(); i++) {
-        try {
+        //try {
             Person::players.push_back(shared_ptr<Person>(new Person(map_data["map"]["players"][i], mapvers, j)));
             j++;
-        } catch (InvalidPersonException &e) {
-            cerr << "Invalid Person found in " << name << endl;
-        }
+        //} catch (InvalidPersonException &e) {
+        //    cerr << "Invalid Person found in " << name << endl;
+        //}
     }
     if (stealthloading) {
         Person::players[0]->coords      = playerCoords;
@@ -3290,6 +3290,8 @@ void Game::Tick()
 
         if (!freeze && !winfreeze && !(mainmenu && gameon) && (gameon || !gamestarted)) {
 
+{MICROPROFILE_SCOPEI("Game::Tick", "dialogues", 0xb500ff);
+
             //dialogues
             static float talkdelay = 0;
 
@@ -3304,10 +3306,13 @@ void Game::Tick()
                 }
             }
 
+}//MICROPROFILE
+
             windvar += multiplier;
             smoketex += multiplier;
             Tutorial::stagetime += multiplier;
 
+{MICROPROFILE_SCOPEI("Game::Tick", "hotspots", 0xb500ff);
             //hotspots
             static float hotspotvisual[40];
             if (Hotspot::hotspots.size()) {
@@ -3336,12 +3341,15 @@ void Game::Tick()
                     }
                 }
             }
+}//MICROPROFILE
 
             //Tutorial
             if (Tutorial::active) {
+                MICROPROFILE_SCOPEI("Game::Tick", "tutorial", 0xb500ff);
                 Tutorial::Do(multiplier);
             }
 
+{MICROPROFILE_SCOPEI("Game::Tick", "bonuses", 0xb500ff);
             //bonuses
             if (!Tutorial::active) {
                 if (bonustime == 0 &&
@@ -3377,7 +3385,9 @@ void Game::Tick()
                 bonustotal += bonusvalue;
             }
             bonustime += multiplier;
+}//MICROPROFILE
 
+{MICROPROFILE_SCOPEI("Game::Tick", "snow", 0xb500ff);
             //snow effects
             if (environment == snowyenvironment) {
                 precipdelay -= multiplier;
@@ -3396,6 +3406,7 @@ void Game::Tick()
                     Sprite::MakeSprite(snowsprite, footpoint, footvel, 1, 1, 1, .1, 1);
                 }
             }
+}//MICROPROFILE
 
             doAerialAcrobatics();
 
@@ -3426,6 +3437,7 @@ void Game::Tick()
                 Person::players[0]->jumpclimb = 0;
             }
 
+{MICROPROFILE_SCOPEI("Game::Tick", "dialog-ctl", 0xb500ff);
             if (Dialog::inDialog()) {
                 cameramode = 1;
                 if (Dialog::directing) {
@@ -3628,6 +3640,7 @@ void Game::Tick()
                     }
                 }
             }
+}//MICROPROFILE
 
             if (!Person::players[0]->jumpkeydown) {
                 Person::players[0]->jumptogglekeydown = 0;
@@ -3691,6 +3704,7 @@ void Game::Tick()
 
             static bool movekey;
 
+{MICROPROFILE_SCOPEI("Game::Tick", "AI", 0xb500ff);
             //?
             for (unsigned i = 0; i < Person::players.size(); i++) {
                 static float oldtargetyaw;
@@ -4589,7 +4603,9 @@ void Game::Tick()
                     Person::players[i]->targetyaw = oldtargetyaw;
                 }
             }
+}//MICROPROFILE
 
+{MICROPROFILE_SCOPEI("Game::Tick", "char-anim", 0xb500ff);
             //Rotation
             for (unsigned k = 0; k < Person::players.size(); k++) {
                 if (fabs(Person::players[k]->yaw - Person::players[k]->targetyaw) > 180) {
@@ -4657,6 +4673,10 @@ void Game::Tick()
             if (Tutorial::active) {
                 Tutorial::DoStuff(multiplier);
             }
+}//MICROPROFILE
+
+
+{MICROPROFILE_SCOPEI("Game::Tick", "sounds", 0xb500ff);
 
             //3d sound
             static float gLoc[3];
@@ -4694,6 +4714,7 @@ void Game::Tick()
             OPENAL_Update();
 
             oldviewer = viewer;
+}//MICROPROFILE
         }
     }
 }

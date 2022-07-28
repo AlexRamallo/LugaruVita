@@ -1,8 +1,10 @@
 #include <GL/gl.h>
 #include <stdio.h>
 #include <iostream>
-#include <assert.h>
 #include "Utils/Log.h"
+#include <assert.h>
+
+#include "Thirdparty/microprofile/microprofile.h"
 
 void glReadBuffer( GLenum mode ){
 	//--
@@ -57,4 +59,9 @@ void glCallLists( GLsizei n, GLenum type, const GLvoid *lists ){
 
 void glTranslated( GLdouble x, GLdouble y, GLdouble z ){
 	glTranslatef((float) x, (float) y, (float) z);
+}
+
+void vglDrawArrays(GLenum mode, GLint first, GLsizei count) {
+	MICROPROFILE_SCOPEI("vitaGL", "glDrawArrays", 0xff0000);
+	glDrawArrays(mode, first, count);
 }

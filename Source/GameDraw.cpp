@@ -461,7 +461,13 @@ int Game::DrawGLScene(StereoSide side)
             glEnable(GL_CULL_FACE);
             glCullFace(GL_FRONT);
             glDepthMask(1);
+
+            flimit_norm_calc_ct = 2;
+            flimit_person_muscle_calc_ct = 2;
+
             for (unsigned k = 0; k < Person::players.size(); k++) {
+                MICROPROFILE_SCOPEI("DrawGLScene", "models-draw-person", 0xb500ff);
+
                 if (k == 0 || !Tutorial::active) {
                     glEnable(GL_BLEND);
                     glEnable(GL_LIGHTING);

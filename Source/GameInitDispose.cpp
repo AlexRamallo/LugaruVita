@@ -78,6 +78,7 @@ void LOG_TOGGLE(char set){
 
 void LOG(const std::string &fmt, ...)
 {  
+#ifndef NDEBUG
     if(!log_enabled) return;
     //stolen from https://en.cppreference.com/w/cpp/utility/variadic    
     va_list args;
@@ -114,6 +115,7 @@ void LOG(const std::string &fmt, ...)
     }
     std::cout << std::endl;
     va_end(args);
+#endif
 }
 
 void Dispose()
@@ -493,7 +495,7 @@ void FadeLoadingScreen(float howmuch)
 
 void Game::InitGame()
 {
-    LOG_TOGGLE(true);
+    LOG_TOGGLE(false);
     std::cout << "InitGame A\n";
 
     LOGFUNC;
@@ -684,7 +686,6 @@ void Game::InitGame()
     Person::players.emplace_back(player);
  
     LOG("InitGame Done!!");
-    LOG_TOGGLE(false);
 }
 
 void Game::LoadScreenTexture()
@@ -710,8 +711,6 @@ void Game::LoadScreenTexture()
 void Game::LoadStuff()
 {
     MICROPROFILE_SCOPEI("Game", "LoadStuff", 0xffff3456);
-
-    LOG_TOGGLE(false);
     LOG("Game::LoadStuff()");
     float temptexdetail;
     float viewdistdetail;

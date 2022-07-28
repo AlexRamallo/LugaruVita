@@ -20,6 +20,8 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "Animation/Skeleton.hpp"
 
+#include "Thirdparty/microprofile/microprofile.h"
+
 #include "Animation/Animation.hpp"
 #include "Audio/openal_wrapper.hpp"
 #include "Game.hpp"
@@ -68,6 +70,7 @@ Skeleton::Skeleton()
  */
 void Skeleton::FindForwards()
 {
+    MICROPROFILE_SCOPEI("Skeleton", "FindForwards", 0xbdc071);
     //Find forward vectors
     CrossProduct(joints[forwardjoints[1]].position - joints[forwardjoints[0]].position, joints[forwardjoints[2]].position - joints[forwardjoints[0]].position, &forward);
     Normalise(&forward);
@@ -107,6 +110,7 @@ void Skeleton::FindForwards()
  */
 float Skeleton::DoConstraints(XYZ* coords, float* scale)
 {
+    MICROPROFILE_SCOPEI("Skeleton", "DoConstraints", 0xbdc071);
     const float elasticity = .3;
     XYZ bounceness;
     const int numrepeats = 3;
@@ -497,6 +501,7 @@ float Skeleton::DoConstraints(XYZ* coords, float* scale)
  */
 void Skeleton::DoGravity(float* scale)
 {
+    MICROPROFILE_SCOPEI("Skeleton", "DoGravity", 0xbdc071);
     for (unsigned i = 0; i < joints.size(); i++) {
         if (
             (
@@ -519,6 +524,7 @@ void Skeleton::DoGravity(float* scale)
  */
 void Skeleton::FindRotationMuscle(int which, int animation)
 {
+    MICROPROFILE_SCOPEI("Skeleton", "FindRotationMuscle", 0xbdc071);
     XYZ p1, p2, fwd;
     float dist;
 
@@ -641,6 +647,7 @@ void Skeleton::Load(const std::string& filename, const std::string& lowfilename,
                     const std::string& model7filename, const std::string& modellowfilename,
                     const std::string& modelclothesfilename, bool clothes)
 {
+    MICROPROFILE_SCOPEI("Skeleton", "Load", 0xbdc071);
     GLfloat M[16];
     FILE* tfile;
     float lSize;

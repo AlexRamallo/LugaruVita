@@ -139,7 +139,7 @@ FILE* Folders::openMandatoryFile(const std::string& filename, const char* mode)
 {
     FILE* tfile = fopen(filename.c_str(), mode);
     if (tfile == NULL) {
-        throw FileNotFoundException(filename);
+        return NULL;
     }
     return tfile;
 }

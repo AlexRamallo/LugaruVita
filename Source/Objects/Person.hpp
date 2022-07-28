@@ -53,6 +53,9 @@ struct InvalidPersonException : public exception
     }
 };
 
+extern int flimit_norm_calc_ct;
+extern int flimit_person_muscle_calc_ct;
+
 class Person : public enable_shared_from_this<Person>
 {
 private:
@@ -60,6 +63,9 @@ private:
 
 public:
     static std::vector<std::shared_ptr<Person>> players;
+
+    bool can_calc_norm;
+    bool can_calc_anim;
 
     int whichpatchx;
     int whichpatchz;

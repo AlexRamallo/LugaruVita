@@ -82,6 +82,8 @@ void TextureRes::uploadPVR(void *pTexture){
         assert(type > 0);
 
         data = (GLubyte*)malloc(nb * sizeof(GLubyte));
+        assert(data != NULL);
+        
         datalen = 0;
         for (int i = 0; i < nb; i++) {
             if ((i + 1) % 4 || type == GL_RGB) {

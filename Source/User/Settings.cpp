@@ -26,8 +26,13 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 
 using namespace Game;
 
+int max_terriain_layers;
+int max_view_distance;
+
 void DefaultSettings()
 {
+    max_terriain_layers = 1;
+    max_view_distance = 80;
     detail = 0;
     ismotionblur = 0;
     //detail = 2;

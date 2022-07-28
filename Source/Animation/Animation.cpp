@@ -35,11 +35,7 @@ void Animation::loadAll()
     if (id < loadable_anim_end){                     \
         animations.emplace_back(file, height, attack);\
     }
-    try {
 #include "Animation.def"
-    } catch (const exception &e) {
-        LOG("Animation::loadAll EXCEPTION: %s", e.what());
-    }
 #undef DECLARE_ANIM
 }
 

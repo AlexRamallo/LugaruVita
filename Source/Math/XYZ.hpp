@@ -22,6 +22,7 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 #define _QUATERNIONS_HPP_
 
 #include "Graphic/gamegl.hpp"
+#include "Thirdparty/microprofile/microprofile.h"
 
 #include <math.h>
 #include <json/value.h>
@@ -289,7 +290,8 @@ inline float distsqflat(XYZ* point1, XYZ* point2)
 }
 
 inline XYZ DoRotation(XYZ thePoint, float xang, float yang, float zang)
-{
+{ 
+    //MICROPROFILE_SCOPEI("XYZ", "DoRotation", 0x01cb0f);
     static XYZ newpoint;
     if (xang) {
         xang *= 6.283185f;

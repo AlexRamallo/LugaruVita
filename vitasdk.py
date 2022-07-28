@@ -8,7 +8,8 @@ from ftplib import FTP
 from os import path
 
 def options(opt):
-	opt.add_option('--SHARKIP', dest='SHARKIP', type='string', default=None)
+	opt.add_option('--sharkip', dest='SHARKIP', type='string', default=None)
+	opt.add_option('--uncompressed-vpk', dest='VPK_UNCOMPRESSED', action='store_true', default=False, help='Don\'t compress VPK')
 
 def configure(conf):
 	sdk_installed = "VITASDK" in conf.environ
@@ -94,6 +95,8 @@ def tsk_vita_vpk(self):
 	t2.title_string = title_string
 
 	t3 = self.create_task('create_vpk')
+	t3.vpk_uncompressed = self.bld.options.VPK_UNCOMPRESSED
+	t3.assets = getattr(self, 'assets', None)
 	t3.inputs = t1.outputs + t2.outputs + sce_sys_src
 	t3.outputs = [self.path.get_bld().find_or_declare('%s.vpk'%self.target.split('.elf')[0])]
 
@@ -454,29 +457,31 @@ class create_vpk(Task.Task):
 		out_name = gen.target.split('.elf')[0]
 		bldroot = gen.path.get_bld()
 
-		#this sucks
-		asset_root = gen.bld.root.find_node(gen.bld.variant_dir)
-
 		#Create VPK
 		vpk_out = gen.path.get_bld().find_or_declare('%s.vpk' % out_name)
 		ziproot = gen.path.get_bld()
-		cmd = [
-			gen.bld.env.ZIP[0], '-r',
+
+		compopt = []
+		if self.vpk_uncompressed:
+			compopt = ['-0']
+
+		cmd = compopt + [
+			'-r',
 			vpk_out.path_from(ziproot),
 			gen.path.find_or_declare('eboot.bin').path_from(ziproot),
 			gen.path.find_or_declare('sce_sys').path_from(ziproot)
 		]
-		gen.bld.cmd_and_log(cmd, cwd=bldroot, quiet=Context.STDOUT)
+
+		gen.bld.cmd_and_log(gen.bld.env.ZIP + cmd, cwd=bldroot, quiet=Context.STDOUT)
 		
-		if asset_root.find_node("assets") != None:
+		if self.assets != None:
 			#Append assets folder to VPK
-			cmd = [
-				gen.bld.env.ZIP[0],
+			cmd = compopt + [
 				'-ur',
-				vpk_out.path_from(asset_root),
-				'assets'
+				vpk_out.path_from(ziproot),
+				self.assets.path_from(ziproot)
 			]
-			gen.bld.cmd_and_log(cmd, cwd = asset_root)
+			gen.bld.cmd_and_log(gen.bld.env.ZIP + cmd, cwd=bldroot)
 
 		gen.outputs = [vpk_out]
 

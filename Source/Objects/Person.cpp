@@ -19,7 +19,7 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include "Objects/Person.hpp"
-
+#include <assert.h>
 #include "Animation/Animation.hpp"
 #include "Audio/Sounds.hpp"
 #include "Audio/openal_wrapper.hpp"
@@ -28,6 +28,8 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 #include "Level/Dialog.hpp"
 #include "Tutorial.hpp"
 #include "Utils/Folders.hpp"
+
+#include "Thirdparty/microprofile/microprofile.h"
 
 extern float multiplier;
 extern Terrain terrain;
@@ -71,6 +73,9 @@ extern int numenvsounds;
 extern float envsoundlife[30];
 
 extern XYZ windvector;
+
+extern int flimit_norm_calc_ct = 0;
+extern int flimit_person_muscle_calc_ct = 0;
 
 std::vector<std::shared_ptr<Person>> Person::players;
 
@@ -372,9 +377,11 @@ Person::Person(FILE* tfile, int mapvers, unsigned i)
         yaw = 0;
     }
     targetyaw = yaw;
-    if (num_weapons < 0 || num_weapons > 5) {
-        throw InvalidPersonException();
-    }
+    //if (num_weapons < 0 || num_weapons > 5) {
+    //    throw InvalidPersonException();
+    //}
+    assert(num_weapons >= 0 && num_weapons <= 5 && "Invalid person!");
+
     if (num_weapons > 0 && num_weapons < 5) {
         for (int j = 0; j < num_weapons; j++) {
             weaponids[j] = weapons.size();
@@ -6255,6 +6262,7 @@ void Person::DoStuff()
  */
 void IKHelper(Person* p, float interp)
 {
+    MICROPROFILE_SCOPEI("Person", "IKHelper", 0x926329);
     XYZ point, change, change2;
     float heightleft, heightright;
 
@@ -6297,8 +6305,16 @@ void IKHelper(Person* p, float interp)
  */
 int Person::DrawSkeleton()
 {
+    MICROPROFILE_SCOPEI("Person", "DrawSkeleton", 0x926329);
     int oldplayerdetail;
-    if ((frustum.SphereInFrustum(coords.x, coords.y + scale * 3, coords.z, scale * 8) && distsq(&viewer, &coords) < viewdistance * viewdistance) || skeleton.free == 3) {
+
+    bool viz;
+    {
+        MICROPROFILE_SCOPEI("Person", "vizcull", 0x926329);
+        viz = (frustum.SphereInFrustum(coords.x, coords.y + scale * 3, coords.z, scale * 8) && distsq(&viewer, &coords) < viewdistance * viewdistance) || skeleton.free == 3;
+    }
+
+    if (viz) {
         if (onterrain && (isIdle() || isCrouch() || wasIdle() || wasCrouch()) && !skeleton.free) {
             calcrot = 1;
         }
@@ -6394,6 +6410,9 @@ int Person::DrawSkeleton()
                     targetheadyaw += 180;
                 }
             }
+
+            if(flimit_person_muscle_calc_ct-- > 0){
+
             for (int i = 0; i < skeleton.drawmodel.vertexNum; i++) {
                 skeleton.drawmodel.vertex[i] = 0;
                 skeleton.drawmodel.vertex[i].y = 999;
@@ -6406,7 +6425,10 @@ int Person::DrawSkeleton()
                 skeleton.drawmodelclothes.vertex[i] = 0;
                 skeleton.drawmodelclothes.vertex[i].y = 999;
             }
+
             for (unsigned int i = 0; i < skeleton.muscles.size(); i++) {
+                MICROPROFILE_SCOPEI("Person", "proc-muscle", 0xe05cc3);
+
                 // convenience renames
                 const int p1 = skeleton.muscles[i].parent1->label;
                 const int p2 = skeleton.muscles[i].parent2->label;
@@ -6590,6 +6612,9 @@ int Person::DrawSkeleton()
                 }
                 updatedelay = 1 + (float)(Random() % 100) / 1000;
             }
+            
+            }
+            
             if (skeleton.free != 2 && (skeleton.free == 1 || skeleton.free == 3 || id == 0 || (normalsupdatedelay <= 0) || animTarget == getupfromfrontanim || animTarget == getupfrombackanim || animCurrent == getupfromfrontanim || animCurrent == getupfrombackanim)) {
                 normalsupdatedelay = 1;
                 if (playerdetail || skeleton.free == 3) {
@@ -8475,9 +8500,10 @@ Person::Person(Json::Value value, int /*mapvers*/, unsigned i)
         }
     }
 
-    if (value["weapons"].size() > 5) {
-        throw InvalidPersonException();
-    }
+    //if (value["weapons"].size() > 5) {
+    //    throw InvalidPersonException();
+    //}
+    assert(value["weapons"].size() <= 5 && "Invalid person!");
     for (unsigned j = 0; j < value["weapons"].size(); j++) {
         weaponids[j] = weapons.size();
         weapons.push_back(Weapon(value["weapons"][j].asInt(), id));

@@ -165,7 +165,6 @@ Object::Object(object_type _type, XYZ _position, float _yaw, float _pitch, float
 
 void Object::handleFire()
 {
-    MICROPROFILE_SCOPEI("Object", "handleFire", 0x008fff);
     if (type == firetype) {
         onfire = 1;
     }
@@ -735,7 +734,6 @@ int Object::checkcollide(XYZ startpoint, XYZ endpoint, int what)
 
 int Object::checkcollide(XYZ startpoint, XYZ endpoint, int what, float minx, float miny, float minz, float maxx, float maxy, float maxz)
 {
-    MICROPROFILE_SCOPEI("Object", "checkcollide", 0x008fff);
     XYZ colpoint, colviewer, coltarget;
 
     if (what == 1000) {

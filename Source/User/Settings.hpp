@@ -53,6 +53,7 @@ extern float screenwidth, screenheight;
 extern bool fullscreen;
 extern float minscreenwidth, minscreenheight;
 extern float maxscreenwidth, maxscreenheight;
+extern int max_terriain_layers;
 
 void DefaultSettings();
 void SaveSettings();

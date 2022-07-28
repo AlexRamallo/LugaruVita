@@ -19,6 +19,7 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include "Environment/Terrain.hpp"
+#include "Thirdparty/microprofile/microprofile.h"
 
 #include "Game.hpp"
 #include "Objects/Object.hpp"
@@ -40,10 +41,14 @@ extern float blurness;
 extern float targetblurness;
 extern bool skyboxtexture;
 
+extern int max_terriain_layers;
+extern int max_view_distance;
+
 //Functions
 
 int Terrain::lineTerrain(XYZ p1, XYZ p2, XYZ* p)
 {
+    MICROPROFILE_SCOPEI("Terrain", "lineTerrain", 0x50c2aa);
     static int i, j, k;
     static float distance;
     static float olddistance;
@@ -158,13 +163,15 @@ int Terrain::lineTerrain(XYZ p1, XYZ p2, XYZ* p)
 
 void Terrain::UpdateTransparency(int whichx, int whichy)
 {
+    MICROPROFILE_SCOPEI("Terrain", "UpdateTransparency", 0x50c2aa);
     static XYZ vertex;
     static int i, j, a, b, c, d, patch_size, stepsize;
     static float distance;
 
     static float viewdistsquared;
 
-    viewdistsquared = viewdistance * viewdistance;
+    int viewdist = MAX(viewdistance, max_view_distance);
+    viewdistsquared = viewdist * viewdist;
     patch_size = size / subdivision;
 
     stepsize = 1;
@@ -242,7 +249,8 @@ void Terrain::UpdateTransparencyotherother(int whichx, int whichy)
 
     static float viewdistsquared;
 
-    viewdistsquared = viewdistance * viewdistance;
+    int viewdist = MAX(viewdistance, max_view_distance);
+    viewdistsquared = viewdist * viewdist;
     patch_size = size / subdivision;
 
     stepsize = 1;
@@ -285,6 +293,7 @@ void Terrain::UpdateTransparencyotherother(int whichx, int whichy)
 
 void Terrain::UpdateVertexArray(int whichx, int whichy)
 {
+    MICROPROFILE_SCOPEI("Terrain", "UpdateVertexArray", 0x50c2aa);
     static int i, j, a, b, c, patch_size, stepsize;
 
     numtris[whichx][whichy] = 0;
@@ -409,6 +418,7 @@ void Terrain::UpdateVertexArray(int whichx, int whichy)
 
 bool Terrain::load(const std::string& fileName)
 {
+    MICROPROFILE_SCOPEI("Terrain", "load", 0x50c2aa);
     static long i, j;
     static long x, y;
     static float patch_size;
@@ -691,6 +701,7 @@ bool Terrain::load(const std::string& fileName)
 
 void Terrain::CalculateNormals()
 {
+    MICROPROFILE_SCOPEI("Terrain", "CalculateNormals", 0x50c2aa);
     static int i, j;
     static XYZ facenormal;
     static XYZ p, q, a, b, c;
@@ -785,7 +796,7 @@ void Terrain::drawpatch(int whichx, int whichy, float opacity)
     glTexCoordPointer(2, GL_FLOAT, 9 * sizeof(GLfloat), &vArray[7 + whichx * patch_elements + whichy * patch_elements * subdivision]);
 
     //Draw
-    glDrawArrays(GL_TRIANGLES, 0, numtris[whichx][whichy] * 3);
+    vglDrawArrays(GL_TRIANGLES, 0, numtris[whichx][whichy] * 3);
 
     glDisableClientState(GL_VERTEX_ARRAY);
     glDisableClientState(GL_COLOR_ARRAY);
@@ -811,7 +822,7 @@ void Terrain::drawpatchother(int whichx, int whichy, float opacity)
     glTexCoordPointer(2, GL_FLOAT, 9 * sizeof(GLfloat), &vArray[7 + whichx * patch_elements + whichy * patch_elements * subdivision]);
 
     //Draw
-    glDrawArrays(GL_TRIANGLES, 0, numtris[whichx][whichy] * 3);
+    vglDrawArrays(GL_TRIANGLES, 0, numtris[whichx][whichy] * 3);
 
     glDisableClientState(GL_VERTEX_ARRAY);
     glDisableClientState(GL_COLOR_ARRAY);
@@ -838,7 +849,7 @@ void Terrain::drawpatchotherother(int whichx, int whichy)
     glTexCoordPointer(2, GL_FLOAT, 9 * sizeof(GLfloat), &vArray[7 + whichx * patch_elements + whichy * patch_elements * subdivision]);
 
     //Draw
-    glDrawArrays(GL_TRIANGLES, 0, numtris[whichx][whichy] * 3);
+    vglDrawArrays(GL_TRIANGLES, 0, numtris[whichx][whichy] * 3);
 
     glDisableClientState(GL_VERTEX_ARRAY);
     glDisableClientState(GL_COLOR_ARRAY);
@@ -850,6 +861,7 @@ void Terrain::drawpatchotherother(int whichx, int whichy)
 
 float Terrain::getHeight(float pointx, float pointz)
 {
+    MICROPROFILE_SCOPEI("Terrain", "getHeight", 0x50c2aa);
     static int tilex, tiley;
     static XYZ startpoint, endpoint, intersect, triangle[3];
 
@@ -901,6 +913,7 @@ float Terrain::getHeight(float pointx, float pointz)
 
 float Terrain::getOpacity(float pointx, float pointz)
 {
+    MICROPROFILE_SCOPEI("Terrain", "getOpacity", 0x50c2aa);
     static float height1, height2;
     static int tilex, tiley;
 
@@ -922,6 +935,7 @@ float Terrain::getOpacity(float pointx, float pointz)
 
 XYZ Terrain::getNormal(float pointx, float pointz)
 {
+    MICROPROFILE_SCOPEI("Terrain", "getNormal", 0x50c2aa);
     static XYZ height1, height2, total;
     static int tilex, tiley;
 
@@ -944,6 +958,7 @@ XYZ Terrain::getNormal(float pointx, float pointz)
 
 XYZ Terrain::getLighting(float pointx, float pointz)
 {
+    MICROPROFILE_SCOPEI("Terrain", "getLighting", 0x50c2aa);
     static XYZ height1, height2;
     static int tilex, tiley;
 
@@ -969,6 +984,9 @@ XYZ Terrain::getLighting(float pointx, float pointz)
 
 void Terrain::draw(int layer)
 {
+    if(layer >= max_terriain_layers) return;
+
+    MICROPROFILE_SCOPEI("Terrain", "draw layer", 0x50c2aa);
     static int i, j;
     static float opacity;
     static XYZ terrainpoint;
@@ -980,28 +998,33 @@ void Terrain::draw(int layer)
     static float patch_size = size / subdivision * scale;
     static float viewdistsquared;
 
-    viewdistsquared = viewdistance * viewdistance;
+    int viewdist = MAX(viewdistance, max_view_distance);
+    viewdistsquared = viewdist * viewdist;
+    
+{MICROPROFILE_SCOPEI("Terrain::draw(int layer)", "cullpatch", 0x50c2aa);
 
     //Only nearby blocks
-    beginx = ((viewer.x - viewdistance) / patch_size) - 1;
+    beginx = ((viewer.x - viewdist) / patch_size) - 1;
     if (beginx < 0) {
         beginx = 0;
     }
-    beginz = ((viewer.z - viewdistance) / patch_size) - 1;
+    beginz = ((viewer.z - viewdist) / patch_size) - 1;
     if (beginz < 0) {
         beginz = 0;
     }
 
-    endx = ((viewer.x + viewdistance) / patch_size) + 1;
+    endx = ((viewer.x + viewdist) / patch_size) + 1;
     if (endx > subdivision) {
         endx = subdivision;
     }
-    endz = ((viewer.z + viewdistance) / patch_size) + 1;
+    endz = ((viewer.z + viewdist) / patch_size) + 1;
     if (endz > subdivision) {
         endz = subdivision;
     }
+}//MICROPROFILE
 
     if (!layer) {
+        MICROPROFILE_SCOPEI("Terrain::draw(int layer)", "layer0-calcdistsq", 0x50c2aa);
         for (i = beginx; i < endx; i++) {
             for (j = beginz; j < endz; j++) {
                 terrainpoint.x = i * patch_size + (patch_size) / 2;
@@ -1011,9 +1034,14 @@ void Terrain::draw(int layer)
             }
         }
     }
+
+{MICROPROFILE_SCOPEI("Terrain::draw(int layer)", "drawpatches", 0x50c2aa);
+
     for (i = beginx; i < endx; i++) {
         for (j = beginz; j < endz; j++) {
-            if (distance[i][j] < (viewdistance + patch_size) * (viewdistance + patch_size)) {
+            MICROPROFILE_SCOPEI("Terrain::draw(int layer)", "procpatch", 0x50c2aa);
+
+            if (distance[i][j] < (viewdist + patch_size) * (viewdist + patch_size)) {
                 opacity = 1;
                 if (distance[i][j] > viewdistsquared * fadestart - viewdistsquared) {
                     opacity = 0;
@@ -1035,7 +1063,14 @@ void Terrain::draw(int layer)
                 }
                 glMatrixMode(GL_MODELVIEW);
                 glPushMatrix();
-                if (frustum.CubeInFrustum(i * patch_size + patch_size * .5, avgypatch[i][j], j * patch_size + patch_size * .5, heightypatch[i][j] / 2)) {
+
+                bool cubeInFrustum;
+
+{MICROPROFILE_SCOPEI("Terrain::draw(int layer)", "frustum-cull", 0x50c2aa);
+                cubeInFrustum = frustum.CubeInFrustum(i * patch_size + patch_size * .5, avgypatch[i][j], j * patch_size + patch_size * .5, heightypatch[i][j] / 2);
+}//MICROPROFILE
+
+                if (cubeInFrustum) {
                     /*
                     //VITAGL: TODO
                     if (environment == desertenvironment && distance[i][j] > viewdistsquared / 4) {
@@ -1045,12 +1080,15 @@ void Terrain::draw(int layer)
                     }
                     */
                     if (!layer && textureness[i][j] != allsecond) {
+                        MICROPROFILE_SCOPEI("Terrain::draw(int layer)", "drawpatch", 0x50c2aa);
                         drawpatch(i, j, opacity);
                     }
                     if (layer == 1 && textureness[i][j] != allfirst) {
+                        MICROPROFILE_SCOPEI("Terrain::draw(int layer)", "drawpatchother", 0x50c2aa);
                         drawpatchother(i, j, opacity);
                     }
                     if (layer == 2 && textureness[i][j] != allfirst) {
+                        MICROPROFILE_SCOPEI("Terrain::draw(int layer)", "drawpatchotherother", 0x50c2aa);
                         drawpatchotherother(i, j);
                     }
                 }
@@ -1058,6 +1096,7 @@ void Terrain::draw(int layer)
             }
         }
     }
+}//MICROPROFILE
     /*
     //VITAGL: TODO
     if (environment == desertenvironment) {
@@ -1075,7 +1114,8 @@ void Terrain::drawdecals()
         static float viewdistsquared;
         static bool blend;
 
-        viewdistsquared = viewdistance * viewdistance;
+        int viewdist = MAX(viewdistance, max_view_distance);
+        viewdistsquared = viewdist * viewdist;
         blend = 1;
 
         lasttype = -1;
@@ -1358,6 +1398,8 @@ void Terrain::MakeDecalLock(decal_type type, XYZ where, int whichx, int whichy, 
 
 void Terrain::DoShadows()
 {
+    MICROPROFILE_SCOPEI("Terrain", "DoShadows", 0x50c2aa);
+
     static XYZ testpoint, testpoint2, terrainpoint, lightloc, col;
     lightloc = light.location;
     if (!skyboxtexture) {

@@ -45,6 +45,9 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 
 #define NB_CAMPAIGN_MENU_ITEM 7
 
+#define MAX(v, m) (((v) > (m)) ? (m) : (v))
+#define MIN(v, m) (((v) < (m)) ? (m) : (v))
+
 namespace Game
 {
 extern Texture terraintexture;

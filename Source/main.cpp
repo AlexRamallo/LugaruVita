@@ -17,6 +17,10 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 */
+#define MICROPROFILE_IMPL 1
+#include "Thirdparty/microprofile/microprofile.h"
+
+#include "Utils/WorkerThread.hpp"
 
 #include "Game.hpp"
 
@@ -29,6 +33,7 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <fstream>
 #include <iostream>
+#include <thread>
 #include <ostream>
 #include <math.h>
 #include <set>
@@ -36,9 +41,6 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 #include <string.h>
 #include <time.h>
 #include <assert.h>
-
-#define MICROPROFILE_IMPL 1
-#include "Thirdparty/microprofile/microprofile.h"
 
 using namespace Game;
 
@@ -52,8 +54,10 @@ using namespace Game;
 #if PLATFORM_VITA
 
 extern "C" {
-    unsigned int _newlib_heap_size_user = 217 * 1024 * 1024;
-    //unsigned int _newlib_heap_size_user = 216 * 1024 * 1024;
+    unsigned int _newlib_heap_size_user = 128 * 1024 * 1024;
+
+    //increase if flickering occurs
+    #define VGL_VERTEX_POOL_SIZE 32 * 1024 * 1024
 }
 
 #include <vitaGL.h>
@@ -496,6 +500,8 @@ void DoUpdate()
     if (count < 2) {
         count = 2;
     }
+    
+    count = 2;//Big speed up (gameplay consequences?)
 
     realmultiplier = multiplier;
     multiplier *= gamespeed;
@@ -806,16 +812,11 @@ int _main(int argc, char** argv)
                 }
             }
 
-            int fr = 0;
+            WorkerThread worker1(1);
+            std::thread thread1 (std::ref(worker1));
+            thread1.detach();
+
             while (!gameDone && !tryquit) {
-                fr++;
-                if(fr > 600){
-                    const char *dest = "ux0:data/microprofile_dump.html";
-                    LOG("Dumping last %d frames of profiling data to %s", fr, dest);
-                    MicroProfileDumpFile(dest, MicroProfileDumpTypeHtml, fr);
-                    SDL_Delay(500);
-                    fr = 0;
-                }
                 if (IsFocused()) {
                     gameFocused = true;
 
@@ -873,10 +874,9 @@ int _main(int argc, char** argv)
 #endif
 }
 
-const int i =1;
-#define is_bigendian()((*(char*)&i) == 0 )
-
 int main(int argc, char** argv){
+    vglSetVertexPoolSize(VGL_VERTEX_POOL_SIZE);
+
     MicroProfileOnThreadCreate("MainThread");
     std::ofstream ofs{"ux0:data/lugaru_runlog.txt"}; 
     std::cout.rdbuf(ofs.rdbuf());
@@ -890,8 +890,6 @@ int main(int argc, char** argv){
     //Account::add("VitaMasterRace");
     //Account::saveFile("ux0:data/lugaru1.acct");
     Account::loadFile("ux0:data/lugaru1.acct");
-
-    std::cout << "is big endian: " << (bool)(is_bigendian()) << std::endl;
 
     int rc = _main(argc, argv);
     std::cout << "Main returned with code: " << rc << std::endl;

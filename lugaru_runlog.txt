@@ -1,4 +1,3 @@
-is big endian: 0
 --------------------------------------------------------------------------
 Lugaru HD: The Rabbit's Foot, by Wolfire Games and the OSS Lugaru project.
 
@@ -11,23 +10,9 @@ Version 1.3-dev (git 7ea491f) -- RelWithDebInfo build
 InitGame A
 InitGame B
 InitGame C
-FadeLoadingScreen...
-	E
-	F
 InitGame D
-Loading font texture... Textures/Font.png
 InitGame E
 InitGame F
-Loading font texture... Textures/FontMono.png
 InitGame G
-	E
-	F
 InitGame H
-Initializing sound system...
-	E
-	F
-Loading all animations...
-Loading PersonType...
-Creating Player...
-Player(INIT) patch X: 0	Z: 0
-InitGame Done!!
+WorkerThread called!

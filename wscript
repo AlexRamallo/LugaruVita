@@ -20,7 +20,6 @@ use_packages = [
 ]
 
 platform_libs = [
-	"vitaGL",
 	"vitashark",
 	"z",
 	"m",
@@ -64,6 +63,8 @@ def options(opt):
 	opt.add_option('--no-vpk', dest="SKIP_VPK", action="store_true", help="Only build assets and eboot.bin, not VPK")
 	opt.add_option('--PSVITAIP', dest='PSVITAIP', type='string')
 	opt.add_option('--vclaunch', dest='VCLAUNCH', default=False, help='send launch command to vitacompanion after eboot update')
+	opt.add_option('--profiling', dest='PROFILING_ENABLED', action='store_true', default=False, help='enable profiling macros')
+	opt.recurse("vitagl")
 
 def configure(conf):
 	conf.find_program("PVRTexToolCLI", var="PVRTT", mandatory=True)
@@ -78,32 +79,44 @@ def configure(conf):
 		"-Wall",
 		"-Wextra",
 		"-Wno-parentheses",
-		"-pedantic"
+		"-pedantic",
+		"-ffast-math",
+		"-mtune=cortex-a9",
+		"-mfpu=neon",
+		"-Wno-incompatible-pointer-types",
 	]
+	
+	conf.env.append_unique('CXXFLAGS', "--std=gnu++11")
+	conf.env.append_unique('CXXFLAGS', '-fno-exceptions')
 
 	if 'release' in conf.variant:
 		conf.env.append_unique('CFLAGS', '-O3')
-		conf.env.append_unique('DEFINES', 'MICROPROFILE_ENABLED=0');
 		conf.env.append_unique('DEFINES', 'MICROPROFILE_WEBSERVER=0');
 	else:
 		conf.env.append_unique('CFLAGS', '-g')
 		conf.env.append_unique('CFLAGS', '-O0')
-		conf.env.append_unique('DEFINES', 'MICROPROFILE_ENABLED=1');
 		conf.env.append_unique('DEFINES', 'MICROPROFILE_WEBSERVER=0');
 
-	conf.env.CXXFLAGS = conf.env.CFLAGS + [
-		"--std=gnu++11",
-	]
+	if conf.options.PROFILING_ENABLED:
+		conf.env.append_unique('DEFINES', 'MICROPROFILE_ENABLED=1');
+	else:
+		conf.env.append_unique('DEFINES', 'MICROPROFILE_ENABLED=0');
+
+	conf.env.CXXFLAGS.extend(conf.env.CFLAGS)
 
 	#load packages
 	for pkg in use_packages:
 		conf.check_cfg(package=pkg, uselib_store=pkg, args=['--cflags', '--libs', '--static'])
+
+	conf.recurse("vitagl")
 
 def build(bld):
 	#Data folder processing (see below)
 	build_assets(bld)
 
 	bld.add_group()
+
+	bld.recurse("vitagl")
 
 	defs = [
 		"DEBUG",
@@ -121,7 +134,7 @@ def build(bld):
 		includes = ["Source"] + incs,
 		features = "c cxx",
 		target = "Entrypoint",
-		use = use_packages,
+		use = use_packages + ["vitaGL"],
 		defines = defs,
 	)
 
@@ -138,7 +151,8 @@ def build(bld):
 		features='cxx cxxprogram %s' % variant,
 		vita_title_id = bld.env.PROJECT_TITLEID,
 		vita_title_string = bld.env.PROJECT_NAME,
-		strip = False
+		assets = bld.path.find_node("Data").get_bld(),
+		strip = 'release' in bld.variant
 	)
 
 	if bld.is_install > 0:
@@ -146,7 +160,7 @@ def build(bld):
 		if ip == None:
 			bld.fatal('Must provide device address using --PSVITAIP option')
 
-		assets = bld.path.find_node("Data").get_bld()
+		assets = bld.path.find_node("Data").get_bld().mkdir()
 
 		if not bld.options.SKIP_VPK:
 			bld.vita_upload_vpk(bld.env.PROJECT_TITLEID, bld.env.PROJECT_NAME, ip)
@@ -234,7 +248,7 @@ def do_copy(task):
 def do_encode_pvrtc(task):
 	default_opts = {
 		'format': 'PVRTCII_4BPP,UBN,sRGB',
-		'quality': 'pvrtcnormal',
+		'quality': 'pvrtcfastest',
 		'dither': False,
 		'premultiply': False,
 		'flip_x': False,

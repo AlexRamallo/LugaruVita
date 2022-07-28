@@ -302,7 +302,7 @@ void MicroProfileFlush()
 	for(int i = 0; i < int(S.nCommandPos); ++i)
 	{
 		int nCount = S.nCommands[i].nNumVertices;
-		glDrawArrays(S.nCommands[i].nCommand, nOffset, nCount);
+		vglDrawArrays(S.nCommands[i].nCommand, nOffset, nCount);
 		nOffset += nCount;
 	}
 

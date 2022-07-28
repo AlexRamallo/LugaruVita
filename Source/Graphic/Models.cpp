@@ -33,6 +33,7 @@ extern bool decalstoggle;
 
 int Model::LineCheck(XYZ* p1, XYZ* p2, XYZ* p, XYZ* move, float* rotate)
 {
+    MICROPROFILE_SCOPEI("Model", "LineCheck", 0x008fff);
     static float distance;
     static float olddistance;
     static int intersecting;
@@ -71,6 +72,7 @@ int Model::LineCheck(XYZ* p1, XYZ* p2, XYZ* p, XYZ* move, float* rotate)
 
 int Model::LineCheckPossible(XYZ* p1, XYZ* p2, XYZ* p, XYZ* move, float* rotate)
 {
+    MICROPROFILE_SCOPEI("Model", "LineCheckPossible", 0x008fff);
     static float distance;
     static float olddistance;
     static int intersecting;
@@ -111,6 +113,7 @@ int Model::LineCheckPossible(XYZ* p1, XYZ* p2, XYZ* p, XYZ* move, float* rotate)
 
 int Model::LineCheckSlidePossible(XYZ* p1, XYZ* p2, XYZ* move, float* rotate)
 {
+    MICROPROFILE_SCOPEI("Model", "LineCheckSlidePossible", 0x008fff);
     static float distance;
     static float olddistance;
     static int intersecting;
@@ -155,6 +158,7 @@ int Model::LineCheckSlidePossible(XYZ* p1, XYZ* p2, XYZ* move, float* rotate)
 
 int Model::SphereCheck(XYZ* p1, float radius, XYZ* p, XYZ* move, float* rotate)
 {
+    MICROPROFILE_SCOPEI("Model", "SphereCheck", 0x008fff);
     static int i;
     static float distance;
     static float olddistance;
@@ -216,6 +220,7 @@ int Model::SphereCheck(XYZ* p1, float radius, XYZ* p, XYZ* move, float* rotate)
 
 int Model::SphereCheckPossible(XYZ* p1, float radius, XYZ* move, float* rotate)
 {
+    MICROPROFILE_SCOPEI("Model", "SphereCheckPossible", 0x008fff);
     static float distance;
     static float olddistance;
     static int intersecting;
@@ -274,6 +279,7 @@ int Model::SphereCheckPossible(XYZ* p1, float radius, XYZ* move, float* rotate)
 
 void Model::UpdateVertexArray()
 {
+    MICROPROFILE_SCOPEI("Model", "UpdateVertexArray", 0x008fff);
     if (type != normaltype && type != decalstype) {
         return;
     }
@@ -343,6 +349,7 @@ void Model::UpdateVertexArray()
 
 void Model::UpdateVertexArrayNoTex()
 {
+    MICROPROFILE_SCOPEI("Model", "UpdateVertexArrayNoTex", 0x008fff);
     if (type != normaltype && type != decalstype) {
         return;
     }
@@ -400,6 +407,8 @@ void Model::UpdateVertexArrayNoTex()
 
 void Model::UpdateVertexArrayNoTexNoNorm()
 {
+    MICROPROFILE_SCOPEI("Model", "UpdateVertexArrayNoTexNoNorm", 0x008fff);
+
     if (type != normaltype && type != decalstype) {
         return;
     }
@@ -482,6 +491,19 @@ bool Model::loadnotex(const std::string& filename)
 
     return true;
 }
+void Model::destroyVBO(){
+    //--
+}
+
+void Model::createVBO(){
+    /*
+    vbos = 0;
+    glGenBuffers(2, &vbo);
+
+    glBindBuffer(GL_ARRAY_BUFFER, vbos[0]);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vbos[0]);
+    */
+}
 
 bool Model::load(const std::string& filename)
 {
@@ -492,7 +514,11 @@ bool Model::load(const std::string& filename)
 
     LOGFUNC;
 
-    LOG(std::string("Loading model...") + filename);
+    if(filename == "TreeTrunk.solid"){
+        LOG_TOGGLE(true);
+    }
+
+    LOG("Loading model...%s", filename.c_str());
 
     Game::LoadingScreen();
 
@@ -501,6 +527,7 @@ bool Model::load(const std::string& filename)
 
     tfile = Folders::openMandatoryFile(Folders::getResourcePath(filename), "rb");
 
+{MICROPROFILE_SCOPEI("Model::load", "parse file", 0x008fff);
     // read model settings
 
     fseek(tfile, 0, SEEK_SET);
@@ -527,11 +554,14 @@ bool Model::load(const std::string& filename)
         Triangles[i].vertex[0] = vertex[0];
         Triangles[i].vertex[1] = vertex[2];
         Triangles[i].vertex[2] = vertex[4];
+
         funpackf(tfile, "Bf Bf Bf", &Triangles[i].gx[0], &Triangles[i].gx[1], &Triangles[i].gx[2]);
         funpackf(tfile, "Bf Bf Bf", &Triangles[i].gy[0], &Triangles[i].gy[1], &Triangles[i].gy[2]);
     }
 
     modelTexture.xsz = 0;
+
+}//MICROPROFILE
 
     fclose(tfile);
 
@@ -565,7 +595,7 @@ bool Model::loaddecal(const std::string& filename)
 
     LOGFUNC;
 
-    LOG(std::string("Loading decal...") + Folders::getResourcePath(filename));
+    LOG("Loading decal... %s", Folders::getResourcePath(filename).c_str());
 
     type = decalstype;
     color = 0;
@@ -683,6 +713,7 @@ bool Model::loadraw(const std::string& filename)
 
 void Model::UniformTexCoords()
 {
+    MICROPROFILE_SCOPEI("Model", "UniformTexCoords", 0x008fff);
     for (unsigned int i = 0; i < Triangles.size(); i++) {
         Triangles[i].gy[0] = vertex[Triangles[i].vertex[0]].y;
         Triangles[i].gy[1] = vertex[Triangles[i].vertex[1]].y;
@@ -696,6 +727,7 @@ void Model::UniformTexCoords()
 
 void Model::FlipTexCoords()
 {
+    MICROPROFILE_SCOPEI("Model", "FlipTexCoords", 0x008fff);
     for (unsigned int i = 0; i < Triangles.size(); i++) {
         Triangles[i].gy[0] = -Triangles[i].gy[0];
         Triangles[i].gy[1] = -Triangles[i].gy[1];
@@ -706,6 +738,7 @@ void Model::FlipTexCoords()
 
 void Model::ScaleTexCoords(float howmuch)
 {
+    MICROPROFILE_SCOPEI("Model", "ScaleTexCoords", 0x008fff);
     for (unsigned int i = 0; i < Triangles.size(); i++) {
         Triangles[i].gx[0] *= howmuch;
         Triangles[i].gx[1] *= howmuch;
@@ -719,6 +752,7 @@ void Model::ScaleTexCoords(float howmuch)
 
 void Model::Scale(float xscale, float yscale, float zscale)
 {
+    MICROPROFILE_SCOPEI("Model", "Scale", 0x008fff);
     static int i;
     for (i = 0; i < vertexNum; i++) {
         vertex[i].x *= xscale;
@@ -743,6 +777,7 @@ void Model::Scale(float xscale, float yscale, float zscale)
 
 void Model::ScaleNormals(float xscale, float yscale, float zscale)
 {
+    MICROPROFILE_SCOPEI("Model", "ScaleNormals", 0x008fff);
     if (type != normaltype && type != decalstype) {
         return;
     }
@@ -762,6 +797,7 @@ void Model::ScaleNormals(float xscale, float yscale, float zscale)
 
 void Model::Translate(float xtrans, float ytrans, float ztrans)
 {
+    MICROPROFILE_SCOPEI("Model", "Translate", 0x008fff);
     static int i;
     for (i = 0; i < vertexNum; i++) {
         vertex[i].x += xtrans;
@@ -785,6 +821,7 @@ void Model::Translate(float xtrans, float ytrans, float ztrans)
 
 void Model::Rotate(float xang, float yang, float zang)
 {
+    MICROPROFILE_SCOPEI("Model", "Rotate", 0x008fff);
     static int i;
     for (i = 0; i < vertexNum; i++) {
         vertex[i] = DoRotation(vertex[i], xang, yang, zang);
@@ -806,18 +843,28 @@ void Model::Rotate(float xang, float yang, float zang)
 
 void Model::CalculateNormals(bool facenormalise)
 {
+    if(flimit_norm_calc_ct > 0){
+        flimit_norm_calc_ct--;
+    }else{
+        return;
+    }
+
+    MICROPROFILE_SCOPEI("Model", "CalculateNormals", 0x008fff);
     Game::LoadingScreen();
 
     if (type != normaltype && type != decalstype) {
         return;
     }
 
+{MICROPROFILE_SCOPEI("Model", "clear", 0x008fff);
     for (int i = 0; i < vertexNum; i++) {
         normals[i].x = 0;
         normals[i].y = 0;
         normals[i].z = 0;
     }
+}//MICROPROFILE
 
+{MICROPROFILE_SCOPEI("Model", "calculate", 0x008fff);
     for (unsigned int i = 0; i < Triangles.size(); i++) {
         CrossProduct(vertex[Triangles[i].vertex[1]] - vertex[Triangles[i].vertex[0]], vertex[Triangles[i].vertex[2]] - vertex[Triangles[i].vertex[0]], &Triangles[i].facenormal);
 
@@ -836,10 +883,14 @@ void Model::CalculateNormals(bool facenormalise)
             Normalise(&Triangles[i].facenormal);
         }
     }
+}//MICROPROFILE
+
+{MICROPROFILE_SCOPEI("Model", "normalize", 0x008fff);
     for (int i = 0; i < vertexNum; i++) {
         Normalise(&normals[i]);
         normals[i] *= -1;
     }
+}//MICROPROFILE
     UpdateVertexArrayNoTex();
 }
 
@@ -901,7 +952,7 @@ void Model::draw()
     }
     textureptr.bind();
 
-    glDrawArrays(GL_TRIANGLES, 0, Triangles.size() * 3);
+    vglDrawArrays(GL_TRIANGLES, 0, Triangles.size() * 3);
 
     if (color) {
         glDisableClientState(GL_COLOR_ARRAY);
@@ -928,7 +979,7 @@ void Model::drawdifftex(Texture texture)
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
-    glDrawArrays(GL_TRIANGLES, 0, Triangles.size() * 3);
+    vglDrawArrays(GL_TRIANGLES, 0, Triangles.size() * 3);
 
     if (color) {
         glDisableClientState(GL_COLOR_ARRAY);
@@ -1048,6 +1099,7 @@ void Model::drawdecals(Texture shadowtexture, Texture bloodtexture, Texture bloo
 
 void Model::DeleteDecal(int which)
 {
+    MICROPROFILE_SCOPEI("Model", "DeleteDecal", 0x008fff);
     if (decalstoggle) {
         if (type != decalstype) {
             return;
@@ -1058,6 +1110,7 @@ void Model::DeleteDecal(int which)
 
 void Model::MakeDecal(decal_type atype, XYZ* where, float* size, float* opacity, float* rotation)
 {
+    MICROPROFILE_SCOPEI("Model", "MakeDecal", 0x008fff);
     if (decalstoggle) {
         if (type != decalstype) {
             return;
@@ -1106,6 +1159,7 @@ void Model::MakeDecal(decal_type atype, XYZ* where, float* size, float* opacity,
 
 void Model::MakeDecal(decal_type atype, XYZ where, float size, float opacity, float rotation)
 {
+    MICROPROFILE_SCOPEI("Model", "MakeDecal", 0x008fff);
     if (decalstoggle) {
         if (type != decalstype) {
             return;
@@ -1210,6 +1264,7 @@ const XYZ& Model::getTriangleVertex(unsigned triangleId, unsigned vertexId) cons
 
 void Model::deleteDeadDecals()
 {
+    MICROPROFILE_SCOPEI("Model", "deleteDeadDecals", 0x008fff);
     for (int i = decals.size() - 1; i >= 0; i--) {
         if ((decals[i].type == blooddecal || decals[i].type == blooddecalslow) && decals[i].alivetime < 2) {
             DeleteDecal(i);
