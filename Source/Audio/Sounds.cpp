@@ -39,6 +39,17 @@ static const char* sound_data[sounds_count] = {
 #undef DECLARE_SOUND
 };
 
+#if AUDIO_DISABLED
+void loadAllSounds(){}
+void addEnvSound(XYZ coords, float vol, float life){}
+void emit_sound_at(int soundid, const XYZ& pos, float vol){}
+void emit_sound_np(int soundid, float vol){}
+void emit_stream_at(int soundid, const XYZ& pos, float vol){}
+void emit_stream_np(int soundid, float vol){}
+void resume_stream(int soundid){}
+void pause_sound(int soundid){}
+#else
+
 // FIXME: dimensionality is not a property of the sound sample.
 // This should be decided at the time of playback
 static int snd_mode(int snd)
@@ -122,3 +133,5 @@ void pause_sound(int soundid)
 {
     OPENAL_SetPaused(channels[soundid], true);
 }
+
+#endif

@@ -812,9 +812,25 @@ int _main(int argc, char** argv)
                 }
             }
 
-            WorkerThread worker1(1);
-            std::thread thread1 (std::ref(worker1));
-            thread1.detach();
+            LOG_TOGGLE(true);
+            bool res = WorkerThread::init();
+            ASSERT(res && "Failed to init WorkerThread system");
+            WorkerThread::spawnWorkers(1);
+            /*
+            auto j1 = WorkerThread::submitJob(WorkerThread::WRK_TEST, (int)2, (int)12, (int)17);
+            auto j2 = WorkerThread::submitJob(WorkerThread::WRK_TEST, (int)69, (int)420, (int)101);
+            
+            int waitit = 0;
+            while(!WorkerThread::tryJoin(j2)){
+                waitit++;
+            }
+            LOG("j2 is done! iterations: %d", waitit);
+
+            WorkerThread::join(j1);
+            LOG("j1 is done!");
+            //*/
+
+            LOG_TOGGLE(false);
 
             while (!gameDone && !tryquit) {
                 if (IsFocused()) {

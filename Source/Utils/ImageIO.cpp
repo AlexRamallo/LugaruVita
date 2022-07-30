@@ -24,6 +24,7 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 #include "Game.hpp"
 #include "Thirdparty/microprofile/microprofile.h"
 #include "Utils/Folders.hpp"
+#include "Utils/Log.h"
 
 #include <jpeglib.h>
 #include <png.h>
@@ -186,7 +187,7 @@ static bool load_jpg(const char* file_name, ImageRec& tex)
 {
     MICROPROFILE_SCOPEI("ImageIO", "load_jpg", 0xffff3456);
     //TODO: calcluate how much we actually need
-    assert(tex.data == NULL);
+    ASSERT(tex.data == NULL);
     tex.data = (GLubyte*)malloc(1024 * 1024 * 4);
 
     struct jpeg_decompress_struct cinfo;
@@ -241,7 +242,7 @@ static bool load_png(const char* file_name, ImageRec& tex)
 {
     MICROPROFILE_SCOPEI("ImageIO", "load_png", 0xffff3456);
     //TODO: calcluate how much we actually need
-    assert(tex.data == NULL);
+    ASSERT(tex.data == NULL);
     tex.data = (GLubyte*)malloc(1024 * 1024 * 4);
 
     bool hasalpha = false;

@@ -23,6 +23,7 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 #include "Thirdparty/microprofile/microprofile.h"
 #include "Utils/Folders.hpp"
 #include "Utils/ImageIO.hpp"
+#include "Utils/Log.h"
 #include <assert.h>
 
 using namespace std;
@@ -33,7 +34,7 @@ extern bool trilinear;
 void TextureRes::uploadPVR(void *pTexture){
     MICROPROFILE_SCOPEI("TextureRes", "uploadPVR", 0x008fff);
     ImageRec *texture = (ImageRec*) pTexture;
-    assert(texture->is_pvr);
+    ASSERT(texture->is_pvr);
 
     //datalen = texture->pvr_header.getImageSize();
 
@@ -49,7 +50,7 @@ void TextureRes::uploadPVR(void *pTexture){
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     }
     
-    assert(texture->pvr_header.getBorder(0) == texture->pvr_header.getBorder(1) && "PVR texture has uneven borders");
+    ASSERT(texture->pvr_header.getBorder(0) == texture->pvr_header.getBorder(1) && "PVR texture has uneven borders");
     
     int sizeBorder = texture->pvr_header.getBorder();
     int sizeX = texture->pvr_header.Width + (2 * sizeBorder);
@@ -73,16 +74,16 @@ void TextureRes::uploadPVR(void *pTexture){
         }
 
         const int nb = sizeX * sizeY * (bpp / 8);
-        assert(nb == texture->pvr_header.getImageSize());
+        ASSERT(nb == texture->pvr_header.getImageSize());
 
         //LOG("PVR Skin\n\tborder: %d\n\tsizeX: %d\n\tsizeY: %d\n\tbpp: %d\n\ttype: %d\n\tnb: %d\timgSize: %d",
         //    sizeBorder, sizeX, sizeY, (int) bpp, (int) type, nb, (int) texture->pvr_header.getImageSize()
         //);
 
-        assert(type > 0);
+        ASSERT(type > 0);
 
         data = (GLubyte*)malloc(nb * sizeof(GLubyte));
-        assert(data != NULL);
+        ASSERT(data != NULL);
         
         datalen = 0;
         for (int i = 0; i < nb; i++) {
@@ -95,7 +96,7 @@ void TextureRes::uploadPVR(void *pTexture){
         if(texture->pvr_header.isCompressed()){
             PVRMipMapLevel mip;
             for(int level = 0; level < texture->pvr_header.MipMapCount; level++){
-                assert(texture->pvr_header.getMipMap(level, &mip) && "Failed to get mipmap level");
+                ASSERT(texture->pvr_header.getMipMap(level, &mip) && "Failed to get mipmap level");
 
                 /*
                 LOG("MIPMAP glCompressedTexImage2D\n\tlevel[%d]: %d, %d. size: %d, offset: %d",

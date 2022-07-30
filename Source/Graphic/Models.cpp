@@ -24,6 +24,8 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 #include "Thirdparty/microprofile/microprofile.h"
 #include "Utils/Folders.hpp"
 
+#include "Thirdparty/vitagl/math_utils.h"
+
 extern float multiplier;
 extern float viewdistance;
 extern XYZ viewer;
@@ -843,12 +845,6 @@ void Model::Rotate(float xang, float yang, float zang)
 
 void Model::CalculateNormals(bool facenormalise)
 {
-    if(flimit_norm_calc_ct > 0){
-        flimit_norm_calc_ct--;
-    }else{
-        return;
-    }
-
     MICROPROFILE_SCOPEI("Model", "CalculateNormals", 0x008fff);
     Game::LoadingScreen();
 
@@ -856,17 +852,18 @@ void Model::CalculateNormals(bool facenormalise)
         return;
     }
 
-{MICROPROFILE_SCOPEI("Model", "clear", 0x008fff);
     for (int i = 0; i < vertexNum; i++) {
         normals[i].x = 0;
         normals[i].y = 0;
         normals[i].z = 0;
     }
-}//MICROPROFILE
 
-{MICROPROFILE_SCOPEI("Model", "calculate", 0x008fff);
     for (unsigned int i = 0; i < Triangles.size(); i++) {
-        CrossProduct(vertex[Triangles[i].vertex[1]] - vertex[Triangles[i].vertex[0]], vertex[Triangles[i].vertex[2]] - vertex[Triangles[i].vertex[0]], &Triangles[i].facenormal);
+        CrossProduct(
+            vertex[Triangles[i].vertex[1]] - vertex[Triangles[i].vertex[0]],
+            vertex[Triangles[i].vertex[2]] - vertex[Triangles[i].vertex[0]],
+            &Triangles[i].facenormal
+        );
 
         normals[Triangles[i].vertex[0]].x += Triangles[i].facenormal.x;
         normals[Triangles[i].vertex[0]].y += Triangles[i].facenormal.y;
@@ -883,14 +880,12 @@ void Model::CalculateNormals(bool facenormalise)
             Normalise(&Triangles[i].facenormal);
         }
     }
-}//MICROPROFILE
 
-{MICROPROFILE_SCOPEI("Model", "normalize", 0x008fff);
     for (int i = 0; i < vertexNum; i++) {
         Normalise(&normals[i]);
         normals[i] *= -1;
     }
-}//MICROPROFILE
+
     UpdateVertexArrayNoTex();
 }
 

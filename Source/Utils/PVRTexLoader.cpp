@@ -20,6 +20,7 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "Graphic/gamegl.hpp"
 #include "Utils/PVRTexLoader.hpp"
+#include "Utils/Log.h"
 #include <stdio.h>
 #include <assert.h>
 #include <unistd.h>
@@ -485,14 +486,14 @@ static size_t calc_mipmap_offset(int level, size_t basesz, size_t minsz, size_t 
 			}
 		}
 	}
-	assert(!(off % alignment) && "bad alignment");
+	ASSERT(!(off % alignment) && "bad alignment");
 	return off;
 }
 
 bool PVRHeader::getMipMap(int level, PVRMipMapLevel *mipmap){
-	assert(NumSurfaces == 1 && "Texture arrays are not supported");
-	assert(NumFaces == 1 && "Cube maps are not supported");
-	assert(Depth == 1 && "3D textures are not supported");
+	ASSERT(NumSurfaces == 1 && "Texture arrays are not supported");
+	ASSERT(NumFaces == 1 && "Cube maps are not supported");
+	ASSERT(Depth == 1 && "3D textures are not supported");
 	
 	if(level < 0 || level >= MipMapCount){
 		return false;

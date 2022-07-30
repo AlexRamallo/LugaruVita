@@ -28,6 +28,7 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 #include "Graphic/gamegl.hpp"
 #include "Math/XYZ.hpp"
 #include "Utils/binio.h"
+#include "Utils/WorkerThread.hpp"
 
 #include <cstdio>
 #include <cstdlib>

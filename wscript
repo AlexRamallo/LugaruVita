@@ -63,8 +63,21 @@ def options(opt):
 	opt.add_option('--no-vpk', dest="SKIP_VPK", action="store_true", help="Only build assets and eboot.bin, not VPK")
 	opt.add_option('--PSVITAIP', dest='PSVITAIP', type='string')
 	opt.add_option('--vclaunch', dest='VCLAUNCH', default=False, help='send launch command to vitacompanion after eboot update')
-	opt.add_option('--profiling', dest='PROFILING_ENABLED', action='store_true', default=False, help='enable profiling macros')
+	opt.add_option('--profiling', dest='MICROPROFILE_ENABLED', action='store_true', default=False, help='enable profiling macros')
+	opt.add_option('--no-audio', dest='AUDIO_DISABLED', action='store_true', default=False, help='disable audio')
 	opt.recurse("vitagl")
+
+def opt_to_def(ctx, key):
+	val = getattr(ctx.options, key, None)
+	if val != None:
+		if type(val) == bool:
+			if val:
+				val = '1'
+			else:
+				val = '0'
+		else:
+			val = str(val)
+		ctx.env.append_unique('DEFINES', '%s=%s' % (key, val))
 
 def configure(conf):
 	conf.find_program("PVRTexToolCLI", var="PVRTT", mandatory=True)
@@ -83,7 +96,6 @@ def configure(conf):
 		"-ffast-math",
 		"-mtune=cortex-a9",
 		"-mfpu=neon",
-		"-Wno-incompatible-pointer-types",
 	]
 	
 	conf.env.append_unique('CXXFLAGS', "--std=gnu++11")
@@ -97,12 +109,11 @@ def configure(conf):
 		conf.env.append_unique('CFLAGS', '-O0')
 		conf.env.append_unique('DEFINES', 'MICROPROFILE_WEBSERVER=0');
 
-	if conf.options.PROFILING_ENABLED:
-		conf.env.append_unique('DEFINES', 'MICROPROFILE_ENABLED=1');
-	else:
-		conf.env.append_unique('DEFINES', 'MICROPROFILE_ENABLED=0');
+	opt_to_def(conf, 'MICROPROFILE_ENABLED')
+	opt_to_def(conf, 'AUDIO_DISABLED')
 
 	conf.env.CXXFLAGS.extend(conf.env.CFLAGS)
+	conf.env.append_unique('CFLAGS', '-Wno-incompatible-pointer-types')
 
 	#load packages
 	for pkg in use_packages:

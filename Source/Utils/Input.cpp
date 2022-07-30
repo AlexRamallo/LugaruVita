@@ -19,6 +19,7 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include "Utils/Input.hpp"
+#include "Utils/Log.h"
 #include "SDL2.h"
 #include <assert.h>
 
@@ -34,7 +35,7 @@ static SDL_GameController *getController(){
 		_controller = SDL_GameControllerOpen(0);
 		if(_controller == NULL){
 			LOG("getController failed: %s", SDL_GetError());
-			assert(0 && "Failed to get a controller from SDL");
+			ASSERT(0 && "Failed to get a controller from SDL");
 		}
 	}
 	return _controller;

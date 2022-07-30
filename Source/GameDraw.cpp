@@ -462,12 +462,9 @@ int Game::DrawGLScene(StereoSide side)
             glCullFace(GL_FRONT);
             glDepthMask(1);
 
-            flimit_norm_calc_ct = 2;
-            flimit_person_muscle_calc_ct = 2;
-
+            int draw_targets[16] = {};
             for (unsigned k = 0; k < Person::players.size(); k++) {
                 MICROPROFILE_SCOPEI("DrawGLScene", "models-draw-person", 0xb500ff);
-
                 if (k == 0 || !Tutorial::active) {
                     glEnable(GL_BLEND);
                     glEnable(GL_LIGHTING);
@@ -479,7 +476,13 @@ int Game::DrawGLScene(StereoSide side)
                         glDisable(GL_BLEND);
                     }
                     if (distance >= .5) {
-                        checkpoint = DoRotation(Person::players[k]->skeleton.joints[fabs(Random() % Person::players[k]->skeleton.joints.size())].position, 0, Person::players[k]->yaw, 0) * Person::players[k]->scale + Person::players[k]->coords;
+                        checkpoint = DoRotation(
+                            Person::players[k]->skeleton.joints[fabs(Random() % Person::players[k]->skeleton.joints.size())].position,
+                            0,
+                            Person::players[k]->yaw,
+                            0
+                        ) * Person::players[k]->scale + Person::players[k]->coords;
+
                         checkpoint.y += 1;
                         int i = -1;
                         if (Person::players[k]->occluded != 0) {
@@ -495,7 +498,11 @@ int Game::DrawGLScene(StereoSide side)
                             Person::players[k]->occluded = 0;
                         }
                         if (Person::players[k]->occluded < 25) {
-                            Person::players[k]->DrawSkeleton();
+
+                            if(Person::players[k]->isVisible()){
+                                Person::players[k]->UpdateSkeleton();
+                                Person::players[k]->DrawSkeleton();
+                            }
                         }
                     }
                 }
@@ -540,6 +547,7 @@ int Game::DrawGLScene(StereoSide side)
         }
         glPopMatrix();
 
+        //draw tutorial enemy
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         glEnable(GL_CULL_FACE);
         glCullFace(GL_FRONT);

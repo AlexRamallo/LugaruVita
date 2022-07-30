@@ -270,13 +270,13 @@ def show_prog(label, block, progress):
 	i = progress[0]
 	st = num / blen
 	pct = int((i / num) * blen)
-	pstr = "["
+	pstr = "\033[F%s [" % label
 	for b in range(0, pct):
 		pstr += '|'
 	for b in range(pct, blen - 1):
 		pstr += "-"
 	pstr += "] %d / %d" % (i, num)
-	print("UPLOAD PROGRESS: %s" % label)
+	#print("UPLOAD PROGRESS: %s" % label)
 	print(pstr)
 
 def do_upload_file(conn, ftp, src, dst, plabel, ensure_directories = True):
@@ -327,7 +327,7 @@ class UpdateFileTask(Task.Task):
 		for i in range(0, len(files)):
 			src = files[i].abspath()
 			dst = dests[i]
-			plabel = "%s (%d / %d)" % (src, i, len(files))
+			plabel = "%s (%d / %d)" % (files[i].path_from(self.generator.bld.path), i, len(files))
 			do_upload_file(self.conn, ftp, src, dst, plabel)
 
 class CompileShaderTask(Task.Task):

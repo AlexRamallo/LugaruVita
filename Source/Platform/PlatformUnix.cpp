@@ -21,7 +21,7 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 #ifdef PLATFORM_UNIX
 
 #include "Platform/Platform.hpp"
-
+#include "Utils/Log.h"
 #include <assert.h>
 #include <cerrno>
 #include <cstdio>
@@ -36,8 +36,8 @@ typedef long long __int64;
 typedef __int64 LARGE_INTEGER;
 static int QueryPerformanceFrequency(LARGE_INTEGER* liptr)
 {
-    assert(sizeof(__int64) == 8);
-    assert(sizeof(LARGE_INTEGER) == 8);
+    ASSERT(sizeof(__int64) == 8);
+    ASSERT(sizeof(LARGE_INTEGER) == 8);
     *liptr = 1000;
     return (1);
 }
