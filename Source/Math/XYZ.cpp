@@ -22,17 +22,17 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 
 bool PointInTriangle(XYZ* p, XYZ normal, XYZ* p1, XYZ* p2, XYZ* p3)
 {
-    static float u0, u1, u2;
-    static float v0, v1, v2;
-    static float a, b;
-    static float max;
-    static int i, j;
-    static bool bInter = 0;
-    static float pointv[3];
-    static float p1v[3];
-    static float p2v[3];
-    static float p3v[3];
-    static float normalv[3];
+    float u0, u1, u2;
+    float v0, v1, v2;
+    float a, b;
+    float max;
+    int i, j;
+    bool bInter = 0;
+    float pointv[3];
+    float p1v[3];
+    float p2v[3];
+    float p3v[3];
+    float normalv[3];
 
     bInter = 0;
 
@@ -104,9 +104,9 @@ bool PointInTriangle(XYZ* p, XYZ normal, XYZ* p1, XYZ* p2, XYZ* p3)
 
 bool LineFacet(XYZ p1, XYZ p2, XYZ pa, XYZ pb, XYZ pc, XYZ* p)
 {
-    static float d;
-    static float denom, mu;
-    static XYZ n;
+    float d;
+    float denom, mu;
+    XYZ n;
 
     //Calculate the parameters for the plane
     n.x = (pb.y - pa.y) * (pc.z - pa.z) - (pb.z - pa.z) * (pc.y - pa.y);
@@ -137,9 +137,9 @@ bool LineFacet(XYZ p1, XYZ p2, XYZ pa, XYZ pb, XYZ pc, XYZ* p)
 
 float LineFacetd(XYZ p1, XYZ p2, XYZ pa, XYZ pb, XYZ pc, XYZ* p)
 {
-    static float d;
-    static float denom, mu;
-    static XYZ n;
+    float d;
+    float denom, mu;
+    XYZ n;
 
     //Calculate the parameters for the plane
     n.x = (pb.y - pa.y) * (pc.z - pa.z) - (pb.z - pa.z) * (pc.y - pa.y);
@@ -170,8 +170,8 @@ float LineFacetd(XYZ p1, XYZ p2, XYZ pa, XYZ pb, XYZ pc, XYZ* p)
 
 float LineFacetd(XYZ p1, XYZ p2, XYZ pa, XYZ pb, XYZ pc, XYZ n, XYZ* p)
 {
-    static float d;
-    static float denom, mu;
+    float d;
+    float denom, mu;
 
     //Calculate the parameters for the plane
     d = -n.x * pa.x - n.y * pa.y - n.z * pa.z;
@@ -197,9 +197,9 @@ float LineFacetd(XYZ p1, XYZ p2, XYZ pa, XYZ pb, XYZ pc, XYZ n, XYZ* p)
 
 float LineFacetd(XYZ* p1, XYZ* p2, XYZ* pa, XYZ* pb, XYZ* pc, XYZ* p)
 {
-    static float d;
-    static float denom, mu;
-    static XYZ n;
+    float d;
+    float denom, mu;
+    XYZ n;
 
     //Calculate the parameters for the plane
     n.x = (pb->y - pa->y) * (pc->z - pa->z) - (pb->z - pa->z) * (pc->y - pa->y);
@@ -229,8 +229,8 @@ float LineFacetd(XYZ* p1, XYZ* p2, XYZ* pa, XYZ* pb, XYZ* pc, XYZ* p)
 
 float LineFacetd(XYZ* p1, XYZ* p2, XYZ* pa, XYZ* pb, XYZ* pc, XYZ* n, XYZ* p)
 {
-    static float d;
-    static float denom, mu;
+    float d;
+    float denom, mu;
 
     //Calculate the parameters for the plane
     d = -n->x * pa->x - n->y * pa->y - n->z * pa->z;

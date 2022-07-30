@@ -481,6 +481,7 @@ int Game::DrawGLScene(StereoSide side)
                         glDisable(GL_BLEND);
                     }
                     if (distance >= .5) {
+                        /*
                         checkpoint = DoRotation(
                             Person::players[k]->skeleton.joints[fabs(Random() % Person::players[k]->skeleton.joints.size())].position,
                             0,
@@ -502,11 +503,14 @@ int Game::DrawGLScene(StereoSide side)
                         } else {
                             Person::players[k]->occluded = 0;
                         }
+                        */
+                        Person::players[k]->occluded = 0;
                         if (Person::players[k]->occluded < 25) {
                             if(Person::players[k]->isVisible() && k != 0){
                                 MICROPROFILE_SCOPEI("Draw", "submit job", 0xaaaaff);
                                 //Person::players[k]->UpdateSkeleton();
                                 //Person::players[k]->DrawSkeleton();
+                                Person::players[k]->PreUpdateSkeleton();
                                 draw_handles[num_draw_targs] = WorkerThread::submitJob(WorkerThread::WorkTask::WRK_UPDATE_SKELETON, k);
                                 draw_targets[num_draw_targs++] = k;
                             }
@@ -515,6 +519,7 @@ int Game::DrawGLScene(StereoSide side)
                 }
             }
 
+            Person::players[0]->PreUpdateSkeleton();
             Person::players[0]->UpdateSkeleton();
             for(int i = 0; draw_targets[i] != 0; i++){
                 MICROPROFILE_SCOPEI("Draw", "join worker", 0xff0000);

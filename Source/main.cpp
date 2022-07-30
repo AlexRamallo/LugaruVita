@@ -815,7 +815,7 @@ int _main(int argc, char** argv)
             LOG_TOGGLE(true);
             bool res = WorkerThread::init();
             ASSERT(res && "Failed to init WorkerThread system");
-            WorkerThread::spawnWorkers(2);
+            WorkerThread::spawnWorkers(1);
             /*
             auto j1 = WorkerThread::submitJob(WorkerThread::WRK_TEST, (int)2, (int)12, (int)17);
             auto j2 = WorkerThread::submitJob(WorkerThread::WRK_TEST, (int)69, (int)420, (int)101);

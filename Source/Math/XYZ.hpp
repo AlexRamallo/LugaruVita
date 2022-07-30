@@ -93,7 +93,7 @@ inline bool DistancePointLine(XYZ* Point, XYZ* LineStart, XYZ* LineEnd, float* D
 
 inline void Normalise(XYZ* vectory)
 {
-    static float d;
+    float d;
     d = fast_sqrt(vectory->x * vectory->x + vectory->y * vectory->y + vectory->z * vectory->z);
     if (d == 0) {
         return;
@@ -105,7 +105,7 @@ inline void Normalise(XYZ* vectory)
 
 inline XYZ XYZ::operator+(XYZ add)
 {
-    static XYZ ne;
+    XYZ ne;
     ne = add;
     ne.x += x;
     ne.y += y;
@@ -115,7 +115,7 @@ inline XYZ XYZ::operator+(XYZ add)
 
 inline XYZ XYZ::operator-(XYZ add)
 {
-    static XYZ ne;
+    XYZ ne;
     ne = add;
     ne.x = x - ne.x;
     ne.y = y - ne.y;
@@ -125,7 +125,7 @@ inline XYZ XYZ::operator-(XYZ add)
 
 inline XYZ XYZ::operator*(float add)
 {
-    static XYZ ne;
+    XYZ ne;
     ne.x = x * add;
     ne.y = y * add;
     ne.z = z * add;
@@ -134,7 +134,7 @@ inline XYZ XYZ::operator*(float add)
 
 inline XYZ XYZ::operator*(XYZ add)
 {
-    static XYZ ne;
+    XYZ ne;
     ne.x = x * add.x;
     ne.y = y * add.y;
     ne.z = z * add.z;
@@ -143,7 +143,7 @@ inline XYZ XYZ::operator*(XYZ add)
 
 inline XYZ XYZ::operator/(float add)
 {
-    static XYZ ne;
+    XYZ ne;
     ne.x = x / add;
     ne.y = y / add;
     ne.z = z / add;
@@ -220,7 +220,7 @@ inline float fast_sqrt(float arg)
 
 inline float normaldotproduct(XYZ point1, XYZ point2)
 {
-    static GLfloat returnvalue;
+    GLfloat returnvalue;
     Normalise(&point1);
     Normalise(&point2);
     returnvalue = (point1.x * point2.x + point1.y * point2.y + point1.z * point2.z);
@@ -234,9 +234,9 @@ inline void ReflectVector(XYZ* vel, const XYZ* n)
 
 inline void ReflectVector(XYZ* vel, const XYZ& n)
 {
-    static XYZ vn;
-    static XYZ vt;
-    static float dotprod;
+    XYZ vn;
+    XYZ vt;
+    float dotprod;
 
     dotprod = dotproduct(&n, vel);
     vn.x = n.x * dotprod;
@@ -254,7 +254,7 @@ inline void ReflectVector(XYZ* vel, const XYZ& n)
 
 inline float dotproduct(const XYZ* point1, const XYZ* point2)
 {
-    static GLfloat returnvalue;
+    GLfloat returnvalue;
     returnvalue = (point1->x * point2->x + point1->y * point2->y + point1->z * point2->z);
     return returnvalue;
 }
@@ -292,7 +292,7 @@ inline float distsqflat(XYZ* point1, XYZ* point2)
 inline XYZ DoRotation(XYZ thePoint, float xang, float yang, float zang)
 { 
     //MICROPROFILE_SCOPEI("XYZ", "DoRotation", 0x01cb0f);
-    static XYZ newpoint;
+    XYZ newpoint;
     if (xang) {
         xang *= 6.283185f;
         xang /= 360;
@@ -350,7 +350,7 @@ inline bool sphere_line_intersection(
     // the number of intersection point, followed by coordinate pairs.
 
     //~ static float x , y , z;
-    static float a, b, c, /*mu,*/ i;
+    float a, b, c, /*mu,*/ i;
 
     if (x1 > x3 + r && x2 > x3 + r)
         return (0);
@@ -392,7 +392,7 @@ inline bool sphere_line_intersection(
     // the number of intersection point, followed by coordinate pairs.
 
     //~ static float x , y , z;
-    static float a, b, c, /*mu,*/ i;
+    float a, b, c, /*mu,*/ i;
 
     if (p1->x > p3->x + *r && p2->x > p3->x + *r)
         return (0);
@@ -423,8 +423,8 @@ inline bool sphere_line_intersection(
 
 inline XYZ DoRotationRadian(XYZ thePoint, float xang, float yang, float zang)
 {
-    static XYZ newpoint;
-    static XYZ oldpoint;
+    XYZ newpoint;
+    XYZ oldpoint;
 
     oldpoint = thePoint;
 

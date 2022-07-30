@@ -155,6 +155,8 @@ public:
     bool calcrot;
 
     XYZ facing;
+    XYZ head_facing;
+    XYZ rotatearound;
 
     float bleeding;
     float bleedx, bleedy;
@@ -404,6 +406,7 @@ public:
     
     bool isVisible();
     int DrawSkeleton();
+        void PreUpdateSkeleton();
         void UpdateSkeleton();
         bool UpdateNormals();
 

@@ -17,8 +17,8 @@ namespace WorkerThread{
 	struct Job {
 		WorkTask type;
 		JobHandle handle;
-		pthread_mutex_t mtx;
-		pthread_cond_t cnd;
+		//pthread_mutex_t mtx;
+		//pthread_cond_t cnd;
 		bool claimed;
 		char done;
 

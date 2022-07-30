@@ -727,6 +727,7 @@ SolidHitBonus(int playerid)
  */
 void Person::DoBlood(float howmuch, int which)
 {
+    MICROPROFILE_SCOPEI("Person", "DoBlood", 0xaaffaa);
     // FIXME: should abstract out inputs
     static int bleedxint, bleedyint;
     static XYZ bloodvel;
@@ -800,6 +801,7 @@ void Person::DoBlood(float howmuch, int which)
  */
 void Person::DoBloodBig(float howmuch, int which)
 {
+    MICROPROFILE_SCOPEI("Person", "DoBloodBig", 0xaaffaa);
     static int bleedxint, bleedyint, i, j;
     static XYZ bloodvel;
     if (howmuch && id == 0) {
@@ -1006,6 +1008,8 @@ void Person::DoBloodBig(float howmuch, int which)
  */
 bool Person::DoBloodBigWhere(float howmuch, int which, XYZ where)
 {
+    MICROPROFILE_SCOPEI("Person", "DoBloodBigWhere", 0xaaffaa);
+
     static int i, j;
     static XYZ bloodvel;
     static XYZ startpoint, endpoint, colpoint, movepoint;
@@ -1652,13 +1656,13 @@ void Person::DoDamage(float howmuch)
  */
 void Person::DoHead()
 {
-    static XYZ rotatearound;
-    static XYZ facing;
-    static float lookspeed = 500;
+    //static XYZ rotatearound;
+    //static XYZ head_facing;
+    static const float lookspeed = 500;
 
     if (!freeze && !winfreeze) {
 
-        //head facing
+        //head head_facing
         targetheadyaw = (float)((int)((0 - yaw - targetheadyaw + 180) * 100) % 36000) / 100;
         targetheadpitch = (float)((int)(targetheadpitch * 100) % 36000) / 100;
 
@@ -1732,25 +1736,25 @@ void Person::DoHead()
         rotatearound = jointPos(neck);
         jointPos(head) = rotatearound + DoRotation(jointPos(head) - rotatearound, headpitch, 0, 0);
 
-        facing = 0;
-        facing.z = -1;
+        head_facing = 0;
+        head_facing.z = -1;
         if (animTarget != bounceidleanim && animTarget != fightidleanim && animTarget != wolfidle && animTarget != knifefightidleanim && animTarget != drawrightanim && animTarget != drawleftanim && animTarget != walkanim) {
-            facing = DoRotation(facing, headpitch * .4, 0, 0);
-            facing = DoRotation(facing, 0, headyaw * .4, 0);
+            head_facing = DoRotation(head_facing, headpitch * .4, 0, 0);
+            head_facing = DoRotation(head_facing, 0, headyaw * .4, 0);
         }
 
         if (animTarget == bounceidleanim || animTarget == fightidleanim || animTarget == wolfidle || animTarget == knifefightidleanim || animTarget == drawrightanim || animTarget == drawleftanim) {
-            facing = DoRotation(facing, headpitch * .8, 0, 0);
-            facing = DoRotation(facing, 0, headyaw * .8, 0);
+            head_facing = DoRotation(head_facing, headpitch * .8, 0, 0);
+            head_facing = DoRotation(head_facing, 0, headyaw * .8, 0);
         }
 
         if (animTarget == walkanim) {
-            facing = DoRotation(facing, headpitch * .6, 0, 0);
-            facing = DoRotation(facing, 0, headyaw * .6, 0);
+            head_facing = DoRotation(head_facing, headpitch * .6, 0, 0);
+            head_facing = DoRotation(head_facing, 0, headyaw * .6, 0);
         }
 
-        skeleton.specialforward[0] = facing;
-        //skeleton.specialforward[0]=DoRotation(facing,0,yaw,0);
+        skeleton.specialforward[0] = head_facing;
+        //skeleton.specialforward[0]=DoRotation(head_facing,0,yaw,0);
         for (unsigned i = 0; i < skeleton.muscles.size(); i++) {
             if (skeleton.muscles[i].visible && (skeleton.muscles[i].parent1->label == head || skeleton.muscles[i].parent2->label == head)) {
                 skeleton.FindRotationMuscle(i, animTarget);
@@ -1764,6 +1768,7 @@ void Person::DoHead()
  */
 void Person::RagDoll(bool checkcollision)
 {
+    MICROPROFILE_SCOPEI("Person", "RagDoll", 0xaaffaa);
     static XYZ change;
     static int i;
     static float speed;
@@ -1937,6 +1942,7 @@ void Person::RagDoll(bool checkcollision)
  */
 void Person::FootLand(bodypart whichfoot, float opacity)
 {
+    MICROPROFILE_SCOPEI("Person", "FootLand", 0xaaffaa);
     if ((whichfoot != leftfoot) && (whichfoot != rightfoot)) {
         cerr << "FootLand called on wrong bodypart" << endl;
         return;
@@ -1991,6 +1997,8 @@ void Person::FootLand(bodypart whichfoot, float opacity)
  */
 void Person::Puff(int whichlabel)
 {
+    MICROPROFILE_SCOPEI("Person", "Puff", 0xaaffaa);
+
     static XYZ footvel, footpoint;
 
     footvel = 0;
@@ -2014,6 +2022,7 @@ void Person::setTargetAnimation(int animation)
  */
 void Person::DoAnimations()
 {
+    MICROPROFILE_SCOPEI("Person", "DoAnimations", 0xaaffaa);
     if (!skeleton.free) {
         static float oldtarget;
 
@@ -6337,6 +6346,13 @@ bool Person::isVisible()
     return false;
 }
 
+/**
+ * This runs on the main thread before the UpdateSkeleton task is started
+ * */
+void Person::PreUpdateSkeleton(){
+
+}
+
 void Person::UpdateSkeleton()
 {
     MICROPROFILE_SCOPEI("Person", "UpdateSkeleton", 0x926329);
@@ -6397,6 +6413,7 @@ void Person::UpdateSkeleton()
             }
         }
 
+        {MICROPROFILE_SCOPEI("Person", "anim-head", 0x926329);
         if (!skeleton.free && (!Animation::animations[animTarget].attack && animTarget != getupfrombackanim && ((animTarget != rollanim && !isFlip()) || targetFrame().label == 6) && animTarget != getupfromfrontanim && animTarget != wolfrunninganim && animTarget != rabbitrunninganim && animTarget != backhandspringanim && animTarget != walljumpfrontanim && animTarget != hurtidleanim && !isLandhard() && !isSleeping())) {
             DoHead();
         } else {
@@ -6406,6 +6423,9 @@ void Person::UpdateSkeleton()
                 targetheadyaw += 180;
             }
         }
+        }//MICROPROFILE
+
+        {MICROPROFILE_SCOPEI("Person", "reset-verts", 0x926329);
 
         int total_verts = skeleton.drawmodel.vertexNum;
         if(total_verts < skeleton.drawmodellow.vertexNum){
@@ -6415,7 +6435,7 @@ void Person::UpdateSkeleton()
             total_verts = skeleton.drawmodelclothes.vertexNum;
         }
         for (int i = 0; i < total_verts; i++) {
-            if(i < skeleton.drawmodellow.vertexNum){
+            if(i < skeleton.drawmodel.vertexNum){
                 skeleton.drawmodel.vertex[i] = 0;
                 skeleton.drawmodel.vertex[i].y = 999;
             }
@@ -6428,10 +6448,9 @@ void Person::UpdateSkeleton()
                 skeleton.drawmodelclothes.vertex[i].y = 999;
             }
         }
-        /**
-         * PERF: TODO
-         * This uses OpenGL for matrix math, so it can only run on the main thread
-         * */
+
+        }//MICROPROFILE
+
         for (unsigned int i = 0; i < skeleton.muscles.size(); i++) {
             MICROPROFILE_SCOPEI("Person", "proc-muscle", 0xe05cc3);
 
@@ -7202,6 +7221,7 @@ int Person::DrawSkeleton()
  */
 int Person::SphereCheck(XYZ* p1, float radius, XYZ* p, XYZ* move, float* rotate, Model* model)
 {
+    MICROPROFILE_SCOPEI("Person", "SphereCheck", 0xaaffaa);
     static float distance;
     static float olddistance;
     static int intersecting;

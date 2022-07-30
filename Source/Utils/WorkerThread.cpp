@@ -20,7 +20,25 @@
 namespace WorkerThread {
 
 #define MAX_JOBS 100
+
+struct JobSync {
+	pthread_mutex_t mtx;
+	pthread_cond_t cnd;
+
+	void init(){
+		PTCHK0(pthread_mutex_init(&mtx, NULL), "Failed to init mutex for JobSync");
+		PTCHK0(pthread_cond_init(&cnd, NULL), "Failed to init cond for JobSync");
+	}
+	void destroy(){
+		PTCHK0(pthread_mutex_lock(&mtx), "failed lock JobSync's mutex");
+		PTCHK0(pthread_mutex_unlock(&mtx), "failed to unlock JobSync's mutex");
+		PTCHK0(pthread_mutex_destroy(&mtx), "JobSync utex destruction failed");
+		PTCHK0(pthread_cond_destroy(&cnd), "JobSync condition variable destruction failed");	
+	}
+};
+
 Job *jobs[MAX_JOBS];
+JobSync jobs_sync[MAX_JOBS];
 pthread_mutex_t mtxJobs;
 
 pthread_cond_t cndJobs;
@@ -41,11 +59,10 @@ void destroy_job(JobHandle handle){
 	Job *j = jobs[handle];
 	ASSERT(j != nullptr && "Tried to destroy null job");
 
-	{MICROPROFILE_SCOPEI("WorkerThread", "destroy mutex & cond", 0xcb010f);
-		PTCHK0(pthread_mutex_lock(&j->mtx), "cleanupJobs failed lock job's mutex");
-		PTCHK0(pthread_mutex_unlock(&j->mtx), "cleanupJobs failed to unlock job's mutex");
-		PTCHK0(pthread_mutex_destroy(&j->mtx), "Mutex destruction failed");
-		PTCHK0(pthread_cond_destroy(&j->cnd), "Condition variable destruction failed");	
+	{MICROPROFILE_SCOPEI("WorkerThread", "unlock mutex & cond", 0xcb010f);
+		//ensure mutex isn't locked
+		PTCHK0(pthread_mutex_lock(&jobs_sync[handle].mtx), "destroy_job failed lock job's mutex");
+		PTCHK0(pthread_mutex_unlock(&jobs_sync[handle].mtx), "destroy_job failed to unlock job's mutex");
 	}
 
 	{MICROPROFILE_SCOPEI("WorkerThread", "free", 0xcb010f);
@@ -64,8 +81,6 @@ Job *popJob(){
 
 	PTCHK0(pthread_mutex_unlock(&mtxUnclaimed), "Failed to unlock mtxUnclaimed during pop");
 	PTCHK0(pthread_mutex_lock(&mtxJobs), "Failed to lock mtxJobs during pop");
-
-	//cleanupJobs();
 
 	//find unclaimed job
 	Job *ret = nullptr;
@@ -89,10 +104,10 @@ Job *popJob(){
 
 void setJobFinished(Job *job){
 	MICROPROFILE_SCOPEI("WorkerThread", "setJobFinished", 0xff8800);
-	PTCHK0(pthread_mutex_lock(&job->mtx), "Failed to lock job's mutex in setJobFinished");
+	PTCHK0(pthread_mutex_lock(&jobs_sync[job->handle].mtx), "Failed to lock job's mutex in setJobFinished");
 	job->done = 1;
-	PTCHK0(pthread_cond_broadcast(&job->cnd), "failed to broadcast job's condition variable");
-	PTCHK0(pthread_mutex_unlock(&job->mtx), "failed to unlock job's mutex in setJobFinished");
+	PTCHK0(pthread_cond_broadcast(&jobs_sync[job->handle].cnd), "failed to broadcast job's condition variable");
+	PTCHK0(pthread_mutex_unlock(&jobs_sync[job->handle].mtx), "failed to unlock job's mutex in setJobFinished");
 }
 
 JobHandle _pushJob(Job *job){
@@ -126,8 +141,6 @@ JobHandle _pushJob(Job *job){
 		job->claimed = false;
 		job->handle = idx;
 		jobs[idx] = job;
-		PTCHK0(pthread_mutex_init(&job->mtx, NULL), "Mutex init failed");
-		PTCHK0(pthread_cond_init(&job->cnd, NULL), "Condition variable init failed");
 
 		PTCHK0(pthread_mutex_lock(&mtxUnclaimed), "Failed to lock mtxUnclaimed in pushJob");
 		unclaimed_jobs++;
@@ -193,24 +206,25 @@ bool init(){
 
 	for(int i = 0; i < MAX_JOBS; i++){
 		ASSERT(jobs[i] == nullptr);
+		jobs_sync[i].init();
 	}
 	return true;
 }
 
 void join(JobHandle &handle){
 	Job *j = jobs[handle];
-	pthread_mutex_lock(&j->mtx);
+	pthread_mutex_lock(&jobs_sync[handle].mtx);
 	while(!j->done){
-		pthread_cond_wait(&j->cnd, &j->mtx);
+		pthread_cond_wait(&jobs_sync[handle].cnd, &jobs_sync[handle].mtx);
 	}
 	j->done = 2; //can be destroyed
-	pthread_mutex_unlock(&j->mtx);
+	pthread_mutex_unlock(&jobs_sync[handle].mtx);
 }
 
 bool tryJoin(JobHandle &handle){
 	Job *j = jobs[handle];
 	ASSERT(j != nullptr && "job is null!");
-	int res = pthread_mutex_trylock(&j->mtx);
+	int res = pthread_mutex_trylock(&jobs_sync[handle].mtx);
 	if(res == EBUSY){
 		return false;
 	}else if(res != 0){
@@ -221,7 +235,7 @@ bool tryJoin(JobHandle &handle){
 		if(finished){
 			j->done = 2;
 		}
-		pthread_mutex_unlock(&j->mtx);
+		pthread_mutex_unlock(&jobs_sync[handle].mtx);
 		return finished;
 	}
 }

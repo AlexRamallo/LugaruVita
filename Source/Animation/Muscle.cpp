@@ -46,9 +46,8 @@ Muscle::Muscle()
     , newrotate1(0)
     , newrotate2(0)
     , newrotate3(0)
-    ,
-
-    strength(0)
+    , relaxlength(0)
+    , strength(0)
 {
 }
 
@@ -117,10 +116,6 @@ void Muscle::loadVerticesClothes(FILE* tfile, int vertexNum)
  */
 void Muscle::DoConstraint(bool spinny)
 {
-    // FIXME: relaxlength shouldn't be static, but may not always be set
-    // so I don't want to change the existing behavior even though it's probably a bug
-    static float relaxlength;
-
     float oldlength = length;
 
     if (type != boneconnect) {

@@ -52,6 +52,7 @@ public:
     float newrotate1, newrotate2, newrotate3;
 
     float strength;
+    float relaxlength;
 
     Muscle();
     void load(FILE* tfile, int vertexNum, std::vector<Joint>& joints);
