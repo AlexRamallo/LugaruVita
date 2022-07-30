@@ -26,6 +26,10 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "Thirdparty/vitagl/math_utils.h"
 
+extern "C" {
+    #include <math_neon.h>
+}
+
 extern float multiplier;
 extern float viewdistance;
 extern XYZ viewer;
@@ -859,11 +863,16 @@ void Model::CalculateNormals(bool facenormalise)
     }
 
     for (unsigned int i = 0; i < Triangles.size(); i++) {
+        /*
         CrossProduct(
             vertex[Triangles[i].vertex[1]] - vertex[Triangles[i].vertex[0]],
             vertex[Triangles[i].vertex[2]] - vertex[Triangles[i].vertex[0]],
             &Triangles[i].facenormal
         );
+        */
+        XYZ v0 = vertex[Triangles[i].vertex[1]] - vertex[Triangles[i].vertex[0]];
+        XYZ v1 = vertex[Triangles[i].vertex[2]] - vertex[Triangles[i].vertex[0]];
+        cross3_neon(&v0.x, &v1.x, &Triangles[i].facenormal.x);
 
         normals[Triangles[i].vertex[0]].x += Triangles[i].facenormal.x;
         normals[Triangles[i].vertex[0]].y += Triangles[i].facenormal.y;

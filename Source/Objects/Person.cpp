@@ -6742,7 +6742,7 @@ void Person::UpdateSkeleton()
             updatedelay = 1 + (float)(Random() % 100) / 1000;
         }
 
-        UpdateNormals();
+        //UpdateNormals();
     }
 
     calcrot = 0;

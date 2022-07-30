@@ -462,11 +462,18 @@ int Game::DrawGLScene(StereoSide side)
             glCullFace(GL_FRONT);
             glDepthMask(1);
 
-            int draw_targets[16];
-            WorkerThread::JobHandle draw_handles[16];
-            memset(draw_targets, 0, sizeof(draw_targets));
-            memset(draw_handles, 0, sizeof(draw_handles));
+            static const int max_players_ct = 16;
+            ASSERT(Person::players.size() <= max_players_ct && "Too many players, need to increase limit");
+
             int num_draw_targs = 0;
+            int draw_targets[max_players_ct];
+
+            WorkerThread::JobHandle hndl_skeleton[max_players_ct];
+            WorkerThread::JobHandle hndl_normals[max_players_ct];
+
+            memset(draw_targets, -1, sizeof(draw_targets));
+            memset(hndl_skeleton, 0, sizeof(hndl_skeleton));
+            memset(hndl_normals, 0, sizeof(hndl_normals));
 
             for (unsigned k = 0; k < Person::players.size(); k++) {
                 MICROPROFILE_SCOPEI("DrawGLScene", "models-draw-person", 0xb500ff);
@@ -482,6 +489,9 @@ int Game::DrawGLScene(StereoSide side)
                     }
                     if (distance >= .5) {
                         /*
+                        
+                        TODO: check if this is only for occlusion culling, or if it's also used by AI
+
                         checkpoint = DoRotation(
                             Person::players[k]->skeleton.joints[fabs(Random() % Person::players[k]->skeleton.joints.size())].position,
                             0,
@@ -506,27 +516,61 @@ int Game::DrawGLScene(StereoSide side)
                         */
                         Person::players[k]->occluded = 0;
                         if (Person::players[k]->occluded < 25) {
-                            if(Person::players[k]->isVisible() && k != 0){
+                            if(Person::players[k]->isVisible()){
                                 MICROPROFILE_SCOPEI("Draw", "submit job", 0xaaaaff);
                                 //Person::players[k]->UpdateSkeleton();
                                 //Person::players[k]->DrawSkeleton();
                                 Person::players[k]->PreUpdateSkeleton();
-                                draw_handles[num_draw_targs] = WorkerThread::submitJob(WorkerThread::WorkTask::WRK_UPDATE_SKELETON, k);
+                                
+                                //submit job for updating skeleton
+                                hndl_skeleton[num_draw_targs] = WorkerThread::submitJob(
+                                    WorkerThread::WorkTask::WRK_UPDATE_SKELETON,
+                                    k
+                                );
+
+                                /*
+                                //submit job for updating normals, which depends on the previous
+                                hndl_normals[num_draw_targs] = WorkerThread::submitDependentJob(
+                                    hndl_skeleton[num_draw_targs],
+                                    WorkerThread::WorkTask::WRK_UPDATE_SKELETON_NORMALS,
+                                    k
+                                );
+                                */
+
                                 draw_targets[num_draw_targs++] = k;
                             }
                         }
                     }
                 }
             }
-
-            Person::players[0]->PreUpdateSkeleton();
-            Person::players[0]->UpdateSkeleton();
-            for(int i = 0; draw_targets[i] != 0; i++){
-                MICROPROFILE_SCOPEI("Draw", "join worker", 0xff0000);
-                WorkerThread::join(draw_handles[i]);
+            
+            /**
+             * submit jobs for updating normals, which depends on the previous
+             * we do it out here so that the skeleton update jobs above get priority,
+             * which should lead to more efficient scheduling
+             * */
+            for(int i = 0; draw_targets[i] != -1; i++){
+                hndl_normals[i] = WorkerThread::submitDependentJob(
+                    hndl_skeleton[i],
+                    WorkerThread::WorkTask::WRK_UPDATE_SKELETON_NORMALS,
+                    draw_targets[i]
+                );
             }
-            Person::players[0]->DrawSkeleton();
-            for(int i = 0; draw_targets[i] != 0; i++){
+
+            //join update skeleton jobs
+            for(int i = 0; draw_targets[i] != -1; i++){
+                MICROPROFILE_SCOPEI("Draw", "join worker", 0xff0000);
+                WorkerThread::join(hndl_skeleton[i], true);
+            }
+
+            //join update normals jobs
+            for(int i = 0; draw_targets[i] != -1; i++){
+                MICROPROFILE_SCOPEI("Draw", "join worker", 0xff0000);
+                WorkerThread::join(hndl_normals[i], true);
+            }
+
+            //draw all players on main thread
+            for(int i = 0; draw_targets[i] != -1; i++){
                 MICROPROFILE_SCOPEI("Draw", "draw joined", 0xffaa00);
                 Person::players[draw_targets[i]]->DrawSkeleton();
             }

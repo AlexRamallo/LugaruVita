@@ -42,6 +42,10 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 #include <time.h>
 #include <assert.h>
 
+extern "C" {
+    #include <math_neon.h>
+}
+
 using namespace Game;
 
 #ifdef WIN32
@@ -815,7 +819,7 @@ int _main(int argc, char** argv)
             LOG_TOGGLE(true);
             bool res = WorkerThread::init();
             ASSERT(res && "Failed to init WorkerThread system");
-            WorkerThread::spawnWorkers(1);
+            WorkerThread::spawnWorkers(2);
             /*
             auto j1 = WorkerThread::submitJob(WorkerThread::WRK_TEST, (int)2, (int)12, (int)17);
             auto j2 = WorkerThread::submitJob(WorkerThread::WRK_TEST, (int)69, (int)420, (int)101);
