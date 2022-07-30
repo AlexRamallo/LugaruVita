@@ -462,12 +462,17 @@ int Game::DrawGLScene(StereoSide side)
             glCullFace(GL_FRONT);
             glDepthMask(1);
 
-            int draw_targets[16] = {};
+            int draw_targets[16];
+            WorkerThread::JobHandle draw_handles[16];
+            memset(draw_targets, 0, sizeof(draw_targets));
+            memset(draw_handles, 0, sizeof(draw_handles));
+            int num_draw_targs = 0;
+
             for (unsigned k = 0; k < Person::players.size(); k++) {
                 MICROPROFILE_SCOPEI("DrawGLScene", "models-draw-person", 0xb500ff);
                 if (k == 0 || !Tutorial::active) {
-                    glEnable(GL_BLEND);
-                    glEnable(GL_LIGHTING);
+                    //glEnable(GL_BLEND);
+                    //glEnable(GL_LIGHTING);
                     terrainlight = terrain.getLighting(Person::players[k]->coords.x, Person::players[k]->coords.z);
                     distance = distsq(&viewer, &Person::players[k]->coords);
                     distance = (viewdistance * viewdistance - (distance - (viewdistance * viewdistance * fadestart)) * (1 / (1 - fadestart))) / viewdistance / viewdistance;
@@ -498,14 +503,27 @@ int Game::DrawGLScene(StereoSide side)
                             Person::players[k]->occluded = 0;
                         }
                         if (Person::players[k]->occluded < 25) {
-
-                            if(Person::players[k]->isVisible()){
-                                Person::players[k]->UpdateSkeleton();
-                                Person::players[k]->DrawSkeleton();
+                            if(Person::players[k]->isVisible() && k != 0){
+                                MICROPROFILE_SCOPEI("Draw", "submit job", 0xaaaaff);
+                                //Person::players[k]->UpdateSkeleton();
+                                //Person::players[k]->DrawSkeleton();
+                                draw_handles[num_draw_targs] = WorkerThread::submitJob(WorkerThread::WorkTask::WRK_UPDATE_SKELETON, k);
+                                draw_targets[num_draw_targs++] = k;
                             }
                         }
                     }
                 }
+            }
+
+            Person::players[0]->UpdateSkeleton();
+            for(int i = 0; draw_targets[i] != 0; i++){
+                MICROPROFILE_SCOPEI("Draw", "join worker", 0xff0000);
+                WorkerThread::join(draw_handles[i]);
+            }
+            Person::players[0]->DrawSkeleton();
+            for(int i = 0; draw_targets[i] != 0; i++){
+                MICROPROFILE_SCOPEI("Draw", "draw joined", 0xffaa00);
+                Person::players[draw_targets[i]]->DrawSkeleton();
             }
         }
 

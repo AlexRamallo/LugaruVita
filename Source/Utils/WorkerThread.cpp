@@ -2,6 +2,7 @@
 #include "Utils/Log.h"
 
 #include "Thirdparty/microprofile/microprofile.h"
+#include "Objects/Person.hpp"
 
 #include <vector>
 #include <stdarg.h>
@@ -34,6 +35,24 @@ void job_free(void *ptr){
 	free(ptr);
 }
 
+void destroy_job(JobHandle handle){
+	MICROPROFILE_SCOPEI("WorkerThread", "destroy_job", 0xcb010f);
+
+	Job *j = jobs[handle];
+	ASSERT(j != nullptr && "Tried to destroy null job");
+
+	{MICROPROFILE_SCOPEI("WorkerThread", "destroy mutex & cond", 0xcb010f);
+		PTCHK0(pthread_mutex_lock(&j->mtx), "cleanupJobs failed lock job's mutex");
+		PTCHK0(pthread_mutex_unlock(&j->mtx), "cleanupJobs failed to unlock job's mutex");
+		PTCHK0(pthread_mutex_destroy(&j->mtx), "Mutex destruction failed");
+		PTCHK0(pthread_cond_destroy(&j->cnd), "Condition variable destruction failed");	
+	}
+
+	{MICROPROFILE_SCOPEI("WorkerThread", "free", 0xcb010f);
+		job_free((void*)j);
+		jobs[handle] = nullptr;
+	}
+}
 
 Job *popJob(){
 	PTCHK0(pthread_mutex_lock(&mtxUnclaimed), "Failed to lock mtxUnclaimed during pop");
@@ -46,6 +65,8 @@ Job *popJob(){
 	PTCHK0(pthread_mutex_unlock(&mtxUnclaimed), "Failed to unlock mtxUnclaimed during pop");
 	PTCHK0(pthread_mutex_lock(&mtxJobs), "Failed to lock mtxJobs during pop");
 
+	//cleanupJobs();
+
 	//find unclaimed job
 	Job *ret = nullptr;
 	for(int i = 0; i < MAX_JOBS; i++){
@@ -53,7 +74,7 @@ Job *popJob(){
 		if(jobs[cur_idx] == nullptr){
 			continue;
 		}
-		if(!jobs[cur_idx]->claimed){
+		if(!jobs[cur_idx]->claimed && ret == nullptr){
 			ret = jobs[cur_idx];
 			break;
 		}
@@ -66,42 +87,40 @@ Job *popJob(){
 	return ret;
 }
 
-void destroyJob(Job *j){
-	PTCHK0(pthread_mutex_lock(&j->mtx), "destroyJob failed lock job's mutex");
-	PTCHK0(pthread_mutex_lock(&mtxJobs), "destroyJob failed to lock mtxJobs");
-	PTCHK0(pthread_mutex_unlock(&j->mtx), "destroyJob failed to unlock job's mutex");
-	PTCHK0(pthread_mutex_destroy(&j->mtx), "Mutex destruction failed");
-	PTCHK0(pthread_cond_destroy(&j->cnd), "Condition variable destruction failed");	
-	LOG("destroyJob(%d)", j->handle);
-	jobs[j->handle] = nullptr;
-	job_free((void*)j);
-	PTCHK0(pthread_mutex_unlock(&mtxJobs), "destroyJob failed to unlock mtxJobs");
-}
-
 void setJobFinished(Job *job){
+	MICROPROFILE_SCOPEI("WorkerThread", "setJobFinished", 0xff8800);
 	PTCHK0(pthread_mutex_lock(&job->mtx), "Failed to lock job's mutex in setJobFinished");
-	job->done = true;
+	job->done = 1;
 	PTCHK0(pthread_cond_broadcast(&job->cnd), "failed to broadcast job's condition variable");
 	PTCHK0(pthread_mutex_unlock(&job->mtx), "failed to unlock job's mutex in setJobFinished");
 }
 
 JobHandle _pushJob(Job *job){
+	MICROPROFILE_SCOPEI("WorkerThread", "_pushJob", 0x01cb0f);
 	//Find free space in jobs array
-	PTCHK0(pthread_mutex_lock(&mtxJobs), "pushJob failed to lock mtxJobs");
+
+	{MICROPROFILE_SCOPEI("WorkerThread", "lock mtxJobs", 0xcb010f);
+		PTCHK0(pthread_mutex_lock(&mtxJobs), "pushJob failed to lock mtxJobs");
+	}
 
 	int idx = -1;
-	
-	for(int i = 0; i < MAX_JOBS; i++){
-		if(jobs[i] == nullptr){
-			idx = i;
-			break;
+	{MICROPROFILE_SCOPEI("WorkerThread", "find free", 0xcb010f);
+		for(int i = 0; i < MAX_JOBS; i++){
+			if(jobs[i] == nullptr){
+				idx = i;
+				break;
+			}else if(jobs[i]->done == 2){
+				destroy_job(i);
+				idx = i;
+				break;
+			}
 		}
 	}
 
 	if(idx == -1){
 		ASSERT(!"Ran out of space for jobs");
 	}else{
-		LOG("pushJob(%d)", idx);
+		MICROPROFILE_SCOPEI("WorkerThread", "init new job", 0xcb010f);
 
 		job->done = false;
 		job->claimed = false;
@@ -184,8 +203,8 @@ void join(JobHandle &handle){
 	while(!j->done){
 		pthread_cond_wait(&j->cnd, &j->mtx);
 	}
+	j->done = 2; //can be destroyed
 	pthread_mutex_unlock(&j->mtx);
-	destroyJob(j);
 }
 
 bool tryJoin(JobHandle &handle){
@@ -199,10 +218,10 @@ bool tryJoin(JobHandle &handle){
 		return false;
 	}else{
 		bool finished = j->done;
-		pthread_mutex_unlock(&j->mtx);
 		if(finished){
-			destroyJob(j);
+			j->done = 2;
 		}
+		pthread_mutex_unlock(&j->mtx);
 		return finished;
 	}
 }
@@ -271,6 +290,25 @@ struct TestJob: public Job {
 	}
 };
 
+struct UpdateSkeletonJob: Job {
+	int playerId;
+	UpdateSkeletonJob(int pid):
+		Job(),
+		playerId(pid)
+	{
+		//--
+	}
+
+	~UpdateSkeletonJob()
+	{
+		//--
+	}
+
+	void execute() override {
+		Person::players[playerId]->UpdateSkeleton();
+	}
+};
+
 JobHandle submitJob(Job *j){
 	return _pushJob(j);
 }
@@ -284,6 +322,12 @@ JobHandle submitJob(WorkTask type, ...){
     	default:
     		ASSERT(!"Invalid job type");
     		break;
+
+    	case WRK_UPDATE_SKELETON: {
+    		int playerId = va_arg(args, int);
+    		ret = submitJob<UpdateSkeletonJob>(playerId);
+    		break;
+    	}
 
     	case WRK_DIE:
     		ret = submitJob<DeathJob>();

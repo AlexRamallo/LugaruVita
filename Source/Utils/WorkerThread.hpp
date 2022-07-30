@@ -9,6 +9,7 @@ namespace WorkerThread{
 		WRK_FUNC,
 		WRK_DIE,
 		WRK_TEST,
+		WRK_UPDATE_SKELETON
 	};
 
 	typedef int JobHandle;
@@ -18,8 +19,8 @@ namespace WorkerThread{
 		JobHandle handle;
 		pthread_mutex_t mtx;
 		pthread_cond_t cnd;
-		bool done;
 		bool claimed;
+		char done;
 
 		Job() = default;
 		virtual ~Job() = default;
