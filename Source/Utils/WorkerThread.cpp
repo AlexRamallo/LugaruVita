@@ -114,7 +114,6 @@ Job *popJob(bool blocking = true){
 	}
 
 	ASSERT(ret != nullptr && "Failed to find any unclaimed jobs!");
-	//ret->state = JS_CLAIMED;
 	ret->setState(JS_CLAIMED);
 
 	PTCHK0(pthread_mutex_unlock(&mtxJobs), "Failed to unlock mtxJobs during pop");
@@ -130,12 +129,16 @@ void setJobFinished(Job *job){
 	int unblock_count = 0;
 	for(int i = 0; i < MAX_DEPENDENTS; i++){
 		Job *dep = job->dependents[i];
+		ASSERT(dep != job && "Invalid job dependency on self");
 		if(dep != nullptr){
-			//dep->state = JS_UNCLAIMED;
 			dep->setState(JS_UNCLAIMED);
 			unblock_count++;
 		}
 	}
+
+	//signal that this job has changed state
+	PTCHK0(pthread_cond_signal(&jobs_sync[job->handle].cnd), "failed to broadcast job's condition variable");
+	PTCHK0(pthread_mutex_unlock(&jobs_sync[job->handle].mtx), "failed to unlock job's mutex in setJobFinished");
 
 	//signal that there are new unclaimed jobs
 	if(unblock_count > 0){
@@ -144,10 +147,6 @@ void setJobFinished(Job *job){
 		PTCHK0(pthread_cond_broadcast(&cndJobs), "Fail to broadcast mtxUnclaimed");
 		PTCHK0(pthread_mutex_unlock(&mtxUnclaimed), "Failed to unlock mtxUnclaimed during dep unblock");
 	}
-
-	//signal that this job has changed state
-	PTCHK0(pthread_cond_signal(&jobs_sync[job->handle].cnd), "failed to broadcast job's condition variable");
-	PTCHK0(pthread_mutex_unlock(&jobs_sync[job->handle].mtx), "failed to unlock job's mutex in setJobFinished");
 }
 
 JobHandle _pushJob(Job *job, JobHandle parent){
@@ -161,7 +160,6 @@ JobHandle _pushJob(Job *job, JobHandle parent){
 		if(jobs[i] == nullptr){
 			idx = i;
 			break;
-		//}else if(jobs[i]->state == JS_JOINED){
 		}else if(jobs[i]->getState() == JS_JOINED){
 			destroy_job(i);
 			idx = i;
@@ -171,64 +169,73 @@ JobHandle _pushJob(Job *job, JobHandle parent){
 
 	if(idx == -1){
 		ASSERT(!"Ran out of space for jobs");
-	}else{
-		MICROPROFILE_SCOPEI("WorkerThread", "init new job", 0xcb010f);
-
-		bool is_blocked = false;
-		if(parent >= 0){
-			Job *pj = jobs[parent];
-			if(pj == nullptr){
-				//parent was already destroyed, meaning it completed at some point
-				//job->state = JS_UNCLAIMED;
-				job->setState(JS_UNCLAIMED);
-			}else{
-				//parent exists, need to check if it completed
-				JobState pst = pj->getState();
-				switch(pst){
-					case JS_DEAD:
-					case JS_FINISHED:
-					case JS_JOINED:
-						//parent completed, no need to block
-						job->setState(JS_UNCLAIMED);
-						break;
-					
-					case JS_UNCLAIMED:
-					case JS_CLAIMED:
-					case JS_BLOCKED:
-						is_blocked = true;
-						//parent hasn't completed, block and add us as a dependent
-						job->setState(JS_BLOCKED);
-						PTCHK0(pthread_mutex_lock(&jobs_sync[parent].mtx), "Failed to lock parent task's mutex");
-						bool added = false;
-						for(int i = 0; i < MAX_DEPENDENTS; i++){
-							if(pj->dependents[i] == nullptr){
-								pj->dependents[i] = job;
-								added = true;
-								break;
-							}
-						}
-						PTCHK0(pthread_mutex_unlock(&jobs_sync[parent].mtx), "Failed to unlock parent task's mutex");
-						ASSERT(added && "Parent job has no more free dependent slots");
-						break;
-				}
-			}
-		}else{
-			job->setState(JS_UNCLAIMED);
-		}
-		job->handle = idx;
-		for(int i = 0; i < MAX_DEPENDENTS; i++){
-			job->dependents[i] = nullptr;
-		}
-		jobs[idx] = job;
-
-		if(!is_blocked){
-			PTCHK0(pthread_mutex_lock(&mtxUnclaimed), "Failed to lock mtxUnclaimed in pushJob");
-			unclaimed_jobs++;
-			PTCHK0(pthread_cond_signal(&cndJobs), "pthread_cond_signal failed");
-			PTCHK0(pthread_mutex_unlock(&mtxUnclaimed), "Failed to unlock mtxUnclaimed in pushJob");
-		}
+		return -1;
 	}
+
+	MICROPROFILE_SCOPEI("WorkerThread", "init new job", 0xcb010f);
+	
+	ASSERT(parent != idx && "Invalid dependency with self in pushJob");
+
+	PTCHK0(pthread_mutex_lock(&jobs_sync[idx].mtx), "failed to lock pushed job mutex");
+	job->handle = idx;
+	job->parent = nullptr;
+
+	bool is_blocked = false;
+	if(parent >= 0){
+		PTCHK0(pthread_mutex_lock(&jobs_sync[parent].mtx, "failed to lock pushed job's parent mutex");
+
+		Job *pj = jobs[parent];
+		if(pj == nullptr){
+			//parent was already destroyed, meaning it completed at some point
+			job->state = JS_UNCLAIMED;
+		}else{
+			//parent exists, need to check if it completed
+			JobState pst = pj->state;
+			switch(pst){
+				case JS_DEAD:
+				case JS_FINISHED:
+				case JS_JOINED:
+					//parent completed, no need to block
+					job->state = JS_UNCLAIMED;
+					break;
+				
+				case JS_UNCLAIMED:
+				case JS_CLAIMED:
+				case JS_BLOCKED:
+					is_blocked = true;
+					//parent hasn't completed, block and add us as a dependent of parent
+					job->state = JS_BLOCKED;
+					job->parent = pj;
+					bool added = false;
+					for(int i = 0; i < MAX_DEPENDENTS; i++){
+						if(pj->dependents[i] == nullptr){
+							pj->dependents[i] = job;
+							added = true;
+							break;
+						}
+					}
+					ASSERT(added && "Parent job has no more free dependent slots");
+					break;
+			}
+		}
+		PTCHK0(pthread_mutex_unlock(&jobs_sync[parent].mtx), "failed to lock pushed job's parent mutex");
+	}else{
+		job->state = JS_UNCLAIMED;
+	}
+	for(int i = 0; i < MAX_DEPENDENTS; i++){
+		job->dependents[i] = nullptr;
+	}
+	jobs[idx] = job;
+	PTCHK0(pthread_mutex_unlock(&jobs_sync[idx].mtx), "failed to unlock pushed job mutex");
 	PTCHK0(pthread_mutex_unlock(&mtxJobs), "Failed to unlock mtxJobs during push");
+
+	//if job isn't blocked, signal that there's an unclaimed job available
+	if(!is_blocked){
+		PTCHK0(pthread_mutex_lock(&mtxUnclaimed), "Failed to lock mtxUnclaimed in pushJob");
+		unclaimed_jobs++;
+		PTCHK0(pthread_cond_signal(&cndJobs), "pthread_cond_signal failed");
+		PTCHK0(pthread_mutex_unlock(&mtxUnclaimed), "Failed to unlock mtxUnclaimed in pushJob");
+	}
 	return (JobHandle) idx;
 }
 
@@ -298,25 +305,54 @@ void join(JobHandle &handle, bool work){
 		for(int i = 0; i < 5; i++){
 			MICROPROFILE_SCOPEI("WorkerThread", "spin", 0x66ffaa);
 			if(tryJoin(handle)){
+				ASSERT(jobs[handle]->getState() == JS_JOINED);
 				return;
 			}else{
 				//do some work
 				Job *job = popJob(false);
 				if(job != nullptr){
+					ASSERT(job->getState() == JS_CLAIMED);
 					job->execute();
 					setJobFinished(job);
+					ASSERT(job->getState() == JS_FINISHED);
 				}
 			}
 		}
 	}
 	//regular blocking join
 	Job *j = jobs[handle];
+	
+	if(j->getState() == JS_BLOCKED){
+		LOG_TOGGLE(true);
+		//if theory correct, then both job type and parent type will be WRK_UPDATE_SKELETON_NORMALS(5)
+		Job *pj = j->parent;
+		LOG("WARNING: called join on a blocked job(%d | type: %d). Recursing to join parent.", (int)j->handle, (int)j->type);
+		if(pj == nullptr){
+			LOG("\tparent is null!");
+		}else{
+			LOG("\tparent is not null! handle: %d, type: %d", (int)pj->handle, (int)pj->type);
+		}
+		LOG_TOGGLE(false);
+
+		ASSERT(pj != nullptr && "Parent job is nullptr");
+		ASSERT(false && "Called join on a blocked job!");
+		ASSERT(j->parent != nullptr && "Parent is null");
+		join(j->parent->handle, work);
+	}
+
 	pthread_mutex_lock(&jobs_sync[handle].mtx);
 	while(j->state != JS_FINISHED){
+		LOG_TOGGLE(true);
+		if(j->state != JS_CLAIMED){
+			//LOG("join(%d |type: %d). Waiting for state to change from %d to %d", handle, (int)j->type, (int)j->state, (int)JS_FINISHED);
+		}
+		LOG_TOGGLE(false);
 		pthread_cond_wait(&jobs_sync[handle].cnd, &jobs_sync[handle].mtx);
 	}
 	j->state = JS_JOINED; //can be destroyed
 	pthread_mutex_unlock(&jobs_sync[handle].mtx);
+
+	ASSERT(jobs[handle]->getState() == JS_JOINED);	
 }
 
 bool tryJoin(JobHandle &handle){
@@ -391,8 +427,10 @@ JobHandle submitJob(Job *j){
 #define DO_SUBMIT_JOB(T, ...) \
 	if(parent >= 0) {\
 		ret = submitDependentJob<T>(parent, ## __VA_ARGS__);\
+		jobs[ret]->type = type;\
 	}else{\
 		ret = submitJob<T>(__VA_ARGS__);\
+		jobs[ret]->type = type;\
 	}
 
 JobHandle vsubmitJob(JobHandle parent, WorkTask type, va_list args){

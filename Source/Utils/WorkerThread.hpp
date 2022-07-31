@@ -45,6 +45,7 @@ namespace WorkerThread{
 		 * until the parent job is finished
 		 * */
 		Job *dependents[MAX_DEPENDENTS];
+		Job *parent; //only valid while state is JS_BLOCKED
 
 		JobState state;
 		void setState(JobState set, bool safe = true);

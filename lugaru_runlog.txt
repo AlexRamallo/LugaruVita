@@ -15,4 +15,4 @@ InitGame E
 InitGame F
 InitGame G
 InitGame H
-Spawning 1 worker threads
+Spawning 2 worker threads
