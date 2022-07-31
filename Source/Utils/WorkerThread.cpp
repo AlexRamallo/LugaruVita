@@ -182,7 +182,7 @@ JobHandle _pushJob(Job *job, JobHandle parent){
 
 	bool is_blocked = false;
 	if(parent >= 0){
-		PTCHK0(pthread_mutex_lock(&jobs_sync[parent].mtx, "failed to lock pushed job's parent mutex");
+		PTCHK0(pthread_mutex_lock(&jobs_sync[parent].mtx), "failed to lock pushed job's parent mutex");
 
 		Job *pj = jobs[parent];
 		if(pj == nullptr){
