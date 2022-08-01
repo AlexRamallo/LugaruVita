@@ -40,11 +40,11 @@ extern bool decalstoggle;
 int Model::LineCheck(XYZ* p1, XYZ* p2, XYZ* p, XYZ* move, float* rotate)
 {
     MICROPROFILE_SCOPEI("Model", "LineCheck", 0x008fff);
-    static float distance;
-    static float olddistance;
-    static int intersecting;
-    static int firstintersecting;
-    static XYZ point;
+    float distance;
+    float olddistance;
+    int intersecting;
+    int firstintersecting;
+    XYZ point;
 
     *p1 = *p1 - *move;
     *p2 = *p2 - *move;
@@ -79,11 +79,11 @@ int Model::LineCheck(XYZ* p1, XYZ* p2, XYZ* p, XYZ* move, float* rotate)
 int Model::LineCheckPossible(XYZ* p1, XYZ* p2, XYZ* p, XYZ* move, float* rotate)
 {
     MICROPROFILE_SCOPEI("Model", "LineCheckPossible", 0x008fff);
-    static float distance;
-    static float olddistance;
-    static int intersecting;
-    static int firstintersecting;
-    static XYZ point;
+    float distance;
+    float olddistance;
+    int intersecting;
+    int firstintersecting;
+    XYZ point;
 
     *p1 = *p1 - *move;
     *p2 = *p2 - *move;
@@ -120,11 +120,11 @@ int Model::LineCheckPossible(XYZ* p1, XYZ* p2, XYZ* p, XYZ* move, float* rotate)
 int Model::LineCheckSlidePossible(XYZ* p1, XYZ* p2, XYZ* move, float* rotate)
 {
     MICROPROFILE_SCOPEI("Model", "LineCheckSlidePossible", 0x008fff);
-    static float distance;
-    static float olddistance;
-    static int intersecting;
-    static int firstintersecting;
-    static XYZ point;
+    float distance;
+    float olddistance;
+    int intersecting;
+    int firstintersecting;
+    XYZ point;
 
     *p1 = *p1 - *move;
     *p2 = *p2 - *move;
@@ -165,13 +165,13 @@ int Model::LineCheckSlidePossible(XYZ* p1, XYZ* p2, XYZ* move, float* rotate)
 int Model::SphereCheck(XYZ* p1, float radius, XYZ* p, XYZ* move, float* rotate)
 {
     MICROPROFILE_SCOPEI("Model", "SphereCheck", 0x008fff);
-    static int i;
-    static float distance;
-    static float olddistance;
-    static int intersecting;
-    static int firstintersecting;
-    static XYZ point;
-    static XYZ oldp1;
+    int i;
+    float distance;
+    float olddistance;
+    int intersecting;
+    int firstintersecting;
+    XYZ point;
+    XYZ oldp1;
 
     firstintersecting = -1;
 
@@ -227,12 +227,12 @@ int Model::SphereCheck(XYZ* p1, float radius, XYZ* p, XYZ* move, float* rotate)
 int Model::SphereCheckPossible(XYZ* p1, float radius, XYZ* move, float* rotate)
 {
     MICROPROFILE_SCOPEI("Model", "SphereCheckPossible", 0x008fff);
-    static float distance;
-    static float olddistance;
-    static int intersecting;
-    static int firstintersecting;
-    static XYZ point;
-    static XYZ oldp1;
+    float distance;
+    float olddistance;
+    int intersecting;
+    int firstintersecting;
+    XYZ point;
+    XYZ oldp1;
 
     firstintersecting = -1;
 
@@ -1120,8 +1120,8 @@ void Model::MakeDecal(decal_type atype, XYZ* where, float* size, float* opacity,
             return;
         }
 
-        static XYZ rot;
-        static float distance;
+        XYZ rot;
+        float distance;
 
         if (*opacity > 0) {
             if (distsq(where, &boundingspherecenter) < (boundingsphereradius + *size) * (boundingsphereradius + *size)) {

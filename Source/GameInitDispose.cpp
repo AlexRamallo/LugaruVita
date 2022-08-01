@@ -506,6 +506,8 @@ void Game::InitGame()
 
     std::cout << "InitGame B\n";
 
+    Sprite::AllocSprites(500);
+
 
     whichjointstartarray[0] = righthip;
     whichjointendarray[0] = rightfoot;

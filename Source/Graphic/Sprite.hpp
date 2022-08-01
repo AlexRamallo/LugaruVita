@@ -29,10 +29,10 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 #include "Math/XYZ.hpp"
 #include "Objects/Object.hpp"
 #include "Utils/ImageIO.hpp"
+#include "Utils/WorkerThread.hpp"
+#include "Thirdparty/vitagl/math_utils.h"
 
 #include <vector>
-
-#define max_sprites 20000
 
 enum
 {
@@ -66,31 +66,25 @@ private:
     float alivetime;
     float speed;
     float rotatespeed;
+    bool alive;
 
     static float checkdelay;
 
-    static vector<std::unique_ptr<Sprite> > sprites;
-
+    float calcDistanceMult(Sprite *spr);
 public:
+    static void AllocSprites(int count);
+
+    static void submitAnimationJob(std::vector<WorkerThread::JobHandle> &out);
+
+    static void doAnimate(int start_idx, int end_idx);
+
     static void DeleteSprite(int which);
     static void MakeSprite(int atype, XYZ where, XYZ avelocity, float red, float green, float blue, float asize, float aopacity);
     static void Draw();
-    static void deleteSprites()
-    {
-        sprites.clear();
-    }
-    static void setLastSpriteSpecial(int s)
-    {
-        sprites.back()->special = s;
-    }
-    static void setLastSpriteSpeed(int s)
-    {
-        sprites.back()->speed = s;
-    }
-    static void setLastSpriteAlivetime(float al)
-    {
-        sprites.back()->alivetime = al;
-    }
+    static void deleteSprites();
+    static void setLastSpriteSpecial(int s);
+    static void setLastSpriteSpeed(int s);
+    static void setLastSpriteAlivetime(float al);
 
     static Texture cloudtexture;
     static Texture bloodtexture;

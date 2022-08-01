@@ -32,7 +32,7 @@
     "Textures/FurChocolate.jpg": {
 		"format": "r8g8b8a8,UBN,sRGB",
         "mipmap": false
-    },
+    }, 
     "Textures/FurDarko.jpg": {
 		"format": "r8g8b8a8,UBN,sRGB",
         "mipmap": false

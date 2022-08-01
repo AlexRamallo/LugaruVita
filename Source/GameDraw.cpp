@@ -665,6 +665,13 @@ int Game::DrawGLScene(StereoSide side)
 
         glDepthMask(0);
 
+        //Sprite::Draw();
+
+        std::vector<WorkerThread::JobHandle> spritejobs;
+        Sprite::submitAnimationJob(spritejobs);
+        for(int i = 0; i < spritejobs.size(); i++){
+            WorkerThread::join(spritejobs[i], true);
+        }
         Sprite::Draw();
 }//MICROPROFILE
 

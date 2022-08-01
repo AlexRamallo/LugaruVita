@@ -1010,12 +1010,13 @@ bool Person::DoBloodBigWhere(float howmuch, int which, XYZ where)
 {
     MICROPROFILE_SCOPEI("Person", "DoBloodBigWhere", 0xaaffaa);
 
-    static int i, j;
-    static XYZ bloodvel;
-    static XYZ startpoint, endpoint, colpoint, movepoint;
-    static float rotationpoint;
-    static int whichtri;
-    static XYZ p1, p2, p3, p0;
+    int i, j;
+    XYZ bloodvel;
+    XYZ startpoint, endpoint, colpoint, movepoint;
+    float rotationpoint;
+    int whichtri;
+    XYZ p1, p2, p3, p0;
+    
     XYZ bary;
     XYZ gxx, gyy;
     float coordsx, coordsy;
