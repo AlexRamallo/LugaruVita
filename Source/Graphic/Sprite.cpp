@@ -64,17 +64,18 @@ void Sprite::deleteSprites(){
 }
 
 struct AnimateSprites: WorkerThread::Job {
+	float mat[4][4];
 	int start_idx, end_idx;
-	AnimateSprites(int start, int end):
+	AnimateSprites(float m[4][4], int start, int end):
 		Job(),
 		start_idx(start),
 		end_idx(end)
 	{
-		//--
+		memcpy(mat, m, sizeof(mat));
 	}
 	~AnimateSprites(){}
 	void execute() override {
-		Sprite::doAnimate(start_idx, end_idx);
+		Sprite::doAnimate(mat, start_idx, end_idx);
 	}
 };
 static bool check;
@@ -91,17 +92,21 @@ void Sprite::submitAnimationJob(std::vector<WorkerThread::JobHandle> &out){
 
 	MICROPROFILE_COUNTER_SET("sprites_per_job", sprites_per_job);
 
+	float mmodel[4][4];
+	glMatrixMode(GL_MODELVIEW);
+	glGetFloatv(GL_MODELVIEW_MATRIX, &mmodel[0][0]);
+
 	for(int start = 0; start < sprites_count; start += sprites_per_job){
 		int end = start + sprites_per_job;
 		if(end >= sprites_count){
 			end = sprites_count - 1;
 		}
-		WorkerThread::JobHandle hndl = WorkerThread::submitJob<AnimateSprites>(start, end);
+		WorkerThread::JobHandle hndl = WorkerThread::submitJob<AnimateSprites>(mmodel, start, end);
 		out.push_back(hndl);
 	}
 }
 
-void Sprite::doAnimate(int start_idx, int end_idx){
+void Sprite::doAnimate(float (&mmodel)[4][4], int start_idx, int end_idx){
 	MICROPROFILE_SCOPEI("Sprite", "animate", 0x55ff55);
 	
 	float tempmult = multiplier;
@@ -289,7 +294,7 @@ void Sprite::doAnimate(int start_idx, int end_idx){
 		//glPushMatrix();
 
 		matrix4x4 mat;
-		matrix4x4_identity(mat);
+		matrix4x4_transpose(mat, mmodel);
 
 		//glTranslatef(sprite->position.x, sprite->position.y, sprite->position.z);
 		matrix4x4_translate(mat, sprite->position.x, sprite->position.y, sprite->position.z);
@@ -314,9 +319,9 @@ void Sprite::doAnimate(int start_idx, int end_idx){
 			matrix4x4_translate(mat, 1, 0, 0);
 		}
 		//glGetFloatv(GL_MODELVIEW_MATRIX, M);
-		sprite->position.x = mat[0][3];
-		sprite->position.y = mat[1][3];
-		sprite->position.z = mat[2][3];
+		sprite->rpoint.x = mat[0][3];
+		sprite->rpoint.y = mat[1][3];
+		sprite->rpoint.z = mat[2][3];
 
 		}//MICROPROFILE
 
@@ -510,12 +515,9 @@ void Sprite::Draw()
 
 		glMatrixMode(GL_MODELVIEW);
 		glPushMatrix();
+		glLoadIdentity();
 
-		glTranslatef(
-			sprites[i].position.x,
-			sprites[i].position.y,
-			sprites[i].position.z
-		);
+		glTranslatef(sprites[i].rpoint.x, sprites[i].rpoint.y, sprites[i].rpoint.z);
 		glRotatef(sprites[i].rotation, 0, 0, 1);
 
 		if ((sprites[i].type == flamesprite || sprites[i].type == weaponflamesprite || sprites[i].type == weaponshinesprite || sprites[i].type == bloodflamesprite)) {

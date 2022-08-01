@@ -54,6 +54,7 @@ class Sprite
 {
 private:
     XYZ oldposition;
+    XYZ rpoint;
     XYZ position;
     XYZ velocity;
     float size;
@@ -76,7 +77,7 @@ public:
 
     static void submitAnimationJob(std::vector<WorkerThread::JobHandle> &out);
 
-    static void doAnimate(int start_idx, int end_idx);
+    static void doAnimate(float (&mat)[4][4], int start_idx, int end_idx);
 
     static void DeleteSprite(int which);
     static void MakeSprite(int atype, XYZ where, XYZ avelocity, float red, float green, float blue, float asize, float aopacity);
