@@ -15,13 +15,13 @@ outlog = "lugaru_runlog.txt"
 
 logfile = "lugaru_runlog.txt"
 elf = "build/LugaruVita.elf"
+#elf = "build/release/LugaruVita.elf"
 
 #logfile = "SharkServer.log"
 #elf = "build/tool_vita_shark_eboot_debug/tool/shark_server/VitaShaRK Server.elf"
 
 ftp = FTP()
 ftp.connect(host='192.168.1.74', port=1337)
-#ftp.connect(host='192.168.1.238', port=1337)
 ftp.login()
 
 months = {

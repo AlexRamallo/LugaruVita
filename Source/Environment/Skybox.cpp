@@ -30,6 +30,16 @@ extern float skyboxr;
 extern float skyboxg;
 extern float skyboxb;
 
+void SkyBox::submitLoadJobs(const std::string& ffront, const std::string& fleft, const std::string& fback,
+                    const std::string& fright, const std::string& fup, const std::string& fdown){
+    jfront = front.submitLoadJob(ffront, true);
+    jleft = left.submitLoadJob(fleft, true);
+    jback = back.submitLoadJob(fback, true);
+    jright = right.submitLoadJob(fright, true);
+    jup = up.submitLoadJob(fup, true);
+    jdown = down.submitLoadJob(fdown, true);
+}
+
 void SkyBox::load(const std::string& ffront, const std::string& fleft, const std::string& fback,
                   const std::string& fright, const std::string& fup, const std::string& fdown)
 {

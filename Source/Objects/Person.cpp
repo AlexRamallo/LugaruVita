@@ -7434,6 +7434,7 @@ void Person::takeWeapon(int weaponId)
 
 void Person::addClothes()
 {
+    MICROPROFILE_SCOPEI("Person", "addClothes", 0xaaffaa);
     if (clothes.size() > 0) {
         for (unsigned i = 0; i < clothes.size(); i++) {
             addClothes(i);

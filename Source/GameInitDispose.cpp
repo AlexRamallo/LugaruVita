@@ -25,6 +25,11 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 #include "Graphic/Texture.hpp"
 #include "Menu/Menu.hpp"
 #include "Utils/Folders.hpp"
+#include "Utils/FileCache.hpp"
+#include "Utils/WorkerThread.hpp"
+
+#include <vector>
+#include <tuple>
 
 #include "Thirdparty/microprofile/microprofile.h"
 
@@ -506,7 +511,8 @@ void Game::InitGame()
 
     std::cout << "InitGame B\n";
 
-    Sprite::AllocSprites(500);
+    //need to implement instancing to up this number w/o tanking perf
+    Sprite::AllocSprites(200);
 
 
     whichjointstartarray[0] = righthip;
@@ -713,7 +719,11 @@ void Game::LoadScreenTexture()
 void Game::LoadStuff()
 {
     MICROPROFILE_SCOPEI("Game", "LoadStuff", 0xffff3456);
+    FileCache::InitCache();
     LOG("Game::LoadStuff()");
+
+    std::vector<std::tuple<WorkerThread::JobHandle, Texture*>> loadTexJobs;
+
     float temptexdetail;
     float viewdistdetail;
     float megascale = 1;
@@ -754,6 +764,7 @@ void Game::LoadStuff()
 
     Weapon::Load();
 
+    /*
     terrain.shadowtexture.load("Textures/Shadow.png", 0);
     terrain.bloodtexture.load("Textures/Blood.png", 0);
     terrain.breaktexture.load("Textures/Break.png", 0);
@@ -774,6 +785,26 @@ void Game::LoadStuff()
     Sprite::splintertexture.load("Textures/Splinter.png", 1);
     Sprite::leaftexture.load("Textures/Leaf.png", 1);
     Sprite::toothtexture.load("Textures/Tooth.png", 1);
+    */
+
+    loadTexJobs.emplace_back(terrain.shadowtexture.submitLoadJob("Textures/Shadow.png", 0), &terrain.shadowtexture);
+    loadTexJobs.emplace_back(terrain.bloodtexture.submitLoadJob("Textures/Blood.png", 0), &terrain.bloodtexture);
+    loadTexJobs.emplace_back(terrain.breaktexture.submitLoadJob("Textures/Break.png", 0), &terrain.breaktexture);
+    loadTexJobs.emplace_back(terrain.bloodtexture2.submitLoadJob("Textures/Blood.png", 0), &terrain.bloodtexture2);
+    loadTexJobs.emplace_back(terrain.footprinttexture.submitLoadJob("Textures/Footprint.png", 0), &terrain.footprinttexture);
+    loadTexJobs.emplace_back(terrain.bodyprinttexture.submitLoadJob("Textures/Bodyprint.png", 0), &terrain.bodyprinttexture);
+    loadTexJobs.emplace_back(hawktexture.submitLoadJob("Textures/Hawk.png", 0), &hawktexture);
+    loadTexJobs.emplace_back(Sprite::cloudtexture.submitLoadJob("Textures/Cloud.png", 1), &Sprite::cloudtexture);
+    loadTexJobs.emplace_back(Sprite::cloudimpacttexture.submitLoadJob("Textures/CloudImpact.png", 1), &Sprite::cloudimpacttexture);
+    loadTexJobs.emplace_back(Sprite::bloodtexture.submitLoadJob("Textures/BloodParticle.png", 1), &Sprite::bloodtexture);
+    loadTexJobs.emplace_back(Sprite::snowflaketexture.submitLoadJob("Textures/SnowFlake.png", 1), &Sprite::snowflaketexture);
+    loadTexJobs.emplace_back(Sprite::flametexture.submitLoadJob("Textures/Flame.png", 1), &Sprite::flametexture);
+    loadTexJobs.emplace_back(Sprite::bloodflametexture.submitLoadJob("Textures/BloodFlame.png", 1), &Sprite::bloodflametexture);
+    loadTexJobs.emplace_back(Sprite::smoketexture.submitLoadJob("Textures/Smoke.png", 1), &Sprite::smoketexture);
+    loadTexJobs.emplace_back(Sprite::shinetexture.submitLoadJob("Textures/Shine.png", 1), &Sprite::shinetexture);
+    loadTexJobs.emplace_back(Sprite::splintertexture.submitLoadJob("Textures/Splinter.png", 1), &Sprite::splintertexture);
+    loadTexJobs.emplace_back(Sprite::leaftexture.submitLoadJob("Textures/Leaf.png", 1), &Sprite::leaftexture);
+    loadTexJobs.emplace_back(Sprite::toothtexture.submitLoadJob("Textures/Tooth.png", 1), &Sprite::toothtexture);
 
     yaw = 0;
     pitch = 0;
@@ -907,4 +938,12 @@ void Game::LoadStuff()
 
     visibleloading = false;
     firstLoadDone = true;
+
+
+    for(auto &it: loadTexJobs){
+        WorkerThread::join(std::get<0>(it), true);
+        std::get<1>(it)->upload();
+    }
+
+    FileCache::ClearCache();
 }

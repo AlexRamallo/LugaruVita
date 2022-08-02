@@ -21,8 +21,6 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef _MODELS_HPP_
 #define _MODELS_HPP_
 
-#define USE_MODEL_VBO 1
-
 #include "Environment/Terrain.hpp"
 #include "Graphic/Texture.hpp"
 #include "Graphic/gamegl.hpp"
@@ -73,11 +71,6 @@ public:
 
     ModelType type;
 
-#if USE_MODEL_VBO
-    GLuint vbos[3];
-    void destroyVBO();
-    void createVBO();
-#endif
     int* owner;
     XYZ* vertex;
     XYZ* normals;
@@ -132,6 +125,13 @@ public:
     void drawimmediate();
     void Rotate(float xang, float yang, float zang);
     void deleteDeadDecals();
+
+    WorkerThread::JobHandle submitLoadnotex(const std::string &filename);
+    WorkerThread::JobHandle submitLoad(const std::string &filename);
+    WorkerThread::JobHandle submitLoadDecal(const std::string &filename);
+    WorkerThread::JobHandle submitLoadRaw(const std::string &filename);
+
+    WorkerThread::JobHandle submitTransformJob();
 
 private:
 

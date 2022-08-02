@@ -155,7 +155,7 @@ def get_update_tasks(bld, assets = None):
 
 	if assets != None:
 		#asset files
-		for ass in assets.ant_glob("**/*", excl="asset_proc.json", remove=False):
+		for ass in assets.ant_glob("**/*", excl=["asset_proc.json", "wscript"], remove=False):
 			dst = '%s/%s' % (assets.name, ass.path_from(assets))
 			mk_task(ass, [dst])
 

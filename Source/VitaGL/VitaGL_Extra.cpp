@@ -60,8 +60,3 @@ void glCallLists( GLsizei n, GLenum type, const GLvoid *lists ){
 void glTranslated( GLdouble x, GLdouble y, GLdouble z ){
 	glTranslatef((float) x, (float) y, (float) z);
 }
-
-void vglDrawArrays(GLenum mode, GLint first, GLsizei count) {
-	MICROPROFILE_SCOPEI("vitaGL", "glDrawArrays", 0xff0000);
-	glDrawArrays(mode, first, count);
-}

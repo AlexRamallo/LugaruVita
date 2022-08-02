@@ -26,7 +26,7 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 
 enum anim_attack_type
 {
-    neutral,
+    neutral = 0,
     normalattack,
     reversed,
     reversal
@@ -34,7 +34,7 @@ enum anim_attack_type
 
 enum anim_height_type
 {
-    lowheight,
+    lowheight = 0,
     middleheight,
     highheight
 };

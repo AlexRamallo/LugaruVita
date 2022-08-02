@@ -28,6 +28,9 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 #include "Game.hpp"
 #include "Level/Awards.hpp"
 #include "Tutorial.hpp"
+#include "Utils/WorkerThread.hpp"
+#include <tuple>
+#include <vector>
 
 extern float multiplier;
 extern Terrain terrain;
@@ -97,11 +100,83 @@ void Weapon::setType(int t)
     }
 }
 
+struct WeaponModelTransformJob: WorkerThread::Job {
+    Model *model;
+    int type;
+    WeaponModelTransformJob(Model *m, int t):
+        Job(),
+        model(m),
+        type(t)
+    {
+        //--
+    }
+    ~WeaponModelTransformJob() = default;
+    void execute() override {
+        switch(type){
+            default: //throwingknifemodel
+                model->Scale(.001, .001, .001);
+                model->Rotate(90, 0, 0);
+                model->Rotate(0, 90, 0);
+                model->flat = 0;
+                model->CalculateNormals(1);
+                break;
+            case 1: //swordmodel
+                model->Scale(.001, .001, .001);
+                model->Rotate(90, 0, 0);
+                model->Rotate(0, 90, 0);
+                model->Rotate(0, 0, 90);
+                model->flat = 1;
+                model->CalculateNormals(1);
+                break;
+            case 2: //staffmodel
+                model->Scale(.005, .005, .005);
+                model->Rotate(90, 0, 0);
+                model->Rotate(0, 90, 0);
+                model->Rotate(0, 0, 90);
+                model->flat = 1;
+                model->CalculateNormals(1);
+                break;
+        }
+    }
+};
+
 /* Load weapons models and textures */
 void Weapon::Load()
 {
-    LOG("Loading weapon data...");
+    MICROPROFILE_SCOPEI("Weapon", "Load", 0x888888);
+    std::vector<std::tuple<WorkerThread::JobHandle, Texture*>> loadTexJobs;
 
+    loadTexJobs.emplace_back(knifetextureptr.submitLoadJob("Textures/Knife.png", 0), &knifetextureptr);
+    loadTexJobs.emplace_back(bloodknifetextureptr.submitLoadJob("Textures/BloodKnife.png", 0), &bloodknifetextureptr);
+    loadTexJobs.emplace_back(lightbloodknifetextureptr.submitLoadJob("Textures/BloodKnifeLight.png", 0), &lightbloodknifetextureptr);
+    loadTexJobs.emplace_back(swordtextureptr.submitLoadJob("Textures/Sword.jpg", 1), &swordtextureptr);
+    loadTexJobs.emplace_back(bloodswordtextureptr.submitLoadJob("Textures/SwordBlood.jpg", 1), &bloodswordtextureptr);
+    loadTexJobs.emplace_back(lightbloodswordtextureptr.submitLoadJob("Textures/SwordBloodLight.jpg", 1), &lightbloodswordtextureptr);
+    loadTexJobs.emplace_back(stafftextureptr.submitLoadJob("Textures/Staff.jpg", 1), &stafftextureptr);
+
+    WorkerThread::JobHandle modelJobs[3] = {
+        throwingknifemodel.submitLoad("Models/ThrowingKnife.solid"),
+        swordmodel.submitLoad("Models/Sword.solid"),
+        staffmodel.submitLoad("Models/Staff.solid"),
+    };
+
+    WorkerThread::JobHandle transformJobs[3] = {
+        WorkerThread::submitDependentJob<WeaponModelTransformJob>(modelJobs[0], &throwingknifemodel, 0),
+        WorkerThread::submitDependentJob<WeaponModelTransformJob>(modelJobs[1], &swordmodel, 1),
+        WorkerThread::submitDependentJob<WeaponModelTransformJob>(modelJobs[2], &staffmodel, 2)
+    };
+
+    for(auto &it: loadTexJobs){
+        WorkerThread::join(std::get<0>(it), true);
+        std::get<1>(it)->upload();
+    }
+
+    for(int i = 0; i < 3; i++){
+        WorkerThread::join(modelJobs[i], true);
+        WorkerThread::join(transformJobs[i], true);
+    }
+
+    /*
     knifetextureptr.load("Textures/Knife.png", 0);
     bloodknifetextureptr.load("Textures/BloodKnife.png", 0);
     lightbloodknifetextureptr.load("Textures/BloodKnifeLight.png", 0);
@@ -132,6 +207,7 @@ void Weapon::Load()
     staffmodel.Rotate(0, 0, 90);
     staffmodel.flat = 1;
     staffmodel.CalculateNormals(1);
+    */
 }
 
 void Weapon::doStuff(int i)

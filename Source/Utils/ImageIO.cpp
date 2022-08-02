@@ -20,6 +20,7 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "Utils/ImageIO.hpp"
 #include "Utils/PVRTexLoader.hpp"
+#include "Utils/FileCache.hpp"
 
 #include "Game.hpp"
 #include "Thirdparty/microprofile/microprofile.h"
@@ -64,7 +65,8 @@ int get_filetype(const char *filename){
     static const uint8_t png[8] = {137,80,78,71,13,10,26,10};
     static const uint8_t pvr[3] = {'P', 'V', 'R'};
 
-    FILE *file = fopen(filename, "rb");
+    //FILE *file = fopen(filename, "rb");
+    FILE *file = FileCache::readFile(filename);
     if(file == NULL){
         return -1;
     }
@@ -195,7 +197,8 @@ static bool load_jpg(const char* file_name, ImageRec& tex)
     JSAMPROW buffer[1]; /* Output row buffer */
     int row_stride;     /* physical row width in output buffer */
     errno = 0;
-    FILE* infile = fopen(file_name, "rb");
+    //FILE* infile = fopen(file_name, "rb");
+    FILE *infile = FileCache::readFile(file_name);
 
     if (infile == NULL) {
         perror((std::string("Couldn't open file ") + file_name).c_str());
@@ -253,7 +256,8 @@ static bool load_png(const char* file_name, ImageRec& tex)
     bool retval = false;
     png_byte** row_pointers = NULL;
     errno = 0;
-    FILE* fp = fopen(file_name, "rb");
+    //FILE* fp = fopen(file_name, "rb");
+    FILE *fp = FileCache::readFile(file_name);
 
     if (fp == NULL) {
         LOG((std::string("Couldn't open file ") + file_name).c_str());

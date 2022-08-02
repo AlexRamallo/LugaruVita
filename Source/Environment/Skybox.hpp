@@ -26,16 +26,19 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 #include "Math/XYZ.hpp"
 #include "Math/XYZ.hpp"
 #include "Utils/ImageIO.hpp"
+#include "Utils/WorkerThread.hpp"
 
 class SkyBox
 {
 public:
     Texture front, left, back, right, up, down;
+    WorkerThread::JobHandle jfront, jleft, jback, jright, jup, jdown;
 
     void load(const std::string& ffront, const std::string& fleft, const std::string& fback,
               const std::string& fright, const std::string& fup, const std::string& fdown);
+    void submitLoadJobs(const std::string& ffront, const std::string& fleft, const std::string& fback,
+                        const std::string& fright, const std::string& fup, const std::string& fdown);
     void draw();
-
     SkyBox() {}
 };
 

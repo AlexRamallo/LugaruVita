@@ -124,7 +124,23 @@ int Game::DrawGLScene(StereoSide side)
     std::string string;
     static int drawmode = 0;
 
-    
+    ///////////////////////
+    //Player animation tasks
+    static const int max_players_ct = 16;
+    ASSERT(Person::players.size() <= max_players_ct && "Too many players, need to increase limit");
+    int num_draw_targs = 0;
+    int draw_targets[max_players_ct];
+    WorkerThread::JobHandle hndl_skeleton[max_players_ct];
+    WorkerThread::JobHandle hndl_normals[max_players_ct];
+    memset(draw_targets, -1, sizeof(draw_targets));
+    memset(hndl_skeleton, -1, sizeof(hndl_skeleton));
+    memset(hndl_normals, -1, sizeof(hndl_normals));
+    ///////////////////////
+
+    ///////////////////////
+    //Sprite animation tasks
+    std::vector<WorkerThread::JobHandle> spritejobs;
+    ///////////////////////
 
     if (stereomode == stereoAnaglyph) {
         switch (side) {
@@ -340,6 +356,9 @@ int Game::DrawGLScene(StereoSide side)
 
 }//MICROPROFILE
 
+    Sprite::submitAnimationJob(spritejobs);
+
+
 {MICROPROFILE_SCOPEI("DrawGLScene", "shadow-decal", 0xb500ff);
         //make shadow decals on terrain and Object::objects
         static XYZ point;
@@ -461,19 +480,6 @@ int Game::DrawGLScene(StereoSide side)
             glEnable(GL_CULL_FACE);
             glCullFace(GL_FRONT);
             glDepthMask(1);
-
-            static const int max_players_ct = 16;
-            ASSERT(Person::players.size() <= max_players_ct && "Too many players, need to increase limit");
-
-            int num_draw_targs = 0;
-            int draw_targets[max_players_ct];
-
-            WorkerThread::JobHandle hndl_skeleton[max_players_ct];
-            WorkerThread::JobHandle hndl_normals[max_players_ct];
-
-            memset(draw_targets, -1, sizeof(draw_targets));
-            memset(hndl_skeleton, -1, sizeof(hndl_skeleton));
-            memset(hndl_normals, -1, sizeof(hndl_normals));
 
             for (unsigned k = 0; k < Person::players.size(); k++) {
                 MICROPROFILE_SCOPEI("DrawGLScene", "models-draw-person", 0xb500ff);
@@ -666,9 +672,6 @@ int Game::DrawGLScene(StereoSide side)
         glDepthMask(0);
 
         //Sprite::Draw();
-
-        std::vector<WorkerThread::JobHandle> spritejobs;
-        Sprite::submitAnimationJob(spritejobs);
         for(int i = 0; i < spritejobs.size(); i++){
             WorkerThread::join(spritejobs[i], true);
         }

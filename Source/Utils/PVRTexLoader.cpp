@@ -20,6 +20,7 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "Graphic/gamegl.hpp"
 #include "Utils/PVRTexLoader.hpp"
+#include "Utils/FileCache.hpp"
 #include "Utils/Log.h"
 #include <stdio.h>
 #include <assert.h>
@@ -184,7 +185,8 @@ static int get_pvr_channel_size(int type){
 }
 
 bool PVRTexLoader::loadTexture(const char *filename, uint8_t **data, PVRHeader *header){
-	FILE *fd = fopen(filename, "rb");
+	//FILE *fd = fopen(filename, "rb");
+	FILE *fd = FileCache::readFile(filename);
 	if(fd == NULL){
 		LOG("Failed to open \"%s\"", filename);
 		return false;

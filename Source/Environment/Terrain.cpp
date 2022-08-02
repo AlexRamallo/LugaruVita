@@ -796,7 +796,7 @@ void Terrain::drawpatch(int whichx, int whichy, float opacity)
     glTexCoordPointer(2, GL_FLOAT, 9 * sizeof(GLfloat), &vArray[7 + whichx * patch_elements + whichy * patch_elements * subdivision]);
 
     //Draw
-    vglDrawArrays(GL_TRIANGLES, 0, numtris[whichx][whichy] * 3);
+    glDrawArrays(GL_TRIANGLES, 0, numtris[whichx][whichy] * 3);
 
     glDisableClientState(GL_VERTEX_ARRAY);
     glDisableClientState(GL_COLOR_ARRAY);
@@ -822,7 +822,7 @@ void Terrain::drawpatchother(int whichx, int whichy, float opacity)
     glTexCoordPointer(2, GL_FLOAT, 9 * sizeof(GLfloat), &vArray[7 + whichx * patch_elements + whichy * patch_elements * subdivision]);
 
     //Draw
-    vglDrawArrays(GL_TRIANGLES, 0, numtris[whichx][whichy] * 3);
+    glDrawArrays(GL_TRIANGLES, 0, numtris[whichx][whichy] * 3);
 
     glDisableClientState(GL_VERTEX_ARRAY);
     glDisableClientState(GL_COLOR_ARRAY);
@@ -849,7 +849,7 @@ void Terrain::drawpatchotherother(int whichx, int whichy)
     glTexCoordPointer(2, GL_FLOAT, 9 * sizeof(GLfloat), &vArray[7 + whichx * patch_elements + whichy * patch_elements * subdivision]);
 
     //Draw
-    vglDrawArrays(GL_TRIANGLES, 0, numtris[whichx][whichy] * 3);
+    glDrawArrays(GL_TRIANGLES, 0, numtris[whichx][whichy] * 3);
 
     glDisableClientState(GL_VERTEX_ARRAY);
     glDisableClientState(GL_COLOR_ARRAY);

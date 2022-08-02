@@ -10,149 +10,185 @@
     },
 
     "Textures/Fur.jpg": {
-		"format": "r8g8b8a8,UBN,sRGB",
+		"format": "r8g8b8,UBN,sRGB",
+        "resize": "256,256",
         "mipmap": false
     },
     "Textures/FurBlack.jpg": {
-		"format": "r8g8b8a8,UBN,sRGB",
+		"format": "r8g8b8,UBN,sRGB",
+        "resize": "256,256",
         "mipmap": false
     },
     "Textures/FurBlackWhite.jpg": {
-		"format": "r8g8b8a8,UBN,sRGB",
+		"format": "r8g8b8,UBN,sRGB",
+        "resize": "256,256",
         "mipmap": false
-    },
+    }, 
     "Textures/FurBrown.jpg": {
-		"format": "r8g8b8a8,UBN,sRGB",
+		"format": "r8g8b8,UBN,sRGB",
+        "resize": "256,256",
         "mipmap": false
     },
     "Textures/FurBrownWhite.jpg": {
-		"format": "r8g8b8a8,UBN,sRGB",
+		"format": "r8g8b8,UBN,sRGB",
+        "resize": "256,256",
         "mipmap": false
     },
     "Textures/FurChocolate.jpg": {
-		"format": "r8g8b8a8,UBN,sRGB",
+		"format": "r8g8b8,UBN,sRGB",
+        "resize": "256,256",
         "mipmap": false
     }, 
     "Textures/FurDarko.jpg": {
-		"format": "r8g8b8a8,UBN,sRGB",
+		"format": "r8g8b8,UBN,sRGB",
+        "resize": "256,256",
         "mipmap": false
     },
     "Textures/FurDavid.jpg": {
-		"format": "r8g8b8a8,UBN,sRGB",
+		"format": "r8g8b8,UBN,sRGB",
+        "resize": "256,256",
         "mipmap": false
     },
     "Textures/FurLynx.jpg": {
-		"format": "r8g8b8a8,UBN,sRGB",
+		"format": "r8g8b8,UBN,sRGB",
+        "resize": "256,256",
         "mipmap": false
     },
     "Textures/FurOpal.jpg": {
-		"format": "r8g8b8a8,UBN,sRGB",
+		"format": "r8g8b8,UBN,sRGB",
+        "resize": "256,256",
         "mipmap": false
     },
     "Textures/FurOtter.jpg": {
-		"format": "r8g8b8a8,UBN,sRGB",
+		"format": "r8g8b8,UBN,sRGB",
+        "resize": "256,256",
         "mipmap": false
     },
     "Textures/FurSable.jpg": {
-		"format": "r8g8b8a8,UBN,sRGB",
+		"format": "r8g8b8,UBN,sRGB",
+        "resize": "256,256",
         "mipmap": false
     },
     "Textures/FurWhite.jpg": {
-		"format": "r8g8b8a8,UBN,sRGB",
+		"format": "r8g8b8,UBN,sRGB",
+        "resize": "256,256",
         "mipmap": false
     },
     "Textures/FurWolfDark.jpg": {
-		"format": "r8g8b8a8,UBN,sRGB",
+		"format": "r8g8b8,UBN,sRGB",
+        "resize": "256,256",
         "mipmap": false
     },
     "Textures/FurWolfGrey.jpg": {
-		"format": "r8g8b8a8,UBN,sRGB",
+		"format": "r8g8b8,UBN,sRGB",
+        "resize": "256,256",
         "mipmap": false
     },
     "Textures/FurWolfLizard.jpg": {
-		"format": "r8g8b8a8,UBN,sRGB",
+		"format": "r8g8b8,UBN,sRGB",
+        "resize": "256,256",
         "mipmap": false
     },
     "Textures/FurWolfSnow.jpg": {
-		"format": "r8g8b8a8,UBN,sRGB",
+		"format": "r8g8b8,UBN,sRGB",
+        "resize": "256,256",
         "mipmap": false
     },
 
 
     "Textures/DesertCl.png": {
     	"format": "r8g8b8a8,UBN,sRGB",
+        "resize": "256,256",
         "mipmap": false
     },
     "Textures/EarWrap.png": {
     	"format": "r8g8b8a8,UBN,sRGB",
+        "resize": "256,256",
         "mipmap": false
     },
     "Textures/LeatherWristLeft.png": {
     	"format": "r8g8b8a8,UBN,sRGB",
+        "resize": "256,256",
         "mipmap": false
     },
     "Textures/LeatherWristRight.png": {
     	"format": "r8g8b8a8,UBN,sRGB",
+        "resize": "256,256",
         "mipmap": false
     },
     "Textures/LeatherArmor.png": {
     	"format": "r8g8b8a8,UBN,sRGB",
+        "resize": "256,256",
         "mipmap": false
     },
     "Textures/GiTop.png": {
     	"format": "r8g8b8a8,UBN,sRGB",
+        "resize": "256,256",
         "mipmap": false
     },
     "Textures/GiTeared.png": {
     	"format": "r8g8b8a8,UBN,sRGB",
+        "resize": "256,256",
         "mipmap": false
     },
     "Textures/GiBottom.png": {
     	"format": "r8g8b8a8,UBN,sRGB",
+        "resize": "256,256",
         "mipmap": false
     },
     "Textures/Gi.png": {
     	"format": "r8g8b8a8,UBN,sRGB",
+        "resize": "256,256",
         "mipmap": false
     },
     "Textures/Pants.png": {
     	"format": "r8g8b8a8,UBN,sRGB",
+        "resize": "256,256",
         "mipmap": false
     },
     "Textures/FancyPants.png": {
     	"format": "r8g8b8a8,UBN,sRGB",
+        "resize": "256,256",
         "mipmap": false
     },
     "Textures/FancyPantsCamoArctic.png": {
     	"format": "r8g8b8a8,UBN,sRGB",
+        "resize": "256,256",
         "mipmap": false
     },
     "Textures/FancyPantsCamoDesert.png": {
     	"format": "r8g8b8a8,UBN,sRGB",
+        "resize": "256,256",
         "mipmap": false
     },
     "Textures/FancyPantsCamo.png": {
     	"format": "r8g8b8a8,UBN,sRGB",
+        "resize": "256,256",
         "mipmap": false
     },
     "Textures/LeatherPants.png": {
     	"format": "r8g8b8a8,UBN,sRGB",
+        "resize": "256,256",
         "mipmap": false
     },
     "Textures/HeadBand.png": {
     	"format": "r8g8b8a8,UBN,sRGB",
+        "resize": "256,256",
         "mipmap": false
     },
     "Textures/Shirt.png": {
     	"format": "r8g8b8a8,UBN,sRGB",
+        "resize": "256,256",
         "mipmap": false
     },
     "Textures/ShirtFemale.png": {
     	"format": "r8g8b8a8,UBN,sRGB",
+        "resize": "256,256",
         "mipmap": false
     },
     "Textures/LongSleeve.png": {
     	"format": "r8g8b8a8,UBN,sRGB",
+        "resize": "256,256",
         "mipmap": false
     }
 }

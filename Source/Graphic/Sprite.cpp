@@ -392,15 +392,17 @@ void Sprite::Draw()
 	{MICROPROFILE_SCOPEI("Sprite", "render", 0x55ff55);
 
 	for (unsigned i = 0; i < sprites_count; i++) {
-		if(!sprites[i].alive){
+		Sprite *sprite = &sprites[i];
+		if(!sprite->alive){
 			continue;
 		}
 		{MICROPROFILE_SCOPEI("Sprite", "draw", 0x55ff55);
 		//draw
 		//TODO: separate sprites by type to minimize binding calls
 
-		if (lasttype != sprites[i].type) {
-			switch (sprites[i].type) {
+		if (lasttype != sprite->type) {
+			MICROPROFILE_SCOPEI("Sprite", "rebind", 0xffff00);
+			switch (sprite->type) {
 				case cloudsprite:
 					cloudtexture.bind();
 					if (!blend) {
@@ -435,17 +437,17 @@ void Sprite::Draw()
 					}
 					break;
 				case splintersprite:
-					if (lastspecial != sprites[i].special) {
-						if (sprites[i].special == 0) {
+					if (lastspecial != sprite->special) {
+						if (sprite->special == 0) {
 							splintertexture.bind();
 						}
-						if (sprites[i].special == 1) {
+						if (sprite->special == 1) {
 							leaftexture.bind();
 						}
-						if (sprites[i].special == 2) {
+						if (sprite->special == 2) {
 							snowflaketexture.bind();
 						}
-						if (sprites[i].special == 3) {
+						if (sprite->special == 3) {
 							toothtexture.bind();
 						}
 						if (!blend) {
@@ -491,86 +493,86 @@ void Sprite::Draw()
 			}
 		}
 
-		if (sprites[i].type == snowsprite) {
-			distancemult = (144 - (distsq(&tempviewer, &sprites[i].position) - (144 * fadestart)) * (1 / (1 - fadestart))) / 144;
+		if (sprite->type == snowsprite) {
+			distancemult = (144 - (distsq(&tempviewer, &sprite->position) - (144 * fadestart)) * (1 / (1 - fadestart))) / 144;
 		} else {
-			distancemult = (viewdistsquared - (distsq(&viewer, &sprites[i].position) - (viewdistsquared * fadestart)) * (1 / (1 - fadestart))) / viewdistsquared;
+			distancemult = (viewdistsquared - (distsq(&viewer, &sprite->position) - (viewdistsquared * fadestart)) * (1 / (1 - fadestart))) / viewdistsquared;
 		}
-		if (sprites[i].type == flamesprite) {
+		if (sprite->type == flamesprite) {
 			if (distancemult >= 1) {
-				glColor4f(sprites[i].color[0], sprites[i].color[1], sprites[i].color[2], sprites[i].opacity);
+				glColor4f(sprite->color[0], sprite->color[1], sprite->color[2], sprite->opacity);
 			} else {
-				glColor4f(sprites[i].color[0], sprites[i].color[1], sprites[i].color[2], sprites[i].opacity * distancemult);
+				glColor4f(sprite->color[0], sprite->color[1], sprite->color[2], sprite->opacity * distancemult);
 			}
 		} else {
 			if (distancemult >= 1) {
-				glColor4f(sprites[i].color[0] * lightcolor[0], sprites[i].color[1] * lightcolor[1], sprites[i].color[2] * lightcolor[2], sprites[i].opacity);
+				glColor4f(sprite->color[0] * lightcolor[0], sprite->color[1] * lightcolor[1], sprite->color[2] * lightcolor[2], sprite->opacity);
 			} else {
-				glColor4f(sprites[i].color[0] * lightcolor[0], sprites[i].color[1] * lightcolor[1], sprites[i].color[2] * lightcolor[2], sprites[i].opacity * distancemult);
+				glColor4f(sprite->color[0] * lightcolor[0], sprite->color[1] * lightcolor[1], sprite->color[2] * lightcolor[2], sprite->opacity * distancemult);
 			}
 		}
 
-		lasttype = sprites[i].type;
-		lastspecial = sprites[i].special;
+		lasttype = sprite->type;
+		lastspecial = sprite->special;
 
 		glMatrixMode(GL_MODELVIEW);
 		glPushMatrix();
 		glLoadIdentity();
 
-		glTranslatef(sprites[i].rpoint.x, sprites[i].rpoint.y, sprites[i].rpoint.z);
-		glRotatef(sprites[i].rotation, 0, 0, 1);
+		glTranslatef(sprite->rpoint.x, sprite->rpoint.y, sprite->rpoint.z);
+		glRotatef(sprite->rotation, 0, 0, 1);
 
-		if ((sprites[i].type == flamesprite || sprites[i].type == weaponflamesprite || sprites[i].type == weaponshinesprite || sprites[i].type == bloodflamesprite)) {
-			if (sprites[i].alivetime < .14) {
-				glScalef(sprites[i].alivetime / .14, sprites[i].alivetime / .14, sprites[i].alivetime / .14);
+		if ((sprite->type == flamesprite || sprite->type == weaponflamesprite || sprite->type == weaponshinesprite || sprite->type == bloodflamesprite)) {
+			if (sprite->alivetime < .14) {
+				glScalef(sprite->alivetime / .14, sprite->alivetime / .14, sprite->alivetime / .14);
 			}
 		}
-		if (sprites[i].type == smoketype || sprites[i].type == snowsprite || sprites[i].type == weaponshinesprite || sprites[i].type == breathsprite) {
-			if (sprites[i].alivetime < .3) {
+		if (sprite->type == smoketype || sprite->type == snowsprite || sprite->type == weaponshinesprite || sprite->type == breathsprite) {
+			if (sprite->alivetime < .3) {
 				if (distancemult >= 1) {
-					glColor4f(sprites[i].color[0] * lightcolor[0], sprites[i].color[1] * lightcolor[1], sprites[i].color[2] * lightcolor[2], sprites[i].opacity * sprites[i].alivetime / .3);
+					glColor4f(sprite->color[0] * lightcolor[0], sprite->color[1] * lightcolor[1], sprite->color[2] * lightcolor[2], sprite->opacity * sprite->alivetime / .3);
 				}
 				if (distancemult < 1) {
-					glColor4f(sprites[i].color[0] * lightcolor[0], sprites[i].color[1] * lightcolor[1], sprites[i].color[2] * lightcolor[2], sprites[i].opacity * distancemult * sprites[i].alivetime / .3);
+					glColor4f(sprite->color[0] * lightcolor[0], sprite->color[1] * lightcolor[1], sprite->color[2] * lightcolor[2], sprite->opacity * distancemult * sprite->alivetime / .3);
 				}
 			}
 		}
-		if (sprites[i].type == splintersprite && sprites[i].special > 0 && sprites[i].special != 3) {
-			if (sprites[i].alivetime < .2) {
+		if (sprite->type == splintersprite && sprite->special > 0 && sprite->special != 3) {
+			if (sprite->alivetime < .2) {
 				if (distancemult >= 1) {
-					glColor4f(sprites[i].color[0] * lightcolor[0], sprites[i].color[1] * lightcolor[1], sprites[i].color[2] * lightcolor[2], sprites[i].alivetime / .2);
+					glColor4f(sprite->color[0] * lightcolor[0], sprite->color[1] * lightcolor[1], sprite->color[2] * lightcolor[2], sprite->alivetime / .2);
 				} else {
-					glColor4f(sprites[i].color[0] * lightcolor[0], sprites[i].color[1] * lightcolor[1], sprites[i].color[2] * lightcolor[2], distancemult * sprites[i].alivetime / .2);
+					glColor4f(sprite->color[0] * lightcolor[0], sprite->color[1] * lightcolor[1], sprite->color[2] * lightcolor[2], distancemult * sprite->alivetime / .2);
 				}
 			} else {
 				if (distancemult >= 1) {
-					glColor4f(sprites[i].color[0] * lightcolor[0], sprites[i].color[1] * lightcolor[1], sprites[i].color[2] * lightcolor[2], 1);
+					glColor4f(sprite->color[0] * lightcolor[0], sprite->color[1] * lightcolor[1], sprite->color[2] * lightcolor[2], 1);
 				} else {
-					glColor4f(sprites[i].color[0] * lightcolor[0], sprites[i].color[1] * lightcolor[1], sprites[i].color[2] * lightcolor[2], distancemult);
+					glColor4f(sprite->color[0] * lightcolor[0], sprite->color[1] * lightcolor[1], sprite->color[2] * lightcolor[2], distancemult);
 				}
 			}
 		}
-		if (sprites[i].type == splintersprite && (sprites[i].special == 0 || sprites[i].special == 3)) {
+		if (sprite->type == splintersprite && (sprite->special == 0 || sprite->special == 3)) {
 			if (distancemult >= 1) {
-				glColor4f(sprites[i].color[0] * lightcolor[0], sprites[i].color[1] * lightcolor[1], sprites[i].color[2] * lightcolor[2], 1);
+				glColor4f(sprite->color[0] * lightcolor[0], sprite->color[1] * lightcolor[1], sprite->color[2] * lightcolor[2], 1);
 			} else {
-				glColor4f(sprites[i].color[0] * lightcolor[0], sprites[i].color[1] * lightcolor[1], sprites[i].color[2] * lightcolor[2], distancemult);
+				glColor4f(sprite->color[0] * lightcolor[0], sprite->color[1] * lightcolor[1], sprite->color[2] * lightcolor[2], distancemult);
 			}
 		}
 
 		glBegin(GL_TRIANGLES);
 		glTexCoord2f(1.0f, 1.0f);
-		glVertex3f(.5 * sprites[i].size, .5 * sprites[i].size, 0.0f);
+		glVertex3f(.5 * sprite->size, .5 * sprite->size, 0.0f);
 		glTexCoord2f(0.0f, 1.0f);
-		glVertex3f(-.5 * sprites[i].size, .5 * sprites[i].size, 0.0f);
+		glVertex3f(-.5 * sprite->size, .5 * sprite->size, 0.0f);
 		glTexCoord2f(1.0f, 0.0f);
-		glVertex3f(.5 * sprites[i].size, -.5 * sprites[i].size, 0.0f);
+		glVertex3f(.5 * sprite->size, -.5 * sprite->size, 0.0f);
 		glTexCoord2f(0.0f, 0.0f);
-		glVertex3f(-.5 * sprites[i].size, -.5 * sprites[i].size, 0.0f);
+		glVertex3f(-.5 * sprite->size, -.5 * sprite->size, 0.0f);
 		glTexCoord2f(1.0f, 0.0f);
-		glVertex3f(.5 * sprites[i].size, -.5 * sprites[i].size, 0.0f);
+		glVertex3f(.5 * sprite->size, -.5 * sprite->size, 0.0f);
 		glTexCoord2f(0.0f, 1.0f);
-		glVertex3f(-.5 * sprites[i].size, .5 * sprites[i].size, 0.0f);
+		glVertex3f(-.5 * sprite->size, .5 * sprite->size, 0.0f);
 		glEnd();
 		glPopMatrix();
 		}//MICROPROFILE

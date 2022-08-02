@@ -8,7 +8,7 @@ void LOG_TOGGLE(char set);
 void LOG(const std::string& fmt, ...);
 
 #ifdef NDEBUG
-	#define ASSERT(cond) while(0){}
+	#define ASSERT(cond)
 #else
 	//helps ensure vita-parse-core displays `cond` when reading a core dump
 	#define ASSERT(cond) {if(!(cond)){__attribute__((unused)) int x = *((int*)nullptr);x=0;}}

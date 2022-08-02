@@ -31,6 +31,8 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 #include "Objects/Object.hpp"
 #include "Utils/binio.h"
 
+#define SKINTEX_SQSIZE 256
+
 const int max_joints = 50;
 
 class Skeleton
@@ -65,7 +67,8 @@ public:
     bool clothes;
     bool spinny;
 
-    GLubyte skinText[512 * 512 * 3];
+    GLubyte skinText[SKINTEX_SQSIZE * SKINTEX_SQSIZE * 3];
+    //GLubyte skinText[512 * 512 * 3];
     int skinsize;
 
     float checkdelay;

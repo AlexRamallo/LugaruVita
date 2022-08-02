@@ -22,6 +22,7 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 #define _TEXTURE_HPP_
 
 #include "Graphic/gamegl.hpp"
+#include "Utils/WorkerThread.hpp"
 
 #include <map>
 #include <memory>
@@ -31,6 +32,8 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 class TextureRes
 {
 private:
+    friend class Texture;
+
     GLuint id;
     string filename;
     bool hasMipmap;
@@ -40,7 +43,7 @@ private:
     int datalen;
     bool is_pvr;
 
-    void load();
+    void *loadimg;
 
     void uploadPVR(void *texture);
 
@@ -49,6 +52,10 @@ public:
     TextureRes(const string& filename, bool hasMipmap, GLubyte* array, int* skinsize);
     ~TextureRes();
     void bind();
+    void load();
+
+    void loadData();
+    void uploadTexture();
 
     /* Make sure TextureRes never gets copied */
     TextureRes(TextureRes const& other) = delete;
@@ -68,6 +75,10 @@ public:
     void load(const string& filename, bool hasMipmap);
     void load(const string& filename, bool hasMipmap, GLubyte* array, int* skinsizep);
     void bind();
+
+    WorkerThread::JobHandle submitLoadJob(const string& filename, bool hasMipmap);
+    WorkerThread::JobHandle submitLoadJob(const string& filename, bool hasMipmap, GLubyte* array, int* skinsizep);
+    void upload();
 };
 
 #endif

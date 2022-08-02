@@ -786,118 +786,102 @@ int _main(int argc, char** argv)
 
     LOGFUNC;
 
-#ifdef NDEBUG
-    try {
-#endif
-        {
-            newGame();
+    {
+        newGame();
 
-            if (!SetUp()) {
-                delete[] commandLineOptionsBuffer;
-                return 42;
-            }
-
-            if (commandLineOptions[DEVTOOLS]) {
-                devtools = true;
-            }
-
-            bool gameDone = false;
-            bool gameFocused = true;
-
-            srand(time(nullptr));
-
-            if (commandLineOptions[CMD].count() > 0) {
-                devtools = true;
-                Menu::startChallengeLevel(1);
-                for (option::Option* opt = commandLineOptions[CMD]; opt; opt = opt->next()) {
-                    if (opt->arg && (strlen(opt->arg) > 0)) {
-                        cmd_dispatch(opt->arg);
-                    }
-                }
-            }
-
-            LOG_TOGGLE(true);
-            bool res = WorkerThread::init();
-            ASSERT(res && "Failed to init WorkerThread system");
-            WorkerThread::spawnWorkers(2);
-            /*
-            auto j1 = WorkerThread::submitJob(WorkerThread::WRK_TEST, (int)2, (int)12, (int)17);
-            auto j2 = WorkerThread::submitJob(WorkerThread::WRK_TEST, (int)69, (int)420, (int)101);
-            
-            int waitit = 0;
-            while(!WorkerThread::tryJoin(j2)){
-                waitit++;
-            }
-            LOG("j2 is done! iterations: %d", waitit);
-
-            WorkerThread::join(j1);
-            LOG("j1 is done!");
-            //*/
-
-            LOG_TOGGLE(false);
-
-            while (!gameDone && !tryquit) {
-                if (IsFocused()) {
-                    gameFocused = true;
-
-                    // check windows messages
-
-                    deltah = 0;
-                    deltav = 0;
-                    SDL_Event e;
-                    if (!waiting) {
-                        // message pump
-                        while (SDL_PollEvent(&e)) {
-                            if (!sdlEventProc(e)) {
-                                gameDone = true;
-                                break;
-                            }
-                        }
-                    }
-
-                    update_analog_sticks();
-
-                    // game
-                    DoUpdate();
-                } else {
-                    if (gameFocused) {
-                        // allow game chance to pause
-                        gameFocused = false;
-                        DoUpdate();
-                    }
-
-                    // game is not in focus, give CPU time to other apps by waiting for messages instead of 'peeking'
-                    SDL_WaitEvent(0);
-                }
-            }
-
-            deleteGame();
+        if (!SetUp()) {
+            delete[] commandLineOptionsBuffer;
+            return 42;
         }
 
-        CleanUp();
-        MicroProfileShutdown();
+        if (commandLineOptions[DEVTOOLS]) {
+            devtools = true;
+        }
 
-        return 0;
-#ifdef NDEBUG
-    } catch (const std::exception& error) {
-        CleanUp();
+        bool gameDone = false;
+        bool gameFocused = true;
 
-        std::string e = "Caught exception: ";
-        e += error.what();
+        srand(time(nullptr));
 
-        LOG(e);
+        if (commandLineOptions[CMD].count() > 0) {
+            devtools = true;
+            Menu::startChallengeLevel(1);
+            for (option::Option* opt = commandLineOptions[CMD]; opt; opt = opt->next()) {
+                if (opt->arg && (strlen(opt->arg) > 0)) {
+                    cmd_dispatch(opt->arg);
+                }
+            }
+        }
 
-        SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Exception catched", error.what(), NULL);
+        LOG_TOGGLE(true);
+        bool res = WorkerThread::init();
+        ASSERT(res && "Failed to init WorkerThread system");
+        WorkerThread::spawnWorkers(2);
+        /*
+        auto j1 = WorkerThread::submitJob(WorkerThread::WRK_TEST, (int)2, (int)12, (int)17);
+        auto j2 = WorkerThread::submitJob(WorkerThread::WRK_TEST, (int)69, (int)420, (int)101);
+        
+        int waitit = 0;
+        while(!WorkerThread::tryJoin(j2)){
+            waitit++;
+        }
+        LOG("j2 is done! iterations: %d", waitit);
 
-        return -1;
+        WorkerThread::join(j1);
+        LOG("j1 is done!");
+        //*/
+
+        LOG_TOGGLE(false);
+
+        while (!gameDone && !tryquit) {
+            if (IsFocused()) {
+                gameFocused = true;
+
+                // check windows messages
+
+                deltah = 0;
+                deltav = 0;
+                SDL_Event e;
+                if (!waiting) {
+                    // message pump
+                    while (SDL_PollEvent(&e)) {
+                        if (!sdlEventProc(e)) {
+                            gameDone = true;
+                            break;
+                        }
+                    }
+                }
+
+                update_analog_sticks();
+
+                // game
+                DoUpdate();
+            } else {
+                if (gameFocused) {
+                    // allow game chance to pause
+                    gameFocused = false;
+                    DoUpdate();
+                }
+
+                // game is not in focus, give CPU time to other apps by waiting for messages instead of 'peeking'
+                SDL_WaitEvent(0);
+            }
+        }
+
+        deleteGame();
     }
-#endif
+
+    CleanUp();
+    MicroProfileShutdown();
+
+    return 0;
 }
 
 int main(int argc, char** argv){
     vglSetVertexPoolSize(VGL_VERTEX_POOL_SIZE);
 
     MicroProfileOnThreadCreate("MainThread");
+    //*
     std::ofstream ofs{"ux0:data/lugaru_runlog.txt"}; 
     std::cout.rdbuf(ofs.rdbuf());
     std::cerr.rdbuf(ofs.rdbuf());
@@ -905,7 +889,7 @@ int main(int argc, char** argv){
 
     freopen("ux0:data/lugaru_runlog.txt", "a", stdout);
     freopen("ux0:data/lugaru_runlog.txt", "a", stderr);
-
+    //*/
 
     //Account::add("VitaMasterRace");
     //Account::saveFile("ux0:data/lugaru1.acct");

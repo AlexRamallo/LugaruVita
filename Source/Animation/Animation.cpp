@@ -23,6 +23,8 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 #include "Game.hpp"
 #include "Utils/Folders.hpp"
 
+#include "Utils/Log.h"
+
 extern "C" {
     extern size_t BinIOFormatByteCount(const char *format);
 }

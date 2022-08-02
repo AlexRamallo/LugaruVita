@@ -37,5 +37,3 @@ void glCopyTexSubImage2D( GLenum target, GLint level,
                                            GLint xoffset, GLint yoffset,
                                            GLint x, GLint y,
                                            GLsizei width, GLsizei height );
-
-void vglDrawArrays(GLenum mode, GLint first, GLsizei count);

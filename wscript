@@ -65,6 +65,7 @@ def options(opt):
 	opt.add_option('--vclaunch', dest='VCLAUNCH', default=False, help='send launch command to vitacompanion after eboot update')
 	opt.add_option('--profiling', dest='MICROPROFILE_ENABLED', action='store_true', default=False, help='enable profiling macros')
 	opt.add_option('--no-audio', dest='AUDIO_DISABLED', action='store_true', default=False, help='disable audio')
+	opt.add_option('--tex-quality', dest='TEXQUALITY', default='pvrtcfastest', help='default PVRTC encoding quality')
 	opt.recurse("vitagl")
 
 def opt_to_def(ctx, key):
@@ -101,9 +102,11 @@ def configure(conf):
 	conf.env.append_unique('CXXFLAGS', "--std=gnu++11")
 	conf.env.append_unique('CXXFLAGS', '-fno-exceptions')
 
-	if 'release' in conf.variant:
-		conf.env.append_unique('CFLAGS', '-O3')
+	if 'release' in conf.cmd:
+		conf.env.append_unique('CFLAGS', '-O0')
+		conf.env.append_unique('CFLAGS', '-g')
 		conf.env.append_unique('DEFINES', 'MICROPROFILE_WEBSERVER=0');
+		conf.env.append_unique('DEFINES', 'NDEBUG=1');
 	else:
 		conf.env.append_unique('CFLAGS', '-g')
 		conf.env.append_unique('CFLAGS', '-O0')
@@ -130,13 +133,14 @@ def build(bld):
 	bld.recurse("vitagl")
 
 	defs = [
-		"DEBUG",
-		"_DEBUG",
 		"DATA_DIR=\"app0:Data\"",
     	"PLATFORM_VITA=1",
     	"PLATFORM_UNIX=1",
     	"BinIO_STDINT_HEADER=<stdint.h>",
 	]
+
+	if 'release' not in bld.variant:
+		defs.extend(["DEBUG", "_DEBUG"])
 
 	srcs = bld.path.ant_glob(["Source/**/*.cpp", "Source/**/*.c"])
 	incs = bld.path.ant_glob(["Source/**"], dir=True, src=False)
@@ -163,7 +167,8 @@ def build(bld):
 		vita_title_id = bld.env.PROJECT_TITLEID,
 		vita_title_string = bld.env.PROJECT_NAME,
 		assets = bld.path.find_node("Data").get_bld(),
-		strip = 'release' in bld.variant
+		#strip = 'release' in bld.variant
+		strip = False
 	)
 
 	if bld.is_install > 0:
@@ -171,7 +176,8 @@ def build(bld):
 		if ip == None:
 			bld.fatal('Must provide device address using --PSVITAIP option')
 
-		assets = bld.path.find_node("Data").get_bld().mkdir()
+		assets = bld.path.find_node("Data").get_bld()
+		assets.mkdir()
 
 		if not bld.options.SKIP_VPK:
 			bld.vita_upload_vpk(bld.env.PROJECT_TITLEID, bld.env.PROJECT_NAME, ip)
@@ -259,13 +265,14 @@ def do_copy(task):
 def do_encode_pvrtc(task):
 	default_opts = {
 		'format': 'PVRTCII_4BPP,UBN,sRGB',
-		'quality': 'pvrtcfastest',
+		'quality': task.generator.bld.options.TEXQUALITY,
 		'dither': False,
 		'premultiply': False,
 		'flip_x': False,
 		'flip_y': True,
 		'mipmap': True,
 	}
+
 	cmd = task.env.PVRTT
 	for n in task.inputs:
 		assert(get_rule(n, "convert", True))
@@ -288,8 +295,8 @@ def do_encode_pvrtc(task):
 			else:
 				sp = rsz.split(',')
 				assert(len(sp) == 2)
-				w = parseint(sp[0])
-				h = parseint(sp[1])
+				w = int(sp[0])
+				h = int(sp[1])
 				out_size = (w, h)
 		else:
 			out_size = get_constrained_pot(size, 8, 512)

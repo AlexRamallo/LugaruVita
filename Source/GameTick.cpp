@@ -23,6 +23,7 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "Game.hpp"
 #include "Thirdparty/microprofile/microprofile.h"
+#include "Utils/FileCache.hpp"
 
 #include "Animation/Animation.hpp"
 #include "Audio/openal_wrapper.hpp"
@@ -41,6 +42,8 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <tuple>
+#include <vector>
 #else
 #include <direct.h>
 #endif
@@ -379,125 +382,129 @@ void Setenvironment(int which)
     pause_sound(stream_wind);
     pause_sound(stream_desertambient);
 
+    std::vector<std::tuple<WorkerThread::JobHandle, Texture*>> envJobs;
+
     if (environment == snowyenvironment) {
+        envJobs.emplace_back(Object::treetextureptr.submitLoadJob("Textures/SnowTree.png", 0), &Object::treetextureptr);
+        envJobs.emplace_back(Object::bushtextureptr.submitLoadJob("Textures/BushSnow.png", 0), &Object::bushtextureptr);
+        envJobs.emplace_back(Object::rocktextureptr.submitLoadJob("Textures/BoulderSnow.jpg", 1), &Object::rocktextureptr);
+        envJobs.emplace_back(Object::boxtextureptr.submitLoadJob("Textures/SnowBox.jpg", 1), &Object::boxtextureptr);
+        envJobs.emplace_back(terraintexture.submitLoadJob("Textures/Snow.jpg", 1), &terraintexture);
+        envJobs.emplace_back(terraintexture2.submitLoadJob("Textures/Rock.jpg", 1), &terraintexture2);
+        skybox->submitLoadJobs("Textures/Skybox(snow)/Front.jpg",
+                               "Textures/Skybox(snow)/Left.jpg",
+                               "Textures/Skybox(snow)/Back.jpg",
+                               "Textures/Skybox(snow)/Right.jpg",
+                               "Textures/Skybox(snow)/Up.jpg",
+                               "Textures/Skybox(snow)/Down.jpg");
         windvector = 0;
         windvector.z = 3;
         if (ambientsound) {
             emit_stream_np(stream_wind);
         }
 
-        Object::treetextureptr.load("Textures/SnowTree.png", 0);
-        Object::bushtextureptr.load("Textures/BushSnow.png", 0);
-        Object::rocktextureptr.load("Textures/BoulderSnow.jpg", 1);
-        Object::boxtextureptr.load("Textures/SnowBox.jpg", 1);
-
         footstepsound = footstepsn1;
         footstepsound2 = footstepsn2;
         footstepsound3 = footstepst1;
         footstepsound4 = footstepst2;
-
-        terraintexture.load("Textures/Snow.jpg", 1);
-        terraintexture2.load("Textures/Rock.jpg", 1);
-
         temptexdetail = texdetail;
         if (texdetail > 1) {
             texdetail = 4;
         }
-        skybox->load("Textures/Skybox(snow)/Front.jpg",
-                     "Textures/Skybox(snow)/Left.jpg",
-                     "Textures/Skybox(snow)/Back.jpg",
-                     "Textures/Skybox(snow)/Right.jpg",
-                     "Textures/Skybox(snow)/Up.jpg",
-                     "Textures/Skybox(snow)/Down.jpg");
-
         texdetail = temptexdetail;
     } else if (environment == desertenvironment) {
+        envJobs.emplace_back(Object::treetextureptr.submitLoadJob("Textures/DesertTree.png", 0), &Object::treetextureptr);
+        envJobs.emplace_back(Object::bushtextureptr.submitLoadJob("Textures/BushDesert.png", 0), &Object::bushtextureptr);
+        envJobs.emplace_back(Object::rocktextureptr.submitLoadJob("Textures/BoulderDesert.jpg", 1), &Object::rocktextureptr);
+        envJobs.emplace_back(Object::boxtextureptr.submitLoadJob("Textures/DesertBox.jpg", 1), &Object::boxtextureptr);
+        envJobs.emplace_back(terraintexture.submitLoadJob("Textures/Sand.jpg", 1), &terraintexture);
+        envJobs.emplace_back(terraintexture2.submitLoadJob("Textures/SandSlope.jpg", 1), &terraintexture2);
+        skybox->submitLoadJobs("Textures/Skybox(sand)/Front.jpg",
+                               "Textures/Skybox(sand)/Left.jpg",
+                               "Textures/Skybox(sand)/Back.jpg",
+                               "Textures/Skybox(sand)/Right.jpg",
+                               "Textures/Skybox(sand)/Up.jpg",
+                               "Textures/Skybox(sand)/Down.jpg");
         windvector = 0;
         windvector.z = 2;
-        Object::treetextureptr.load("Textures/DesertTree.png", 0);
-        Object::bushtextureptr.load("Textures/BushDesert.png", 0);
-        Object::rocktextureptr.load("Textures/BoulderDesert.jpg", 1);
-        Object::boxtextureptr.load("Textures/DesertBox.jpg", 1);
-
         if (ambientsound) {
             emit_stream_np(stream_desertambient);
         }
-
         footstepsound = footstepsn1;
         footstepsound2 = footstepsn2;
         footstepsound3 = footstepsn1;
         footstepsound4 = footstepsn2;
-
-        terraintexture.load("Textures/Sand.jpg", 1);
-        terraintexture2.load("Textures/SandSlope.jpg", 1);
-
         temptexdetail = texdetail;
         if (texdetail > 1) {
             texdetail = 4;
         }
-        skybox->load("Textures/Skybox(sand)/Front.jpg",
-                     "Textures/Skybox(sand)/Left.jpg",
-                     "Textures/Skybox(sand)/Back.jpg",
-                     "Textures/Skybox(sand)/Right.jpg",
-                     "Textures/Skybox(sand)/Up.jpg",
-                     "Textures/Skybox(sand)/Down.jpg");
-
         texdetail = temptexdetail;
     } else if (environment == grassyenvironment) {
+
+        envJobs.emplace_back(Object::treetextureptr.submitLoadJob("Textures/Tree.png", 0), &Object::treetextureptr);
+        envJobs.emplace_back(Object::bushtextureptr.submitLoadJob("Textures/Bush.png", 0), &Object::bushtextureptr);
+        envJobs.emplace_back(Object::rocktextureptr.submitLoadJob("Textures/Boulder.jpg", 1), &Object::rocktextureptr);
+        envJobs.emplace_back(Object::boxtextureptr.submitLoadJob("Textures/GrassBox.jpg", 1), &Object::boxtextureptr);
+        envJobs.emplace_back(terraintexture.submitLoadJob("Textures/GrassDirt.jpg", 1), &terraintexture);
+        envJobs.emplace_back(terraintexture2.submitLoadJob("Textures/MossRock.jpg", 1), &terraintexture2);
+        skybox->submitLoadJobs("Textures/Skybox(grass)/Front.jpg",
+                               "Textures/Skybox(grass)/Left.jpg",
+                               "Textures/Skybox(grass)/Back.jpg",
+                               "Textures/Skybox(grass)/Right.jpg",
+                               "Textures/Skybox(grass)/Up.jpg",
+                               "Textures/Skybox(grass)/Down.jpg");
+
         windvector = 0;
         windvector.z = 2;
-        Object::treetextureptr.load("Textures/Tree.png", 0);
-        Object::bushtextureptr.load("Textures/Bush.png", 0);
-        Object::rocktextureptr.load("Textures/Boulder.jpg", 1);
-        Object::boxtextureptr.load("Textures/GrassBox.jpg", 1);
-
         if (ambientsound) {
             emit_stream_np(stream_wind, 100.);
         }
-
         footstepsound = footstepgr1;
         footstepsound2 = footstepgr2;
         footstepsound3 = footstepst1;
         footstepsound4 = footstepst2;
-
-        terraintexture.load("Textures/GrassDirt.jpg", 1);
-        terraintexture2.load("Textures/MossRock.jpg", 1);
-
         temptexdetail = texdetail;
         if (texdetail > 1) {
             texdetail = 4;
         }
-        skybox->load("Textures/Skybox(grass)/Front.jpg",
-                     "Textures/Skybox(grass)/Left.jpg",
-                     "Textures/Skybox(grass)/Back.jpg",
-                     "Textures/Skybox(grass)/Right.jpg",
-                     "Textures/Skybox(grass)/Up.jpg",
-                     "Textures/Skybox(grass)/Down.jpg");
-
         texdetail = temptexdetail;
     }
+    envJobs.emplace_back(skybox->jfront, &skybox->front);
+    envJobs.emplace_back(skybox->jleft, &skybox->left);
+    envJobs.emplace_back(skybox->jback, &skybox->back);
+    envJobs.emplace_back(skybox->jright, &skybox->right);
+    envJobs.emplace_back(skybox->jup, &skybox->up);
+    envJobs.emplace_back(skybox->jdown, &skybox->down);
+
     temptexdetail = texdetail;
     texdetail = 1;
     terrain.load("Textures/HeightMap.png");
-
     texdetail = temptexdetail;
+
+    for(auto &it: envJobs){
+        WorkerThread::join(std::get<0>(it), true);
+        std::get<1>(it)->upload();
+    }
 }
 
 bool Game::LoadLevel(int which)
 {
-    MICROPROFILE_SCOPEI("Game", "LoadLevel", 0xff008f);
     stealthloading = 0;
     whichlevel = which;
 
+    bool ret;
+
     if (which == -1) {
-        return LoadLevel("tutorial", true);
+        ret = LoadLevel("tutorial", true);
     } else if (which >= 0 && which <= 15) {
         char buf[32];
         snprintf(buf, 32, "map%d", which + 1); // challenges
-        return LoadLevel(buf);
+        ret = LoadLevel(buf);
     } else {
-        return LoadLevel("mapsave");
+        ret = LoadLevel("mapsave");
     }
+
+    return ret;
 }
 
 void Game::ResetBeforeLevelLoad(bool tutorial)
@@ -571,6 +578,7 @@ void Game::ResetBeforeLevelLoad(bool tutorial)
 
 bool Game::LoadLevel(const std::string& name, bool tutorial)
 {
+    MICROPROFILE_SCOPEI("GameTick", "LoadLevel", 0xfe239f);
     if (LoadJsonLevel(name, tutorial)) {
         // Try JSON loading first, binary is fallback
         return true;
@@ -958,6 +966,7 @@ bool Game::LoadLevel(const std::string& name, bool tutorial)
 
 bool Game::LoadJsonLevel(const std::string& name, bool tutorial)
 {
+    MICROPROFILE_SCOPEI("GameTick", "LoadJsonLevel", 0xfe239f);
     const std::string level_path = Folders::getResourcePath("Maps/" + name + ".json");
     if (!Folders::file_exists(level_path)) {
         LOG("LoadLevel: Could not open file: %s", level_path.c_str());

@@ -19,6 +19,7 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include "Folders.hpp"
+#include "Utils/FileCache.hpp"
 
 #include <cerrno>
 #include <cstdlib>
@@ -137,7 +138,15 @@ bool Folders::makeDirectory(const std::string& path)
 
 FILE* Folders::openMandatoryFile(const std::string& filename, const char* mode)
 {
-    FILE* tfile = fopen(filename.c_str(), mode);
+    //FILE* tfile = fopen(filename.c_str(), mode);
+    
+    FILE *tfile;
+    if(!strcmp(mode, "rb")){
+        tfile = FileCache::readFile(filename);
+    }else{
+        tfile = fopen(filename.c_str(), mode);
+    }
+
     if (tfile == NULL) {
         return NULL;
     }

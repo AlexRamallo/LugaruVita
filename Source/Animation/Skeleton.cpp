@@ -636,6 +636,33 @@ void Skeleton::FindRotationMuscle(int which, int animation)
     }
 }
 
+struct SkeletonTransformLoadedModelJob: WorkerThread::Job {
+    Model *model;
+    bool fliptc;
+    bool clothes;
+    SkeletonTransformLoadedModelJob(Model *m, bool flip, bool cloth):
+        Job(),
+        model(m),
+        fliptc(flip),
+        clothes(cloth)
+    {
+        //--
+    }
+    ~SkeletonTransformLoadedModelJob() = default;
+    void execute() override {
+        model->Rotate(180, 0, 0);
+        if(clothes){
+            model->Scale(.041, .04, .041);
+        }else{
+            model->Scale(.04, .04, .04);
+        }
+        model->CalculateNormals(0);
+        if(fliptc){
+            model->FlipTexCoords();
+        }
+    }
+};
+
 /* EFFECT
  * load skeleton
  * takes filenames for three skeleton files and various models
@@ -655,11 +682,56 @@ void Skeleton::Load(const std::string& filename, const std::string& lowfilename,
 
     LOGFUNC;
 
-    num_models = 7;
+    num_models = 7; 
 
     // load various models
     // rotate, scale, do normals, do texcoords for each as needed
+    WorkerThread::JobHandle loadJobs[] = {
+        model[0].submitLoadnotex(modelfilename),
+        model[1].submitLoadnotex(model2filename),
+        model[2].submitLoadnotex(model3filename),
+        model[3].submitLoadnotex(model4filename),
+        model[4].submitLoadnotex(model5filename),
+        model[5].submitLoadnotex(model6filename),
+        model[6].submitLoadnotex(model7filename),
+        drawmodel.submitLoad(modelfilename),
+        modellow.submitLoadnotex(modellowfilename),
+        drawmodellow.submitLoad(modellowfilename),
+        -1,
+        -1
+    };
+    const int numJobs = sizeof(loadJobs) / sizeof(WorkerThread::JobHandle);
+    WorkerThread::JobHandle transform_jobs[numJobs];
 
+
+    for (int i = 0; i < num_models; i++) {
+        transform_jobs[i] = WorkerThread::submitDependentJob<SkeletonTransformLoadedModelJob>(loadJobs[i], &model[i], false, false);
+    }
+    transform_jobs[7] = WorkerThread::submitDependentJob<SkeletonTransformLoadedModelJob>(loadJobs[7], &drawmodel, true, false);
+    transform_jobs[8] = WorkerThread::submitDependentJob<SkeletonTransformLoadedModelJob>(loadJobs[8], &modellow, false, false);
+    transform_jobs[9] = WorkerThread::submitDependentJob<SkeletonTransformLoadedModelJob>(loadJobs[9], &drawmodellow, true, false);
+
+    if (clothes) {
+        loadJobs[10] = modelclothes.submitLoadnotex(modelclothesfilename);
+        transform_jobs[10] = WorkerThread::submitDependentJob<SkeletonTransformLoadedModelJob>(loadJobs[10], &modelclothes, false, true);
+        loadJobs[11] = drawmodelclothes.submitLoad(modelclothesfilename);
+        transform_jobs[11] = WorkerThread::submitDependentJob<SkeletonTransformLoadedModelJob>(loadJobs[11], &drawmodelclothes, true, false);
+    }
+
+    for(int i = 0; i < numJobs; i++){
+        if(loadJobs[i] == -1) continue;
+        WorkerThread::join(loadJobs[i], true);
+        WorkerThread::join(transform_jobs[i], true);
+    }
+
+    if ((Tutorial::active) && (id != 0)) {
+        drawmodel.UniformTexCoords();
+        drawmodel.ScaleTexCoords(0.1);
+        drawmodellow.UniformTexCoords();
+        drawmodellow.ScaleTexCoords(0.1);
+    }
+
+    /*
     model[0].loadnotex(modelfilename);
     model[1].loadnotex(model2filename);
     model[2].loadnotex(model3filename);
@@ -673,8 +745,7 @@ void Skeleton::Load(const std::string& filename, const std::string& lowfilename,
         model[i].Scale(.04, .04, .04);
         model[i].CalculateNormals(0);
     }
-
-    drawmodel.load(modelfilename);
+    drawmodel.load(modelfilename),
     drawmodel.Rotate(180, 0, 0);
     drawmodel.Scale(.04, .04, .04);
     drawmodel.FlipTexCoords();
@@ -693,6 +764,7 @@ void Skeleton::Load(const std::string& filename, const std::string& lowfilename,
     drawmodellow.Rotate(180, 0, 0);
     drawmodellow.Scale(.04, .04, .04);
     drawmodellow.FlipTexCoords();
+
     if (Tutorial::active && id != 0) {
         drawmodellow.UniformTexCoords();
     }
@@ -713,6 +785,7 @@ void Skeleton::Load(const std::string& filename, const std::string& lowfilename,
         drawmodelclothes.FlipTexCoords();
         drawmodelclothes.CalculateNormals(0);
     }
+    */
 
     // FIXME: three similar blocks follow, one for each of:
     // filename, lowfilename, clothesfilename

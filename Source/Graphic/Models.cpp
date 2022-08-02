@@ -37,6 +37,12 @@ extern float fadestart;
 extern float texdetail;
 extern bool decalstoggle;
 
+
+/**
+ * Load cache keeps files in memory until cleared, to avoid loading the same
+ * file from disk every time it's requested
+ * */
+
 int Model::LineCheck(XYZ* p1, XYZ* p2, XYZ* p, XYZ* move, float* rotate)
 {
     MICROPROFILE_SCOPEI("Model", "LineCheck", 0x008fff);
@@ -435,6 +441,51 @@ void Model::UpdateVertexArrayNoTexNoNorm()
     }
 }
 
+struct LoadModelJob: WorkerThread::Job {
+    std::string fname;
+    Model *model;
+    int type;
+    LoadModelJob(std::string f, Model *m, int t):
+        Job(),
+        fname(f),
+        model(m),
+        type(t)
+    {
+        //--
+    }
+    ~LoadModelJob() = default;
+
+    void execute() override {
+        switch(type){
+            default:
+                model->loadnotex(fname);
+                break;
+            case 1:
+                model->load(fname);
+                break;
+            case 2:
+                model->loaddecal(fname);
+                break;
+            case 3:
+                model->loadraw(fname);
+                break;
+        }
+    }
+};
+
+WorkerThread::JobHandle Model::submitLoadnotex(const std::string &filename){
+    return WorkerThread::submitJob<LoadModelJob>(filename, this, 0);
+}
+WorkerThread::JobHandle Model::submitLoad(const std::string &filename){
+    return WorkerThread::submitJob<LoadModelJob>(filename, this, 1);
+}
+WorkerThread::JobHandle Model::submitLoadDecal(const std::string &filename){
+    return WorkerThread::submitJob<LoadModelJob>(filename, this, 2);
+}
+WorkerThread::JobHandle Model::submitLoadRaw(const std::string &filename){
+    return WorkerThread::submitJob<LoadModelJob>(filename, this, 3);
+}
+
 bool Model::loadnotex(const std::string& filename)
 {
     MICROPROFILE_SCOPEI("Model", "loadnotex", 0x008fff);
@@ -497,19 +548,6 @@ bool Model::loadnotex(const std::string& filename)
 
     return true;
 }
-void Model::destroyVBO(){
-    //--
-}
-
-void Model::createVBO(){
-    /*
-    vbos = 0;
-    glGenBuffers(2, &vbo);
-
-    glBindBuffer(GL_ARRAY_BUFFER, vbos[0]);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vbos[0]);
-    */
-}
 
 bool Model::load(const std::string& filename)
 {
@@ -520,10 +558,6 @@ bool Model::load(const std::string& filename)
 
     LOGFUNC;
 
-    if(filename == "TreeTrunk.solid"){
-        LOG_TOGGLE(true);
-    }
-
     LOG("Loading model...%s", filename.c_str());
 
     Game::LoadingScreen();
@@ -531,45 +565,54 @@ bool Model::load(const std::string& filename)
     type = normaltype;
     color = 0;
 
-    tfile = Folders::openMandatoryFile(Folders::getResourcePath(filename), "rb");
+    {
+        MICROPROFILE_SCOPEI("Model", "parsefile", 0x008fff);
+        tfile = Folders::openMandatoryFile(Folders::getResourcePath(filename), "rb");
 
-{MICROPROFILE_SCOPEI("Model::load", "parse file", 0x008fff);
-    // read model settings
+        // read model settings
 
-    fseek(tfile, 0, SEEK_SET);
-    funpackf(tfile, "Bs Bs", &vertexNum, &triangleNum);
+        fseek(tfile, 0, SEEK_SET);
+        funpackf(tfile, "Bs Bs", &vertexNum, &triangleNum);
 
-    // read the model data
-    deallocate();
+        // read the model data
+        deallocate();
 
-    possible.clear();
+        possible.clear();
 
-    owner = (int*)malloc(sizeof(int) * vertexNum);
-    vertex = (XYZ*)malloc(sizeof(XYZ) * vertexNum);
-    normals = (XYZ*)malloc(sizeof(XYZ) * vertexNum);
-    Triangles.resize(triangleNum);
-    vArray = (GLfloat*)malloc(sizeof(GLfloat) * triangleNum * 24);
+        {
+            MICROPROFILE_SCOPEI("Model", "allocbufs", 0x008fff);
+            owner = (int*)malloc(sizeof(int) * vertexNum);
+            vertex = (XYZ*)malloc(sizeof(XYZ) * vertexNum);
+            normals = (XYZ*)malloc(sizeof(XYZ) * vertexNum);
+            Triangles.resize(triangleNum);
+            vArray = (GLfloat*)malloc(sizeof(GLfloat) * triangleNum * 24);
+        }
 
-    for (i = 0; i < vertexNum; i++) {
-        funpackf(tfile, "Bf Bf Bf", &vertex[i].x, &vertex[i].y, &vertex[i].z);
+        {
+            MICROPROFILE_SCOPEI("Model", "unpackverts", 0x008fff);
+            for (i = 0; i < vertexNum; i++) {
+                funpackf(tfile, "Bf Bf Bf", &vertex[i].x, &vertex[i].y, &vertex[i].z);
+            }
+        }
+
+        {
+            MICROPROFILE_SCOPEI("Model", "unpacktris", 0x008fff);
+            for (i = 0; i < triangleNum; i++) {
+                short vertex[6];
+                funpackf(tfile, "Bs Bs Bs Bs Bs Bs", &vertex[0], &vertex[1], &vertex[2], &vertex[3], &vertex[4], &vertex[5]);
+                Triangles[i].vertex[0] = vertex[0];
+                Triangles[i].vertex[1] = vertex[2];
+                Triangles[i].vertex[2] = vertex[4];
+
+                funpackf(tfile, "Bf Bf Bf", &Triangles[i].gx[0], &Triangles[i].gx[1], &Triangles[i].gx[2]);
+                funpackf(tfile, "Bf Bf Bf", &Triangles[i].gy[0], &Triangles[i].gy[1], &Triangles[i].gy[2]);
+            }
+        }
+
+        modelTexture.xsz = 0;
+
+        fclose(tfile);
     }
-
-    for (i = 0; i < triangleNum; i++) {
-        short vertex[6];
-        funpackf(tfile, "Bs Bs Bs Bs Bs Bs", &vertex[0], &vertex[1], &vertex[2], &vertex[3], &vertex[4], &vertex[5]);
-        Triangles[i].vertex[0] = vertex[0];
-        Triangles[i].vertex[1] = vertex[2];
-        Triangles[i].vertex[2] = vertex[4];
-
-        funpackf(tfile, "Bf Bf Bf", &Triangles[i].gx[0], &Triangles[i].gx[1], &Triangles[i].gx[2]);
-        funpackf(tfile, "Bf Bf Bf", &Triangles[i].gy[0], &Triangles[i].gy[1], &Triangles[i].gy[2]);
-    }
-
-    modelTexture.xsz = 0;
-
-}//MICROPROFILE
-
-    fclose(tfile);
 
     UpdateVertexArray();
 
@@ -577,7 +620,7 @@ bool Model::load(const std::string& filename)
         owner[i] = -1;
     }
 
-    static int j;
+    int j;
     boundingsphereradius = 0;
     for (i = 0; i < vertexNum; i++) {
         for (j = 0; j < vertexNum; j++) {
@@ -759,7 +802,7 @@ void Model::ScaleTexCoords(float howmuch)
 void Model::Scale(float xscale, float yscale, float zscale)
 {
     MICROPROFILE_SCOPEI("Model", "Scale", 0x008fff);
-    static int i;
+    int i;
     for (i = 0; i < vertexNum; i++) {
         vertex[i].x *= xscale;
         vertex[i].y *= yscale;
@@ -767,7 +810,7 @@ void Model::Scale(float xscale, float yscale, float zscale)
     }
     UpdateVertexArray();
 
-    static int j;
+    int j;
 
     boundingsphereradius = 0;
     for (i = 0; i < vertexNum; i++) {
@@ -804,7 +847,7 @@ void Model::ScaleNormals(float xscale, float yscale, float zscale)
 void Model::Translate(float xtrans, float ytrans, float ztrans)
 {
     MICROPROFILE_SCOPEI("Model", "Translate", 0x008fff);
-    static int i;
+    int i;
     for (i = 0; i < vertexNum; i++) {
         vertex[i].x += xtrans;
         vertex[i].y += ytrans;
@@ -812,7 +855,7 @@ void Model::Translate(float xtrans, float ytrans, float ztrans)
     }
     UpdateVertexArray();
 
-    static int j;
+    int j;
     boundingsphereradius = 0;
     for (i = 0; i < vertexNum; i++) {
         for (j = 0; j < vertexNum; j++) {
@@ -828,13 +871,13 @@ void Model::Translate(float xtrans, float ytrans, float ztrans)
 void Model::Rotate(float xang, float yang, float zang)
 {
     MICROPROFILE_SCOPEI("Model", "Rotate", 0x008fff);
-    static int i;
+    int i;
     for (i = 0; i < vertexNum; i++) {
         vertex[i] = DoRotation(vertex[i], xang, yang, zang);
     }
     UpdateVertexArray();
 
-    static int j;
+    int j;
     boundingsphereradius = 0;
     for (i = 0; i < vertexNum; i++) {
         for (j = 0; j < vertexNum; j++) {
@@ -956,7 +999,7 @@ void Model::draw()
     }
     textureptr.bind();
 
-    vglDrawArrays(GL_TRIANGLES, 0, Triangles.size() * 3);
+    glDrawArrays(GL_TRIANGLES, 0, Triangles.size() * 3);
 
     if (color) {
         glDisableClientState(GL_COLOR_ARRAY);
@@ -983,7 +1026,7 @@ void Model::drawdifftex(Texture texture)
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
-    vglDrawArrays(GL_TRIANGLES, 0, Triangles.size() * 3);
+    glDrawArrays(GL_TRIANGLES, 0, Triangles.size() * 3);
 
     if (color) {
         glDisableClientState(GL_COLOR_ARRAY);
@@ -1169,8 +1212,8 @@ void Model::MakeDecal(decal_type atype, XYZ where, float size, float opacity, fl
             return;
         }
 
-        static XYZ rot;
-        static float distance;
+        XYZ rot;
+        float distance;
 
         if (opacity > 0) {
             if (distsq(&where, &boundingspherecenter) < (boundingsphereradius + size) * (boundingsphereradius + size)) {
