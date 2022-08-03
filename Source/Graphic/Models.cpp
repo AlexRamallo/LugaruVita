@@ -30,6 +30,8 @@ extern "C" {
     #include <math_neon.h>
 }
 
+#include <pthread.h>
+
 extern float multiplier;
 extern float viewdistance;
 extern XYZ viewer;
@@ -486,7 +488,138 @@ WorkerThread::JobHandle Model::submitLoadRaw(const std::string &filename){
     return WorkerThread::submitJob<LoadModelJob>(filename, this, 3);
 }
 
-bool Model::loadnotex(const std::string& filename)
+struct ModelCacheEntry {
+    const std::string filename;
+    const Model *model;
+    ModelCacheEntry(const std::string &f, Model *m):
+        filename(f),
+        model(m)
+    {
+        //--
+    }
+
+    ~ModelCacheEntry(){
+        if(model != nullptr){
+            delete model;
+            model = nullptr;
+        }
+    }
+};
+
+static pthread_mutex_t mtxCache;
+std::vector<std::shared_ptr<ModelCacheEntry>> modelCache;
+static bool did_init_once = false;
+void Model::initModelCache(){
+    ASSERT(modelCache.size() == 0);
+    if(!did_init_once){
+        did_init_once = true;
+        if(pthread_mutex_init(&mtxCache, NULL)){
+            ASSERT(!"Failed to initialize model cache mutex");
+        }
+    }
+}
+
+void Model::clearModelCache(){
+    modelCache.clear();
+}
+
+static bool getModelCache(Model *model, const std::string &filename){
+    if(pthread_mutex_lock(&mtxCache)){
+        ASSERT(!"Failed to lock model cache mutex");
+        return false;
+    }
+
+    std::shared_ptr<ModelCacheEntry> cached = nullptr;
+    for(std::shared_ptr<ModelCacheEntry> cache: modelCache){
+        if(cache->model->type == model->type){
+            if(cache->filename == filename){
+                cached = cache;
+                break;
+            }
+        }
+    }
+
+    if(cached == nullptr){
+        if(pthread_mutex_unlock(&mtxCache)){
+            ASSERT(!"Failed to unlock model cache mutex");
+            return false;
+        }
+
+        Model *cm = new Model();
+        bool ok = false;
+
+        switch(model->type){
+            default:
+                ASSERT(!"Bad model type");
+                pthread_mutex_unlock(&mtxCache);
+                return false;
+        
+            case notextype:
+                ok = cm->loadnotex(filename, false);
+                break;
+
+            case decalstype:
+                ok = cm->loaddecal(filename, false);
+                break;
+
+            case rawtype:
+                ok = cm->loadraw(filename, false);
+                break;
+
+            case normaltype:
+                ok = cm->load(filename, false);
+                break;
+        }
+        
+        if(pthread_mutex_lock(&mtxCache)){
+            ASSERT(!"Failed to lock model cache mutex");
+            return false;
+        }
+
+        if(ok){
+            modelCache.push_back(std::make_shared<ModelCacheEntry>(filename, cm));
+            cached = modelCache.back();
+        }else{
+            delete cm;
+            cached = nullptr;
+        }
+    }
+    
+    if(pthread_mutex_unlock(&mtxCache)){
+        ASSERT(!"Failed to unlock model cache mutex");
+        return false;
+    }
+
+    if(cached == nullptr){
+        return false;
+    }
+
+    ASSERT(model->vertex == nullptr);
+    ASSERT(model->normals == nullptr);
+    ASSERT(model->Triangles.size() == 0);
+    ASSERT(model->vertexNum == 0);
+
+    int numVert = cached->model->vertexNum;
+    model->vertexNum = numVert;
+    model->vertex = (XYZ*)malloc(sizeof(XYZ) * numVert);
+    ASSERT(model->vertex != nullptr);
+
+    memcpy(model->vertex, cached->model->vertex, sizeof(XYZ) * numVert);
+    
+    if(cached->model->type == decalstype || cached->model->type == normaltype){
+        model->normals = (XYZ*)malloc(sizeof(XYZ) * numVert);
+        memcpy(model->normals, cached->model->normals, sizeof(XYZ) * numVert);
+    }
+
+    model->Triangles = cached->model->Triangles;
+
+    ASSERT(model->vertexNum == cached->model->vertexNum);
+    ASSERT(model->Triangles.size() == cached->model->Triangles.size());
+    ASSERT(&model->Triangles[0] != &cached->model->Triangles[0]);
+    return true;
+}
+
+bool Model::loadnotex(const std::string& filename, bool use_cache)
 {
     MICROPROFILE_SCOPEI("Model", "loadnotex", 0x008fff);
     FILE* tfile;
@@ -495,40 +628,44 @@ bool Model::loadnotex(const std::string& filename)
 
     type = notextype;
     color = 0;
-
-    tfile = Folders::openMandatoryFile(Folders::getResourcePath(filename), "rb");
-
-    // read model settings
-
-    fseek(tfile, 0, SEEK_SET);
-    funpackf(tfile, "Bs Bs", &vertexNum, &triangleNum);
-
-    // read the model data
+    
     deallocate();
-
     possible.clear();
 
-    owner = (int*)malloc(sizeof(int) * vertexNum);
-    vertex = (XYZ*)malloc(sizeof(XYZ) * vertexNum);
-    Triangles.resize(triangleNum);
-    vArray = (GLfloat*)malloc(sizeof(GLfloat) * triangleNum * 24);
+    if(use_cache){
+        if(!getModelCache(this, filename)){
+            ASSERT(!"Failed to load notex model!");
+            return false;
+        }
+        
+        owner = (int*)malloc(sizeof(int) * vertexNum);
+        vArray = (GLfloat*)malloc(sizeof(GLfloat) * Triangles.size() * 24);
+    }else{
+        tfile = Folders::openMandatoryFile(Folders::getResourcePath(filename), "rb");
+        // read model settings
+        fseek(tfile, 0, SEEK_SET);
+        funpackf(tfile, "Bs Bs", &vertexNum, &triangleNum);
+        // read the model data
+        owner = (int*)malloc(sizeof(int) * vertexNum);
+        vertex = (XYZ*)malloc(sizeof(XYZ) * vertexNum);
+        Triangles.resize(triangleNum);
+        vArray = (GLfloat*)malloc(sizeof(GLfloat) * triangleNum * 24);
 
-    for (i = 0; i < vertexNum; i++) {
-        funpackf(tfile, "Bf Bf Bf", &vertex[i].x, &vertex[i].y, &vertex[i].z);
+        for (i = 0; i < vertexNum; i++) {
+            funpackf(tfile, "Bf Bf Bf", &vertex[i].x, &vertex[i].y, &vertex[i].z);
+        }
+
+        for (i = 0; i < triangleNum; i++) {
+            short vertex[6];
+            funpackf(tfile, "Bs Bs Bs Bs Bs Bs", &vertex[0], &vertex[1], &vertex[2], &vertex[3], &vertex[4], &vertex[5]);
+            Triangles[i].vertex[0] = vertex[0];
+            Triangles[i].vertex[1] = vertex[2];
+            Triangles[i].vertex[2] = vertex[4];
+            funpackf(tfile, "Bf Bf Bf", &Triangles[i].gx[0], &Triangles[i].gx[1], &Triangles[i].gx[2]);
+            funpackf(tfile, "Bf Bf Bf", &Triangles[i].gy[0], &Triangles[i].gy[1], &Triangles[i].gy[2]);
+        }
+        fclose(tfile);
     }
-
-    for (i = 0; i < triangleNum; i++) {
-        short vertex[6];
-        funpackf(tfile, "Bs Bs Bs Bs Bs Bs", &vertex[0], &vertex[1], &vertex[2], &vertex[3], &vertex[4], &vertex[5]);
-        Triangles[i].vertex[0] = vertex[0];
-        Triangles[i].vertex[1] = vertex[2];
-        Triangles[i].vertex[2] = vertex[4];
-        funpackf(tfile, "Bf Bf Bf", &Triangles[i].gx[0], &Triangles[i].gx[1], &Triangles[i].gx[2]);
-        funpackf(tfile, "Bf Bf Bf", &Triangles[i].gy[0], &Triangles[i].gy[1], &Triangles[i].gy[2]);
-    }
-
-    fclose(tfile);
-
     UpdateVertexArray();
 
     for (i = 0; i < vertexNum; i++) {
@@ -549,7 +686,7 @@ bool Model::loadnotex(const std::string& filename)
     return true;
 }
 
-bool Model::load(const std::string& filename)
+bool Model::load(const std::string& filename, bool use_cache)
 {
     MICROPROFILE_SCOPEI("Model", "load", 0x008fff);
     FILE* tfile;
@@ -560,24 +697,28 @@ bool Model::load(const std::string& filename)
 
     LOG("Loading model...%s", filename.c_str());
 
-    Game::LoadingScreen();
+    //Game::LoadingScreen();
 
     type = normaltype;
     color = 0;
+    
+    deallocate();
+    possible.clear();
 
-    {
-        MICROPROFILE_SCOPEI("Model", "parsefile", 0x008fff);
+    if(use_cache){
+        if(!getModelCache(this, filename)){
+            ASSERT(!"Failed to load normal model!");
+            return false;
+        }
+
+        owner = (int*)malloc(sizeof(int) * vertexNum);
+        vArray = (GLfloat*)malloc(sizeof(GLfloat) * Triangles.size() * 24);
+    }else{
         tfile = Folders::openMandatoryFile(Folders::getResourcePath(filename), "rb");
 
         // read model settings
-
         fseek(tfile, 0, SEEK_SET);
         funpackf(tfile, "Bs Bs", &vertexNum, &triangleNum);
-
-        // read the model data
-        deallocate();
-
-        possible.clear();
 
         {
             MICROPROFILE_SCOPEI("Model", "allocbufs", 0x008fff);
@@ -587,14 +728,12 @@ bool Model::load(const std::string& filename)
             Triangles.resize(triangleNum);
             vArray = (GLfloat*)malloc(sizeof(GLfloat) * triangleNum * 24);
         }
-
         {
             MICROPROFILE_SCOPEI("Model", "unpackverts", 0x008fff);
             for (i = 0; i < vertexNum; i++) {
                 funpackf(tfile, "Bf Bf Bf", &vertex[i].x, &vertex[i].y, &vertex[i].z);
             }
         }
-
         {
             MICROPROFILE_SCOPEI("Model", "unpacktris", 0x008fff);
             for (i = 0; i < triangleNum; i++) {
@@ -608,11 +747,9 @@ bool Model::load(const std::string& filename)
                 funpackf(tfile, "Bf Bf Bf", &Triangles[i].gy[0], &Triangles[i].gy[1], &Triangles[i].gy[2]);
             }
         }
-
-        modelTexture.xsz = 0;
-
         fclose(tfile);
     }
+    modelTexture.xsz = 0;
 
     UpdateVertexArray();
 
@@ -635,7 +772,7 @@ bool Model::load(const std::string& filename)
     return true;
 }
 
-bool Model::loaddecal(const std::string& filename)
+bool Model::loaddecal(const std::string& filename, bool use_cache)
 {
     MICROPROFILE_SCOPEI("Model", "loaddecal", 0x008fff);
     FILE* tfile;
@@ -649,42 +786,45 @@ bool Model::loaddecal(const std::string& filename)
     type = decalstype;
     color = 0;
 
-    tfile = Folders::openMandatoryFile(Folders::getResourcePath(filename), "rb");
-
-    // read model settings
-
-    fseek(tfile, 0, SEEK_SET);
-    funpackf(tfile, "Bs Bs", &vertexNum, &triangleNum);
-
-    // read the model data
-
     deallocate();
-
     possible.clear();
 
-    owner = (int*)malloc(sizeof(int) * vertexNum);
-    vertex = (XYZ*)malloc(sizeof(XYZ) * vertexNum);
-    normals = (XYZ*)malloc(sizeof(XYZ) * vertexNum);
-    Triangles.resize(triangleNum);
-    vArray = (GLfloat*)malloc(sizeof(GLfloat) * triangleNum * 24);
+    if(use_cache){
+        if(!getModelCache(this, filename)){
+            ASSERT(!"Failed to load normal model!");
+            return false;
+        }
 
-    for (i = 0; i < vertexNum; i++) {
-        funpackf(tfile, "Bf Bf Bf", &vertex[i].x, &vertex[i].y, &vertex[i].z);
+        owner = (int*)malloc(sizeof(int) * vertexNum);
+        vArray = (GLfloat*)malloc(sizeof(GLfloat) * Triangles.size() * 24);
+    }else{
+        tfile = Folders::openMandatoryFile(Folders::getResourcePath(filename), "rb");
+        // read model settings
+        fseek(tfile, 0, SEEK_SET);
+        funpackf(tfile, "Bs Bs", &vertexNum, &triangleNum);
+        // read the model data
+        owner = (int*)malloc(sizeof(int) * vertexNum);
+        vertex = (XYZ*)malloc(sizeof(XYZ) * vertexNum);
+        normals = (XYZ*)malloc(sizeof(XYZ) * vertexNum);
+        Triangles.resize(triangleNum);
+        vArray = (GLfloat*)malloc(sizeof(GLfloat) * triangleNum * 24);
+
+        for (i = 0; i < vertexNum; i++) {
+            funpackf(tfile, "Bf Bf Bf", &vertex[i].x, &vertex[i].y, &vertex[i].z);
+        }
+
+        for (i = 0; i < triangleNum; i++) {
+            short vertex[6];
+            funpackf(tfile, "Bs Bs Bs Bs Bs Bs", &vertex[0], &vertex[1], &vertex[2], &vertex[3], &vertex[4], &vertex[5]);
+            Triangles[i].vertex[0] = vertex[0];
+            Triangles[i].vertex[1] = vertex[2];
+            Triangles[i].vertex[2] = vertex[4];
+            funpackf(tfile, "Bf Bf Bf", &Triangles[i].gx[0], &Triangles[i].gx[1], &Triangles[i].gx[2]);
+            funpackf(tfile, "Bf Bf Bf", &Triangles[i].gy[0], &Triangles[i].gy[1], &Triangles[i].gy[2]);
+        }
+        fclose(tfile);
     }
-
-    for (i = 0; i < triangleNum; i++) {
-        short vertex[6];
-        funpackf(tfile, "Bs Bs Bs Bs Bs Bs", &vertex[0], &vertex[1], &vertex[2], &vertex[3], &vertex[4], &vertex[5]);
-        Triangles[i].vertex[0] = vertex[0];
-        Triangles[i].vertex[1] = vertex[2];
-        Triangles[i].vertex[2] = vertex[4];
-        funpackf(tfile, "Bf Bf Bf", &Triangles[i].gx[0], &Triangles[i].gx[1], &Triangles[i].gx[2]);
-        funpackf(tfile, "Bf Bf Bf", &Triangles[i].gy[0], &Triangles[i].gy[1], &Triangles[i].gy[2]);
-    }
-
     modelTexture.xsz = 0;
-
-    fclose(tfile);
 
     UpdateVertexArray();
 
@@ -706,7 +846,7 @@ bool Model::loaddecal(const std::string& filename)
     return true;
 }
 
-bool Model::loadraw(const std::string& filename)
+bool Model::loadraw(const std::string& filename, bool use_cache)
 {
     MICROPROFILE_SCOPEI("Model", "loadraw", 0x008fff);
     FILE* tfile;
@@ -719,39 +859,45 @@ bool Model::loadraw(const std::string& filename)
 
     type = rawtype;
     color = 0;
-
-    tfile = Folders::openMandatoryFile(Folders::getResourcePath(filename), "rb");
-
-    // read model settings
-
-    fseek(tfile, 0, SEEK_SET);
-    funpackf(tfile, "Bs Bs", &vertexNum, &triangleNum);
-
-    // read the model data
+    
     deallocate();
-
     possible.clear();
 
-    owner = (int*)malloc(sizeof(int) * vertexNum);
-    vertex = (XYZ*)malloc(sizeof(XYZ) * vertexNum);
-    Triangles.resize(triangleNum);
-    vArray = (GLfloat*)malloc(sizeof(GLfloat) * triangleNum * 24);
+    if(use_cache){
+        if(!getModelCache(this, filename)){
+            ASSERT(!"Failed to load normal model!");
+            return false;
+        }
+        owner = (int*)malloc(sizeof(int) * vertexNum);
+        vArray = (GLfloat*)malloc(sizeof(GLfloat) * Triangles.size() * 24);
+    }else{
+        tfile = Folders::openMandatoryFile(Folders::getResourcePath(filename), "rb");
 
-    for (i = 0; i < vertexNum; i++) {
-        funpackf(tfile, "Bf Bf Bf", &vertex[i].x, &vertex[i].y, &vertex[i].z);
+        // read model settings
+        fseek(tfile, 0, SEEK_SET);
+        funpackf(tfile, "Bs Bs", &vertexNum, &triangleNum);
+
+        owner = (int*)malloc(sizeof(int) * vertexNum);
+        vertex = (XYZ*)malloc(sizeof(XYZ) * vertexNum);
+        Triangles.resize(triangleNum);
+        vArray = (GLfloat*)malloc(sizeof(GLfloat) * triangleNum * 24);
+
+        for (i = 0; i < vertexNum; i++) {
+            funpackf(tfile, "Bf Bf Bf", &vertex[i].x, &vertex[i].y, &vertex[i].z);
+        }
+
+        for (i = 0; i < triangleNum; i++) {
+            short vertex[6];
+            funpackf(tfile, "Bs Bs Bs Bs Bs Bs", &vertex[0], &vertex[1], &vertex[2], &vertex[3], &vertex[4], &vertex[5]);
+            Triangles[i].vertex[0] = vertex[0];
+            Triangles[i].vertex[1] = vertex[2];
+            Triangles[i].vertex[2] = vertex[4];
+            funpackf(tfile, "Bf Bf Bf", &Triangles[i].gx[0], &Triangles[i].gx[1], &Triangles[i].gx[2]);
+            funpackf(tfile, "Bf Bf Bf", &Triangles[i].gy[0], &Triangles[i].gy[1], &Triangles[i].gy[2]);
+        }
+
+        fclose(tfile);
     }
-
-    for (i = 0; i < triangleNum; i++) {
-        short vertex[6];
-        funpackf(tfile, "Bs Bs Bs Bs Bs Bs", &vertex[0], &vertex[1], &vertex[2], &vertex[3], &vertex[4], &vertex[5]);
-        Triangles[i].vertex[0] = vertex[0];
-        Triangles[i].vertex[1] = vertex[2];
-        Triangles[i].vertex[2] = vertex[4];
-        funpackf(tfile, "Bf Bf Bf", &Triangles[i].gx[0], &Triangles[i].gx[1], &Triangles[i].gx[2]);
-        funpackf(tfile, "Bf Bf Bf", &Triangles[i].gy[0], &Triangles[i].gy[1], &Triangles[i].gy[2]);
-    }
-
-    fclose(tfile);
 
     for (i = 0; i < vertexNum; i++) {
         owner[i] = -1;
@@ -893,7 +1039,7 @@ void Model::Rotate(float xang, float yang, float zang)
 void Model::CalculateNormals(bool facenormalise)
 {
     MICROPROFILE_SCOPEI("Model", "CalculateNormals", 0x008fff);
-    Game::LoadingScreen();
+    //Game::LoadingScreen();
 
     if (type != normaltype && type != decalstype) {
         return;

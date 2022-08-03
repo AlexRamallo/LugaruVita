@@ -1,5 +1,6 @@
 #include "Utils/FileCache.hpp"
 #include "Utils/Log.h"
+#include <pthread.h>
 #include <stdio.h>
 #include <map>
 
@@ -48,12 +49,24 @@ struct CacheEntry {
 	}
 };
 
+static pthread_mutex_t mtxCache;
 static std::map<std::string, CacheEntry> entries;
 static bool cache_active = false;
-
+static bool did_init_once = false;
 static FILE *getCache(const std::string &filename){
+	if(pthread_mutex_lock(&mtxCache)){
+		ASSERT(!"Failed to lock file cache mutex");
+		return nullptr;
+	}
+
 	CacheEntry &entry = entries[filename];
-	return entry.handle(filename);
+	FILE *ret = entry.handle(filename);
+
+	if(pthread_mutex_unlock(&mtxCache)){
+		ASSERT(!"Failed to unlock file cache mutex");
+		return nullptr;
+	}
+	return ret;
 }
 
 FILE *readFile(const std::string &filename) {
@@ -66,6 +79,12 @@ FILE *readFile(const std::string &filename) {
 
 void InitCache() {
 	cache_active = true;
+	if(!did_init_once){
+		did_init_once = true;
+		if(pthread_mutex_init(&mtxCache, NULL)){
+			ASSERT(!"Failed to init file cache mutex!");
+		}
+	}
 }
 
 void ClearCache() {

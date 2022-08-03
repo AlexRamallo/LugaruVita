@@ -100,7 +100,6 @@ def configure(conf):
 	]
 	
 	conf.env.append_unique('CXXFLAGS', "--std=gnu++11")
-	conf.env.append_unique('CXXFLAGS', '-fno-exceptions')
 
 	if 'release' in conf.cmd:
 		conf.env.append_unique('CFLAGS', '-O0')
@@ -108,6 +107,7 @@ def configure(conf):
 		conf.env.append_unique('DEFINES', 'MICROPROFILE_WEBSERVER=0');
 		conf.env.append_unique('DEFINES', 'NDEBUG=1');
 	else:
+		conf.env.append_unique('CXXFLAGS', '-fno-exceptions')
 		conf.env.append_unique('CFLAGS', '-g')
 		conf.env.append_unique('CFLAGS', '-O0')
 		conf.env.append_unique('DEFINES', 'MICROPROFILE_WEBSERVER=0');

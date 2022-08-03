@@ -7432,27 +7432,87 @@ void Person::takeWeapon(int weaponId)
     weaponids[0] = weaponId;
 }
 
+struct PersonLoadClothesJob: WorkerThread::Job {
+    std::string filename;
+    ImageRec *tex_out;
+    PersonLoadClothesJob(std::string &f, ImageRec *out):
+        Job(),
+        filename(f),
+        tex_out(out)
+    {
+        //--
+    }
+
+    void execute() override {
+        std::string fname = Folders::getResourcePath(filename);
+        load_image(fname.c_str(), *tex_out);
+    }
+
+};
+
+void Person::submitLoadClothesJobs(std::vector<WorkerThread::JobHandle> &out, std::vector<ImageRec*> &tex_out)
+{
+    if (clothes.size() > 0) {
+        for(int i = 0; i < clothes.size(); i++){
+            tex_out.push_back(new ImageRec());
+            out.push_back(WorkerThread::submitJob<PersonLoadClothesJob>(clothes[i], tex_out.back()));
+        }
+    }
+}
+
+struct PersonApplyClothesJob: WorkerThread::Job {
+    std::vector<ImageRec*> *loaded_tex;
+    Person *person;
+    PersonApplyClothesJob(std::vector<ImageRec*> *t, Person *p):
+        Job(),
+        loaded_tex(t),
+        person(p)
+    {
+        //--
+    }
+    void execute() override {
+        person->addClothes(*loaded_tex);
+    }
+};
+
+WorkerThread::JobHandle Person::submitApplyClothesJob(std::vector<ImageRec*> *tex_out){
+    return WorkerThread::submitJob<PersonApplyClothesJob>(tex_out, this);
+}
+
+void Person::addClothes(std::vector<ImageRec*> &textures)
+{
+    ASSERT(clothes.size() == textures.size());
+    for(int i = 0; i < clothes.size(); i++){
+        addClothes(i, textures[i]);
+    }
+    DoMipmaps();
+}
+
 void Person::addClothes()
 {
     MICROPROFILE_SCOPEI("Person", "addClothes", 0xaaffaa);
     if (clothes.size() > 0) {
+
         for (unsigned i = 0; i < clothes.size(); i++) {
-            addClothes(i);
+            addClothes(i, nullptr);
         }
         DoMipmaps();
     }}
 
-bool Person::addClothes(const int& clothesId)
+bool Person::addClothes(const int& clothesId, ImageRec *texture)
 {
     LOGFUNC;
-    const std::string fileName = clothes[clothesId];
-
+    std::string fname = Folders::getResourcePath(clothes[clothesId]);
     GLubyte* array = &skeleton.skinText[0];
-
     //Load Image
-    ImageRec texture; 
-    std::string fname = Folders::getResourcePath(fileName);
-    bool opened = load_image(fname.c_str(), texture);
+    ImageRec _tex;
+    bool opened;
+    if(texture == nullptr){
+        opened = load_image(fname.c_str(), _tex);
+        texture = &_tex;
+    }else{
+        opened = true;
+    }
 
     float alphanum;
     //Is it valid?
@@ -7484,19 +7544,19 @@ bool Person::addClothes(const int& clothesId)
         int bytesPerPixel;
         int sizeX;
         int sizeY;
-        if(texture.is_pvr){
-            if(texture.pvr_header.isCompressed()){
+        if(texture->is_pvr){
+            if(texture->pvr_header.isCompressed()){
                 LOG("ERROR: found compressed clothing texture (%s)", fname.c_str());
                 return 0;
             }else{
-                sizeX = texture.pvr_header.Width + texture.pvr_header.getBorder(0);
-                sizeY = texture.pvr_header.Height + texture.pvr_header.getBorder(1);
-                bytesPerPixel = texture.pvr_header.getBitsPerPixel() / 8;
+                sizeX = texture->pvr_header.Width + texture->pvr_header.getBorder(0);
+                sizeY = texture->pvr_header.Height + texture->pvr_header.getBorder(1);
+                bytesPerPixel = texture->pvr_header.getBitsPerPixel() / 8;
             }
         }else{
-            sizeX = texture.sizeX;
-            sizeY = texture.sizeY;
-            bytesPerPixel = texture.bpp / 8;
+            sizeX = texture->sizeX;
+            sizeY = texture->sizeY;
+            bytesPerPixel = texture->bpp / 8;
         }
 
         int tempnum = 0;
@@ -7505,19 +7565,19 @@ bool Person::addClothes(const int& clothesId)
             if (bytesPerPixel == 3) {
                 alphanum = 255;
             } else if ((i + 1) % 4 == 0) {
-                alphanum = texture.data[i];
+                alphanum = texture->data[i];
             }
             if ((i + 1) % 4 || bytesPerPixel == 3) {
                 if ((i % 4) == 0) {
-                    texture.data[i] *= tintr;
+                    texture->data[i] *= tintr;
                 }
                 if ((i % 4) == 1) {
-                    texture.data[i] *= tintg;
+                    texture->data[i] *= tintg;
                 }
                 if ((i % 4) == 2) {
-                    texture.data[i] *= tintb;
+                    texture->data[i] *= tintb;
                 }
-                array[tempnum] = (float)array[tempnum] * (1 - alphanum / 255) + (float)texture.data[i] * (alphanum / 255);
+                array[tempnum] = (float)array[tempnum] * (1 - alphanum / 255) + (float)texture->data[i] * (alphanum / 255);
                 tempnum++;
             }
         }

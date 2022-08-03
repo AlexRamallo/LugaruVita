@@ -1124,6 +1124,11 @@ bool Game::LoadJsonLevel(const std::string& name, bool tutorial)
         Game::LoadingScreen();
     }
 
+    std::vector<std::vector<ImageRec*>> player_clothes_tex;
+    player_clothes_tex.resize(Person::players.size());
+
+    std::vector<WorkerThread::JobHandle> player_clothes_jobs;
+
     for (unsigned i = 0; i < Person::players.size(); i++) {
         Game::LoadingScreen();
 
@@ -1131,7 +1136,8 @@ bool Game::LoadJsonLevel(const std::string& name, bool tutorial)
 
         Person::players[i]->skeletonLoad();
 
-        Person::players[i]->addClothes();
+        //Person::players[i]->addClothes();
+        Person::players[i]->submitLoadClothesJobs(player_clothes_jobs, player_clothes_tex[i]);
 
         Person::players[i]->speed = 1 + (float)(Random() % 100) / 1000;
         if (difficulty == 0) {
@@ -1148,6 +1154,24 @@ bool Game::LoadJsonLevel(const std::string& name, bool tutorial)
             } else {
                 Person::players[i]->damagetolerance = 200;
             }
+        }
+    }
+
+    //Laziness because WorkerThreads don't support more than one (parent) dependency
+    std::vector<WorkerThread::JobHandle> applyClothesJobs;
+    for(int i = 0; i < player_clothes_jobs.size(); i++){
+        WorkerThread::join(player_clothes_jobs[i], true);
+        applyClothesJobs.push_back(Person::players[i]->submitApplyClothesJob(&player_clothes_tex[i]));
+    }
+    //join the apply-clothes jobs
+    for(int i = 0; i < applyClothesJobs.size(); i++){
+        WorkerThread::join(applyClothesJobs[i], true);
+    }
+
+    //clean up
+    for (int i = 0; i < Person::players.size(); i++) {
+        for(int v = 0; v < player_clothes_tex[i].size(); v++){
+            delete player_clothes_tex[i][v];
         }
     }
 

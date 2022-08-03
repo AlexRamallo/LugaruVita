@@ -31,7 +31,10 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 #include <vector>
 #include <tuple>
 
+#include <pthread.h>
 #include "Thirdparty/microprofile/microprofile.h"
+
+#define LOG_MUTEX false
 
 extern float screenwidth, screenheight;
 extern float viewdistance;
@@ -81,10 +84,27 @@ void LOG_TOGGLE(char set){
     log_enabled = set;
 }
 
+
+#if LOG_MUTEX
+static pthread_mutex_t mtxLog;
+static bool did_init_log = false;
+#endif
 void LOG(const std::string &fmt, ...)
 {  
 #ifndef NDEBUG
+
+#if LOG_MUTEX
+    if(!did_init_log){
+        did_init_log = true;
+        ASSERT(!pthread_mutex_init(&mtxLog, NULL));
+    }
+#endif
     if(!log_enabled) return;
+
+#if LOG_MUTEX
+    ASSERT(!pthread_mutex_lock(&mtxLog));
+#endif
+
     //stolen from https://en.cppreference.com/w/cpp/utility/variadic    
     va_list args;
     va_start(args, fmt);
@@ -120,6 +140,11 @@ void LOG(const std::string &fmt, ...)
     }
     std::cout << std::endl;
     va_end(args);
+
+#if LOG_MUTEX
+    ASSERT(!pthread_mutex_unlock(&mtxLog));
+#endif
+
 #endif
 }
 
@@ -718,8 +743,10 @@ void Game::LoadScreenTexture()
 /* Loads models and textures which only needs to be loaded once */
 void Game::LoadStuff()
 {
+    LOG_TOGGLE(true);
     MICROPROFILE_SCOPEI("Game", "LoadStuff", 0xffff3456);
     FileCache::InitCache();
+    Model::initModelCache();
     LOG("Game::LoadStuff()");
 
     std::vector<std::tuple<WorkerThread::JobHandle, Texture*>> loadTexJobs;
@@ -945,5 +972,6 @@ void Game::LoadStuff()
         std::get<1>(it)->upload();
     }
 
+    Model::clearModelCache();
     FileCache::ClearCache();
 }

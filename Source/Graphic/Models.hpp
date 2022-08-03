@@ -109,10 +109,10 @@ public:
     void UpdateVertexArray();
     void UpdateVertexArrayNoTex();
     void UpdateVertexArrayNoTexNoNorm();
-    bool loadnotex(const std::string& filename);
-    bool loadraw(const std::string& filename);
-    bool load(const std::string& filename);
-    bool loaddecal(const std::string& filename);
+    bool loadnotex(const std::string& filename, bool cached=true);
+    bool loadraw(const std::string& filename, bool cached=true);
+    bool load(const std::string& filename, bool cached=true);
+    bool loaddecal(const std::string& filename, bool cached=true);
     void Scale(float xscale, float yscale, float zscale);
     void FlipTexCoords();
     void UniformTexCoords();
@@ -133,6 +133,8 @@ public:
 
     WorkerThread::JobHandle submitTransformJob();
 
+    static void initModelCache();
+    static void clearModelCache();
 private:
 
     void deallocate();
