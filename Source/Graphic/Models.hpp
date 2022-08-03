@@ -76,6 +76,7 @@ public:
     XYZ* normals;
     std::vector<TexturedTriangle> Triangles;
     GLfloat* vArray;
+    bool vgl_array;
 
     /*
     int owner[max_textured_triangle];

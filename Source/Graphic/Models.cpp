@@ -25,6 +25,7 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 #include "Utils/Folders.hpp"
 
 #include "Thirdparty/vitagl/math_utils.h"
+#include "Thirdparty/vitagl/gpu_utils.h"
 
 extern "C" {
     #include <math_neon.h>
@@ -38,6 +39,16 @@ extern XYZ viewer;
 extern float fadestart;
 extern float texdetail;
 extern bool decalstoggle;
+
+static void *alloc_model(size_t size){
+#ifdef DRAW_SPEEDHACK
+    void *ret = gpu_alloc_mapped(size, VGL_MEM_VRAM);
+#else
+    void *ret = malloc(size);
+#endif
+    ASSERT(ret != nullptr && "Failed to allocate memory for model");
+    return ret;
+}
 
 
 /**
@@ -639,8 +650,11 @@ bool Model::loadnotex(const std::string& filename, bool use_cache)
         }
         
         owner = (int*)malloc(sizeof(int) * vertexNum);
-        vArray = (GLfloat*)malloc(sizeof(GLfloat) * Triangles.size() * 24);
+        //vArray = (GLfloat*)malloc(sizeof(GLfloat) * Triangles.size() * 24);
+        vArray = (GLfloat*)alloc_model(sizeof(GLfloat) * Triangles.size() * 24);
+        vgl_array = true;
     }else{
+        vgl_array = false;
         tfile = Folders::openMandatoryFile(Folders::getResourcePath(filename), "rb");
         // read model settings
         fseek(tfile, 0, SEEK_SET);
@@ -712,8 +726,11 @@ bool Model::load(const std::string& filename, bool use_cache)
         }
 
         owner = (int*)malloc(sizeof(int) * vertexNum);
-        vArray = (GLfloat*)malloc(sizeof(GLfloat) * Triangles.size() * 24);
+        //vArray = (GLfloat*)malloc(sizeof(GLfloat) * Triangles.size() * 24);
+        vArray = (GLfloat*)alloc_model(sizeof(GLfloat) * Triangles.size() * 24);
+        vgl_array = true;
     }else{
+        vgl_array = false;
         tfile = Folders::openMandatoryFile(Folders::getResourcePath(filename), "rb");
 
         // read model settings
@@ -796,8 +813,11 @@ bool Model::loaddecal(const std::string& filename, bool use_cache)
         }
 
         owner = (int*)malloc(sizeof(int) * vertexNum);
-        vArray = (GLfloat*)malloc(sizeof(GLfloat) * Triangles.size() * 24);
+        //vArray = (GLfloat*)malloc(sizeof(GLfloat) * Triangles.size() * 24);
+        vArray = (GLfloat*)alloc_model(sizeof(GLfloat) * Triangles.size() * 24);
+        vgl_array = true;
     }else{
+        vgl_array = false;
         tfile = Folders::openMandatoryFile(Folders::getResourcePath(filename), "rb");
         // read model settings
         fseek(tfile, 0, SEEK_SET);
@@ -869,8 +889,11 @@ bool Model::loadraw(const std::string& filename, bool use_cache)
             return false;
         }
         owner = (int*)malloc(sizeof(int) * vertexNum);
-        vArray = (GLfloat*)malloc(sizeof(GLfloat) * Triangles.size() * 24);
+        //vArray = (GLfloat*)malloc(sizeof(GLfloat) * Triangles.size() * 24);
+        vArray = (GLfloat*)alloc_model(sizeof(GLfloat) * Triangles.size() * 24);
+        vgl_array = true;
     }else{
+        vgl_array = false;
         tfile = Folders::openMandatoryFile(Folders::getResourcePath(filename), "rb");
 
         // read model settings
@@ -1488,7 +1511,15 @@ void Model::deallocate()
     normals = 0;
 
     if (vArray) {
-        free(vArray);
+        #ifdef DRAW_SPEEDHACK
+        if(vgl_array){
+            vgl_free(vArray);
+        }else{
+            free(vArray);
+        }
+        #else
+            free(vArray);
+        #endif
     }
     vArray = 0;
 
@@ -1506,6 +1537,7 @@ Model::Model()
     , boundingspherecenter()
     , boundingsphereradius(0)
     , flat(false)
+    , vgl_array(false)
 {
     memset(&modelTexture, 0, sizeof(modelTexture));
 }

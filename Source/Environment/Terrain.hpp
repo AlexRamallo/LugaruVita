@@ -74,7 +74,9 @@ public:
     int numtris[subdivision][subdivision];
     int textureness[subdivision][subdivision];
 
-    GLfloat vArray[(max_patch_elements)*subdivision * subdivision];
+    //GLfloat vArray[(max_patch_elements)*subdivision * subdivision];
+    GLfloat *vArray;
+    bool allocate();
 
     bool visible[subdivision][subdivision];
     float avgypatch[subdivision][subdivision];

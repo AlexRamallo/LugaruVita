@@ -7,6 +7,9 @@ More information, updates and bug reports at http://osslugaru.gitlab.io
 Version 1.3-dev (git c241700) -- Debug build
 --------------------------------------------------------------------------
 
+Terrain::allocate! vArray: 0
+	vArraySize: 3538944
+	vArray: 0x82106eb8
 InitGame A
 InitGame B
 InitGame C
@@ -16,11 +19,3 @@ InitGame F
 InitGame G
 InitGame H
 Spawning 2 worker threads
-Game::LoadStuff()
-Loading font texture... Textures/Font.png
-Loading font texture... Textures/FontMono.png
-LoadiLonagd imnogd emlo.d.e.lM.odels/ThrowingKnife.solid
-.L.oMaodels/Sword.solid
-ddionagd imnogd emll.d.e.lM.odels/ThrowingKnife.solid
-...Models/Sword.solid
-Loading model...Models/Staff.solid

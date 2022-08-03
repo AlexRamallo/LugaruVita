@@ -20,6 +20,7 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "Environment/Terrain.hpp"
 #include "Thirdparty/microprofile/microprofile.h"
+#include "Thirdparty/vitagl/gpu_utils.h"
 
 #include "Game.hpp"
 #include "Objects/Object.hpp"
@@ -1528,7 +1529,28 @@ void Terrain::DoShadows()
     }
 }
 
-Terrain::Terrain()
+bool Terrain::allocate(){
+    ASSERT(vArray == nullptr && "Called allocate more than once");
+    if(vArray != nullptr){
+        return false;
+    }
+
+    int vArraySize = ((max_patch_elements)*subdivision*subdivision) * sizeof(GLfloat);
+
+
+#ifdef DRAW_SPEEDHACK    
+    vArray = (GLfloat*) gpu_alloc_mapped(vArraySize, VGL_MEM_VRAM);
+#else
+    vArray = (GLfloat*) malloc(vArraySize);
+#endif
+    ASSERT(vArray != nullptr && "Failed to allocate memory for Terrain");
+    memset(vArray, 0, vArraySize);
+
+    return vArray != nullptr;
+}
+
+Terrain::Terrain():
+    vArray(nullptr)
 {
     size = 0;
 
@@ -1545,7 +1567,7 @@ Terrain::Terrain()
     memset(numtris, 0, sizeof(numtris));
     memset(textureness, 0, sizeof(textureness));
 
-    memset(vArray, 0, sizeof(vArray));
+    //memset(vArray, 0, sizeof(vArray));
 
     memset(visible, 0, sizeof(visible));
     memset(avgypatch, 0, sizeof(avgypatch));

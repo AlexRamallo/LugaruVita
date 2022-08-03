@@ -122,6 +122,9 @@ void LOG(const std::string &fmt, ...)
             } else if (c == 'f') {
                 double d = va_arg(args, double);
                 std::cout << d;
+            } else if (c == 'p') {
+                void* d = va_arg(args, void*);
+                std::cout << d;
             } else if(c == 's') {
                 char *s = va_arg(args, char*);
                 std::cout << s;
@@ -177,6 +180,11 @@ void Game::newGame()
     text = new Text();
     textmono = new Text();
     skybox = new SkyBox();
+
+    if(!terrain.allocate()){
+        LOG("Failed to allocate space for terrain");
+        exit(1);
+    }
 }
 
 void Game::deleteGame()
