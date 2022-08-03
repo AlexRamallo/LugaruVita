@@ -1,4 +1,5 @@
 #include "Utils/WorkerThread.hpp"
+#include "Utils/Folders.hpp"
 #include "Utils/Log.h"
 
 #include "Thirdparty/microprofile/microprofile.h"
@@ -385,7 +386,7 @@ struct FunctionPointerJob: public Job {
 		ASSERT(func != nullptr && "Function pointer for FunctionPointerJob is null");
 	}
 
-	~FunctionPointerJob() {/***/}
+	~FunctionPointerJob() = default;
 
 	void execute() override {
 		ASSERT(func != nullptr);
@@ -413,10 +414,21 @@ struct UpdateSkeletonJob: Job {
 
 struct UpdateSkeletonNormalsJob: Job {
 	UpdateSkeletonNormalsJob(int pid):Job(), playerId(pid) {/***/}
-	~UpdateSkeletonNormalsJob() {/***/}
+	~UpdateSkeletonNormalsJob() = default;
 	int playerId;
 	void execute() override {
 		Person::players[playerId]->UpdateNormals();
+	}
+};
+
+struct LoadImageJob: Job {
+	ImageRec *image;
+	std::string filename;
+	LoadImageJob(ImageRec *img, std::string &fname):Job(), image(img), filename(fname) {/***/}
+	~LoadImageJob() = default;
+	void execute() override {
+        std::string fname = Folders::getResourcePath(filename);
+        load_image(fname.c_str(), *image);
 	}
 };
 
@@ -456,6 +468,13 @@ JobHandle vsubmitJob(JobHandle parent, WorkTask type, va_list args){
     		int playerId = va_arg(args, int);
     		//ret = submitJob<UpdateSkeletonNormalsJob>(playerId);
     		DO_SUBMIT_JOB(UpdateSkeletonNormalsJob, playerId);
+    		break;
+    	}
+
+    	case WRK_LOAD_IMAGE: {
+    		ImageRec *img = va_arg(args, ImageRec*);
+    		std::string filename = va_arg(args, std::string);
+    		DO_SUBMIT_JOB(LoadImageJob, img, filename);
     		break;
     	}
 

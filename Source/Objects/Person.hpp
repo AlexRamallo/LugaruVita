@@ -419,11 +419,11 @@ public:
 
     void takeWeapon(int weaponId);
 
-    bool addClothes(const int& clothesId, ImageRec *texture = nullptr);
+    bool addClothes(const int& clothesId, const ImageRec *texture = nullptr);
     void addClothes();
 
     void submitLoadClothesJobs(std::vector<WorkerThread::JobHandle> &out, std::vector<ImageRec*> &tex_out);
-    WorkerThread::JobHandle submitApplyClothesJob(std::vector<ImageRec*> *tex_out);
+    WorkerThread::JobHandle submitApplyClothesJob(std::map<std::string, ImageRec*> *imgcache);
     void addClothes(std::vector<ImageRec*> &textures);
 
     void doAI();

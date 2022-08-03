@@ -7461,22 +7461,25 @@ void Person::submitLoadClothesJobs(std::vector<WorkerThread::JobHandle> &out, st
 }
 
 struct PersonApplyClothesJob: WorkerThread::Job {
-    std::vector<ImageRec*> *loaded_tex;
+    std::map<std::string, ImageRec*> *imgcache;
     Person *person;
-    PersonApplyClothesJob(std::vector<ImageRec*> *t, Person *p):
+    PersonApplyClothesJob(std::map<std::string, ImageRec*> *c, Person *p):
         Job(),
-        loaded_tex(t),
+        imgcache(c),
         person(p)
     {
         //--
     }
     void execute() override {
-        person->addClothes(*loaded_tex);
+        for(int i = 0; i < person->clothes.size(); i++){
+            person->addClothes(i, (*imgcache)[person->clothes[i]]);
+        }
+        person->DoMipmaps();
     }
 };
 
-WorkerThread::JobHandle Person::submitApplyClothesJob(std::vector<ImageRec*> *tex_out){
-    return WorkerThread::submitJob<PersonApplyClothesJob>(tex_out, this);
+WorkerThread::JobHandle Person::submitApplyClothesJob(std::map<std::string, ImageRec*> *imgcache){
+    return WorkerThread::submitJob<PersonApplyClothesJob>(imgcache, this);
 }
 
 void Person::addClothes(std::vector<ImageRec*> &textures)
@@ -7499,7 +7502,7 @@ void Person::addClothes()
         DoMipmaps();
     }}
 
-bool Person::addClothes(const int& clothesId, ImageRec *texture)
+bool Person::addClothes(const int& clothesId, const ImageRec *texture)
 {
     LOGFUNC;
     std::string fname = Folders::getResourcePath(clothes[clothesId]);
@@ -7562,22 +7565,24 @@ bool Person::addClothes(const int& clothesId, ImageRec *texture)
         int tempnum = 0;
         alphanum = 255;
         for (int i = 0; i < (int)(sizeY * sizeX * bytesPerPixel); i++) {
+            uint8_t col = texture->data[i];
+
             if (bytesPerPixel == 3) {
                 alphanum = 255;
             } else if ((i + 1) % 4 == 0) {
-                alphanum = texture->data[i];
+                alphanum = col;
             }
             if ((i + 1) % 4 || bytesPerPixel == 3) {
                 if ((i % 4) == 0) {
-                    texture->data[i] *= tintr;
+                    col *= tintr;
                 }
                 if ((i % 4) == 1) {
-                    texture->data[i] *= tintg;
+                    col *= tintg;
                 }
                 if ((i % 4) == 2) {
-                    texture->data[i] *= tintb;
+                    col *= tintb;
                 }
-                array[tempnum] = (float)array[tempnum] * (1 - alphanum / 255) + (float)texture->data[i] * (alphanum / 255);
+                array[tempnum] = (float)array[tempnum] * (1 - alphanum / 255) + (float)col * (alphanum / 255);
                 tempnum++;
             }
         }

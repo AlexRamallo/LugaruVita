@@ -128,26 +128,26 @@ struct PVRHeader {
 	 * Returns true if successful, false if level is out of range
 	 * or texture format is not supported
 	 * */
-	bool getMipMap(int level, PVRMipMapLevel *mipmap);
+	bool getMipMap(int level, PVRMipMapLevel *mipmap) const;
 
-	bool isCompressed();
-	GLuint getGLInternalFormat();
-	GLsizei getImageSize();	
-	GLint getBorder(int side = 0);
+	bool isCompressed() const;
+	GLuint getGLInternalFormat() const;
+	GLsizei getImageSize() const;	
+	GLint getBorder(int side = 0) const;
 	
 	//only if not compressed
-	GLuint getGLPixelFormat();
-	GLenum getGLPixelType();
+	GLuint getGLPixelFormat() const;
+	GLenum getGLPixelType() const;
 
 	//returns number of bits per pixel
-	GLsizei getBitsPerPixel();
+	GLsizei getBitsPerPixel() const;
 
 	//there aren't part of the standard PVR header
 	GLsizei img_size;
 	GLint border[3];
 	GLbyte chtype[4]; //overrides
 private:
-	bool getUncompressedChannelOrder(uint8_t order[4], uint8_t rate[4]);
+	bool getUncompressedChannelOrder(uint8_t order[4], uint8_t rate[4]) const;
 };
 
 class PVRTexLoader {

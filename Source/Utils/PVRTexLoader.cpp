@@ -267,11 +267,11 @@ static GLuint parse_gl_pixel_format(uint8_t order[4], uint8_t rate[4]){
 	return 0;
 }
 
-GLint PVRHeader::getBorder(int side) {
+GLint PVRHeader::getBorder(int side) const{
 	return border[side];
 }
 
-GLuint PVRHeader::getGLPixelFormat(){
+GLuint PVRHeader::getGLPixelFormat() const{
 	uint8_t order[4], rate[4];
 	if(getUncompressedChannelOrder(order, rate)){
 		return parse_gl_pixel_format(order, rate);
@@ -343,7 +343,7 @@ GLenum get_channel_gl_unitype_ratio(uint32_t unitype, uint8_t order[4], uint8_t 
  * for uniform-rate pixel formats. If rates are not uniform, pass the
  * output of this function to `get_channel_gl_unitype_ratio`
  * */
-GLenum get_channel_gl_unitype(uint32_t ChannelType){
+GLenum get_channel_gl_unitype(uint32_t ChannelType) {
 	//Only works if all channels are the same type
 	if(ChannelType != -1){
 		switch(ChannelType){
@@ -374,7 +374,7 @@ GLenum get_channel_gl_unitype(uint32_t ChannelType){
 	}
 }
 
-GLsizei PVRHeader::getBitsPerPixel(){
+GLsizei PVRHeader::getBitsPerPixel() const{
 	uint8_t order[4], rate[4];
 	if(getUncompressedChannelOrder(order, rate)){
 		GLsizei ret = 0;
@@ -387,7 +387,7 @@ GLsizei PVRHeader::getBitsPerPixel(){
 	}
 }
 
-GLenum PVRHeader::getGLPixelType(){
+GLenum PVRHeader::getGLPixelType() const{
 	GLenum ut = get_channel_gl_unitype(ChannelType);
 	if(ChannelType != -1){
 		return ut;
@@ -398,15 +398,15 @@ GLenum PVRHeader::getGLPixelType(){
 	}
 }
 
-GLsizei PVRHeader::getImageSize(){
+GLsizei PVRHeader::getImageSize() const{
 	return img_size;
 }
 
-bool PVRHeader::isCompressed(){
+bool PVRHeader::isCompressed() const{
 	return PixelFormat < (uint64_t) PVRPixelFormat::COMPRESSED_END;
 }
 
-bool PVRHeader::getUncompressedChannelOrder(uint8_t order[4], uint8_t rate[4]){
+bool PVRHeader::getUncompressedChannelOrder(uint8_t order[4], uint8_t rate[4]) const{
 	/**
 	 * Notes:
 	 * 
@@ -436,7 +436,7 @@ bool PVRHeader::getUncompressedChannelOrder(uint8_t order[4], uint8_t rate[4]){
 	}
 	return false;
 }
-GLuint PVRHeader::getGLInternalFormat(){
+GLuint PVRHeader::getGLInternalFormat() const{
 	//TODO: test this
 	uint8_t order[4], rate[4];
 	if(getUncompressedChannelOrder(order, rate)){
@@ -492,7 +492,7 @@ static size_t calc_mipmap_offset(int level, size_t basesz, size_t minsz, size_t 
 	return off;
 }
 
-bool PVRHeader::getMipMap(int level, PVRMipMapLevel *mipmap){
+bool PVRHeader::getMipMap(int level, PVRMipMapLevel *mipmap) const{
 	ASSERT(NumSurfaces == 1 && "Texture arrays are not supported");
 	ASSERT(NumFaces == 1 && "Cube maps are not supported");
 	ASSERT(Depth == 1 && "3D textures are not supported");

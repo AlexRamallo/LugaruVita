@@ -19,10 +19,8 @@ Spawning 2 worker threads
 Game::LoadStuff()
 Loading font texture... Textures/Font.png
 Loading font texture... Textures/FontMono.png
-LoLoaaddiinngg  mmooddeell......MModels/Sword.solidfe.solid
-odels/Sword.solid
-
-Looaaddiinngg  mmooddeell......MModels/ThrowingKni
-odels/ThrowingKnife.solid
-
+LoadiLonagd imnogd emlo.d.e.lM.odels/ThrowingKnife.solid
+.L.oMaodels/Sword.solid
+ddionagd imnogd emll.d.e.lM.odels/ThrowingKnife.solid
+...Models/Sword.solid
 Loading model...Models/Staff.solid
