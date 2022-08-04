@@ -23,9 +23,14 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "Graphic/gamegl.hpp"
 #include "Thirdparty/microprofile/microprofile.h"
+#include "Thirdparty/vitagl/math_utils.h"
 
 #include <math.h>
 #include <json/value.h>
+
+extern "C" {
+    #include <math_neon.h>
+}
 
 class XYZ
 {
@@ -75,7 +80,7 @@ float LineFacetd(XYZ* p1, XYZ* p2, XYZ* pa, XYZ* pb, XYZ* pc, XYZ* p);
 inline void ReflectVector(XYZ* vel, const XYZ* n);
 inline void ReflectVector(XYZ* vel, const XYZ& n);
 inline XYZ DoRotation(XYZ thePoint, float xang, float yang, float zang);
-inline XYZ DoRotationRadian(XYZ thePoint, float xang, float yang, float zang);
+//inline XYZ DoRotationRadian(XYZ thePoint, float xang, float yang, float zang);
 inline float findDistance(XYZ* point1, XYZ* point2);
 inline float findLength(XYZ* point1);
 inline float findLengthfast(XYZ* point1);
@@ -291,7 +296,8 @@ inline float distsqflat(XYZ* point1, XYZ* point2)
 
 inline XYZ DoRotation(XYZ thePoint, float xang, float yang, float zang)
 { 
-    //MICROPROFILE_SCOPEI("XYZ", "DoRotation", 0x01cb0f);
+    MICROPROFILE_SCOPEI("XYZ", "DoRotation", 0x01cb0f);
+    /*
     XYZ newpoint;
     if (xang) {
         xang *= 6.283185f;
@@ -323,6 +329,37 @@ inline XYZ DoRotation(XYZ thePoint, float xang, float yang, float zang)
     if (xang) {
         newpoint.y = thePoint.y * cosf(xang) - thePoint.z * sinf(xang);
         newpoint.z = thePoint.y * sinf(xang) + thePoint.z * cosf(xang);
+        thePoint.z = newpoint.z;
+        thePoint.y = newpoint.y;
+    }
+
+    return thePoint;
+    */
+
+    XYZ newpoint;
+
+    float sc[2];
+
+    if (yang) {
+        sincosf_neon(DEG_TO_RAD(yang), sc);
+        newpoint.z = thePoint.z * sc[1] - thePoint.x * sc[0];
+        newpoint.x = thePoint.z * sc[0] + thePoint.x * sc[1];
+        thePoint.z = newpoint.z;
+        thePoint.x = newpoint.x;
+    }
+
+    if (zang) {
+        sincosf_neon(DEG_TO_RAD(zang), sc);
+        newpoint.x = thePoint.x * sc[1] - thePoint.y * sc[0];
+        newpoint.y = thePoint.y * sc[1] + thePoint.x * sc[0];
+        thePoint.x = newpoint.x;
+        thePoint.y = newpoint.y;
+    }
+
+    if (xang) {
+        sincosf_neon(DEG_TO_RAD(xang), sc);
+        newpoint.y = thePoint.y * sc[1] - thePoint.z * sc[0];
+        newpoint.z = thePoint.y * sc[0] + thePoint.z * sc[1];
         thePoint.z = newpoint.z;
         thePoint.y = newpoint.y;
     }
@@ -421,6 +458,7 @@ inline bool sphere_line_intersection(
     return (1);
 }
 
+/*
 inline XYZ DoRotationRadian(XYZ thePoint, float xang, float yang, float zang)
 {
     XYZ newpoint;
@@ -451,6 +489,7 @@ inline XYZ DoRotationRadian(XYZ thePoint, float xang, float yang, float zang)
 
     return oldpoint;
 }
+*/
 
 inline bool DistancePointLine(XYZ* Point, XYZ* LineStart, XYZ* LineEnd, float* Distance, XYZ* Intersection)
 {

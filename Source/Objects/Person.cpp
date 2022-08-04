@@ -6493,98 +6493,60 @@ void Person::UpdateSkeleton()
                     skeleton.FindRotationMuscle(i, animTarget);
                 }
                 mid = (skeleton.muscles[i].parent1->position + skeleton.muscles[i].parent2->position) / 2;
-                //glMatrixMode(GL_MODELVIEW);
-                //glPushMatrix();
-                //glLoadIdentity();
 
                 matrix4x4 mat;
                 matrix4x4_identity(mat);
 
                 if (!skeleton.free) {
-                    //glRotatef(tilt2, 1, 0, 0);
                     matrix4x4_rotate_x(mat, DEG_TO_RAD(tilt2));
                 }
                 if (!skeleton.free) {
-                    //glRotatef(tilt, 0, 0, 1);
                     matrix4x4_rotate_z(mat, DEG_TO_RAD(tilt));
                 }
 
-                //glTranslatef(mid.x, mid.y, mid.z);
                 matrix4x4_translate(mat, mid.x, mid.y, mid.z);
 
                 skeleton.muscles[i].lastrotate1 = skeleton.muscles[i].rotate1;
-                //glRotatef(-skeleton.muscles[i].lastrotate1 + 90, 0, 1, 0);
                 matrix4x4_rotate_y(mat, DEG_TO_RAD(-skeleton.muscles[i].lastrotate1 + 90));
 
                 skeleton.muscles[i].lastrotate2 = skeleton.muscles[i].rotate2;
-                //glRotatef(-skeleton.muscles[i].lastrotate2 + 90, 0, 0, 1);
                 matrix4x4_rotate_z(mat, DEG_TO_RAD(-skeleton.muscles[i].lastrotate2 + 90));
 
                 skeleton.muscles[i].lastrotate3 = skeleton.muscles[i].rotate3;
-                //glRotatef(-skeleton.muscles[i].lastrotate3, 0, 1, 0);
                 matrix4x4_rotate_y(mat, DEG_TO_RAD(-skeleton.muscles[i].lastrotate3));
 
                 if (playerdetail || skeleton.free == 3) {
                     for (unsigned j = 0; j < skeleton.muscles[i].vertices.size(); j++) {
                         XYZ& v0 = skeleton.model[start].vertex[skeleton.muscles[i].vertices[j]];
                         XYZ& v1 = skeleton.model[endthing].vertex[skeleton.muscles[i].vertices[j]];
-                        
-                        //glMatrixMode(GL_MODELVIEW);
-                        //glPushMatrix();
+
                         matrix4x4 mat2;
                         matrix4x4_copy(mat2, mat);
 
                         if (p1 == abdomen || p2 == abdomen) {
-                            /*
-                            glTranslatef((v0.x * (1 - morphness) + v1.x * morphness) * getProportionXYZ(1).x,
-                                         (v0.y * (1 - morphness) + v1.y * morphness) * getProportionXYZ(1).y,
-                                         (v0.z * (1 - morphness) + v1.z * morphness) * getProportionXYZ(1).z);
-                            */
                             matrix4x4_translate(mat2,
                                 (v0.x * (1 - morphness) + v1.x * morphness) * getProportionXYZ(1).x,
                                 (v0.y * (1 - morphness) + v1.y * morphness) * getProportionXYZ(1).y,
                                 (v0.z * (1 - morphness) + v1.z * morphness) * getProportionXYZ(1).z);
                         }
                         if (p1 == lefthand || p1 == righthand || p1 == leftwrist || p1 == rightwrist || p1 == leftelbow || p1 == rightelbow || p2 == leftelbow || p2 == rightelbow) {
-                            /*
-                            glTranslatef((v0.x * (1 - morphness) + v1.x * morphness) * getProportionXYZ(2).x,
-                                         (v0.y * (1 - morphness) + v1.y * morphness) * getProportionXYZ(2).y,
-                                         (v0.z * (1 - morphness) + v1.z * morphness) * getProportionXYZ(2).z);
-                            */
                             matrix4x4_translate(mat2,
                                 (v0.x * (1 - morphness) + v1.x * morphness) * getProportionXYZ(2).x,
                                 (v0.y * (1 - morphness) + v1.y * morphness) * getProportionXYZ(2).y,
                                 (v0.z * (1 - morphness) + v1.z * morphness) * getProportionXYZ(2).z);
                         }
                         if (p1 == leftfoot || p1 == rightfoot || p1 == leftankle || p1 == rightankle || p1 == leftknee || p1 == rightknee || p2 == leftknee || p2 == rightknee) {
-                            /*
-                            glTranslatef((v0.x * (1 - morphness) + v1.x * morphness) * getProportionXYZ(3).x,
-                                         (v0.y * (1 - morphness) + v1.y * morphness) * getProportionXYZ(3).y,
-                                         (v0.z * (1 - morphness) + v1.z * morphness) * getProportionXYZ(3).z);
-                             */
                             matrix4x4_translate(mat2,
                                 (v0.x * (1 - morphness) + v1.x * morphness) * getProportionXYZ(3).x,
                                 (v0.y * (1 - morphness) + v1.y * morphness) * getProportionXYZ(3).y,
                                 (v0.z * (1 - morphness) + v1.z * morphness) * getProportionXYZ(3).z);
                         }
                         if (p1 == head || p2 == head) {
-                            /*
-                            glTranslatef((v0.x * (1 - morphness) + v1.x * morphness) * getProportionXYZ(0).x,
-                                         (v0.y * (1 - morphness) + v1.y * morphness) * getProportionXYZ(0).y,
-                                         (v0.z * (1 - morphness) + v1.z * morphness) * getProportionXYZ(0).z);
-                            */
                             matrix4x4_translate(mat2,
                                 (v0.x * (1 - morphness) + v1.x * morphness) * getProportionXYZ(0).x,
                                 (v0.y * (1 - morphness) + v1.y * morphness) * getProportionXYZ(0).y,
                                 (v0.z * (1 - morphness) + v1.z * morphness) * getProportionXYZ(0).z);
                         }
-                        /*
-                        glGetFloatv(GL_MODELVIEW_MATRIX, M);
-                        skeleton.drawmodel.vertex[skeleton.muscles[i].vertices[j]].x = M[12] * scale;
-                        skeleton.drawmodel.vertex[skeleton.muscles[i].vertices[j]].y = M[13] * scale;
-                        skeleton.drawmodel.vertex[skeleton.muscles[i].vertices[j]].z = M[14] * scale;
-                        glPopMatrix();
-                        */
                         skeleton.drawmodel.vertex[skeleton.muscles[i].vertices[j]].x = mat2[0][3] * scale;
                         skeleton.drawmodel.vertex[skeleton.muscles[i].vertices[j]].y = mat2[1][3] * scale;
                         skeleton.drawmodel.vertex[skeleton.muscles[i].vertices[j]].z = mat2[2][3] * scale;
@@ -6593,157 +6555,100 @@ void Person::UpdateSkeleton()
                 if (!playerdetail || skeleton.free == 3) {
                     for (unsigned j = 0; j < skeleton.muscles[i].verticeslow.size(); j++) {
                         XYZ& v0 = skeleton.modellow.vertex[skeleton.muscles[i].verticeslow[j]];
-                        //glMatrixMode(GL_MODELVIEW);
-                        //glPushMatrix();
                         matrix4x4 mat2;
                         matrix4x4_copy(mat2, mat);
 
                         if (p1 == abdomen || p2 == abdomen) {
-                            /*
-                            glTranslatef(v0.x * getProportionXYZ(1).x,
-                                         v0.y * getProportionXYZ(1).y,
-                                         v0.z * getProportionXYZ(1).z);
-                            */
                             matrix4x4_translate(mat2,
                                 v0.x * getProportionXYZ(1).x,
                                 v0.y * getProportionXYZ(1).y,
                                 v0.z * getProportionXYZ(1).z);
                         }
                         if (p1 == lefthand || p1 == righthand || p1 == leftwrist || p1 == rightwrist || p1 == leftelbow || p1 == rightelbow || p2 == leftelbow || p2 == rightelbow) {
-                            /*glTranslatef(v0.x * getProportionXYZ(2).x,
-                                         v0.y * getProportionXYZ(2).y,
-                                         v0.z * getProportionXYZ(2).z);*/
                             matrix4x4_translate(mat2,
                                 v0.x * getProportionXYZ(2).x,
                                 v0.y * getProportionXYZ(2).y,
                                 v0.z * getProportionXYZ(2).z);
                         }
                         if (p1 == leftfoot || p1 == rightfoot || p1 == leftankle || p1 == rightankle || p1 == leftknee || p1 == rightknee || p2 == leftknee || p2 == rightknee) {
-                            /*glTranslatef(v0.x * getProportionXYZ(3).x,
-                                         v0.y * getProportionXYZ(3).y,
-                                         v0.z * getProportionXYZ(3).z);*/
                             matrix4x4_translate(mat2,
                                 v0.x * getProportionXYZ(3).x,
                                 v0.y * getProportionXYZ(3).y,
                                 v0.z * getProportionXYZ(3).z);
                         }
                         if (p1 == head || p2 == head) {
-                            /*glTranslatef(v0.x * getProportionXYZ(0).x,
-                                         v0.y * getProportionXYZ(0).y,
-                                         v0.z * getProportionXYZ(0).z);*/
                             matrix4x4_translate(mat2,
                                 v0.x * getProportionXYZ(0).x,
                                 v0.y * getProportionXYZ(0).y,
                                 v0.z * getProportionXYZ(0).z);
                         }
-                        /*
-                        glGetFloatv(GL_MODELVIEW_MATRIX, M);
-                        skeleton.drawmodellow.vertex[skeleton.muscles[i].verticeslow[j]].x = M[12] * scale;
-                        skeleton.drawmodellow.vertex[skeleton.muscles[i].verticeslow[j]].y = M[13] * scale;
-                        skeleton.drawmodellow.vertex[skeleton.muscles[i].verticeslow[j]].z = M[14] * scale;
-                        glPopMatrix();
-                        */
                         skeleton.drawmodellow.vertex[skeleton.muscles[i].verticeslow[j]].x = mat2[0][3] * scale;
                         skeleton.drawmodellow.vertex[skeleton.muscles[i].verticeslow[j]].y = mat2[1][3] * scale;
                         skeleton.drawmodellow.vertex[skeleton.muscles[i].verticeslow[j]].z = mat2[2][3] * scale;
                     }
                 }
-                //glPopMatrix();
             }
             if (skeleton.clothes && skeleton.muscles[i].verticesclothes.size() > 0) {
                 mid = (skeleton.muscles[i].parent1->position + skeleton.muscles[i].parent2->position) / 2;
-                
-                //glMatrixMode(GL_MODELVIEW);
-                //glPushMatrix();
-                //glLoadIdentity();
 
                 matrix4x4 mat;
                 matrix4x4_identity(mat);
 
                 if (!skeleton.free) {
-                    //glRotatef(tilt2, 1, 0, 0);
                     matrix4x4_rotate_x(mat, DEG_TO_RAD(tilt2));
                 }
                 if (!skeleton.free) {
-                    //glRotatef(tilt, 0, 0, 1);
                     matrix4x4_rotate_z(mat, DEG_TO_RAD(tilt));
                 }
-                //glTranslatef(mid.x, mid.y, mid.z);
                 matrix4x4_translate(mat, mid.x, mid.y, mid.z);
 
                 skeleton.muscles[i].lastrotate1 = skeleton.muscles[i].rotate1;
-                //glRotatef(-skeleton.muscles[i].lastrotate1 + 90, 0, 1, 0);
                 matrix4x4_rotate_y(mat, DEG_TO_RAD(-skeleton.muscles[i].lastrotate1 + 90));
 
                 skeleton.muscles[i].lastrotate2 = skeleton.muscles[i].rotate2;
-                //glRotatef(-skeleton.muscles[i].lastrotate2 + 90, 0, 0, 1);
                 matrix4x4_rotate_z(mat, DEG_TO_RAD(-skeleton.muscles[i].lastrotate2 + 90));
 
                 skeleton.muscles[i].lastrotate3 = skeleton.muscles[i].rotate3;
-                //glRotatef(-skeleton.muscles[i].lastrotate3, 0, 1, 0);
                 matrix4x4_rotate_y(mat, DEG_TO_RAD(-skeleton.muscles[i].lastrotate3));
 
                 for (unsigned j = 0; j < skeleton.muscles[i].verticesclothes.size(); j++) {
                     XYZ& v0 = skeleton.modelclothes.vertex[skeleton.muscles[i].verticesclothes[j]];
-                    //glMatrixMode(GL_MODELVIEW);
-                    //glPushMatrix();
                     
                     matrix4x4 mat2;
                     matrix4x4_copy(mat2, mat);
 
                     if (p1 == abdomen || p2 == abdomen) {
-                        /*glTranslatef(v0.x * getProportionXYZ(1).x,
-                                     v0.y * getProportionXYZ(1).y,
-                                     v0.z * getProportionXYZ(1).z);*/
                         matrix4x4_translate(mat2,
                                 v0.x * getProportionXYZ(1).x,
                                 v0.y * getProportionXYZ(1).y,
                                 v0.z * getProportionXYZ(1).z);
                     }
                     if (p1 == lefthand || p1 == righthand || p1 == leftwrist || p1 == rightwrist || p1 == leftelbow || p1 == rightelbow || p2 == leftelbow || p2 == rightelbow) {
-                        /*glTranslatef(v0.x * getProportionXYZ(2).x,
-                                     v0.y * getProportionXYZ(2).y,
-                                     v0.z * getProportionXYZ(2).z);*/
                         matrix4x4_translate(mat2,
                                 v0.x * getProportionXYZ(2).x,
                                 v0.y * getProportionXYZ(2).y,
                                 v0.z * getProportionXYZ(2).z);
                     }
                     if (p1 == leftfoot || p1 == rightfoot || p1 == leftankle || p1 == rightankle || p1 == leftknee || p1 == rightknee || p2 == leftknee || p2 == rightknee) {
-                        /*glTranslatef(v0.x * getProportionXYZ(3).x,
-                                     v0.y * getProportionXYZ(3).y,
-                                     v0.z * getProportionXYZ(3).z);*/
                         matrix4x4_translate(mat2,
                                 v0.x * getProportionXYZ(3).x,
                                 v0.y * getProportionXYZ(3).y,
                                 v0.z * getProportionXYZ(3).z);
                     }
                     if (p1 == head || p2 == head) {
-                        /*glTranslatef(v0.x * getProportionXYZ(0).x,
-                                     v0.y * getProportionXYZ(0).y,
-                                     v0.z * getProportionXYZ(0).z);*/
                         matrix4x4_translate(mat2,
                                 v0.x * getProportionXYZ(0).x,
                                 v0.y * getProportionXYZ(0).y,
                                 v0.z * getProportionXYZ(0).z);
                     }
-                    /*
-                    glGetFloatv(GL_MODELVIEW_MATRIX, M);
-                    skeleton.drawmodelclothes.vertex[skeleton.muscles[i].verticesclothes[j]].x = M[12] * scale;
-                    skeleton.drawmodelclothes.vertex[skeleton.muscles[i].verticesclothes[j]].y = M[13] * scale;
-                    skeleton.drawmodelclothes.vertex[skeleton.muscles[i].verticesclothes[j]].z = M[14] * scale;
-                    glPopMatrix();
-                    */
                     skeleton.drawmodelclothes.vertex[skeleton.muscles[i].verticesclothes[j]].x = mat2[0][3] * scale;
                     skeleton.drawmodelclothes.vertex[skeleton.muscles[i].verticesclothes[j]].y = mat2[1][3] * scale;
                     skeleton.drawmodelclothes.vertex[skeleton.muscles[i].verticesclothes[j]].z = mat2[2][3] * scale;
                 }
-                //glPopMatrix();
             }
             updatedelay = 1 + (float)(Random() % 100) / 1000;
         }
 
-        //UpdateNormals();
     }
 
     calcrot = 0;
@@ -6760,6 +6665,49 @@ void Person::UpdateSkeleton()
         calcrot = 0;
     }
 }
+
+#define _dophase_calcnormals(model) \
+    switch(phase){\
+        default: case 1: model.submitCalculateNormalsJobs_Phase1(false, p1dep, out); break;\
+        case 2: model.submitCalculateNormalsJobs_Phase2(out); break;\
+        case 3: model.submitCalculateNormalsJobs_Phase3(1, out); break;\
+    }
+
+void Person::submitCalculateNormalsJobs(
+    int phase,
+    WorkerThread::JobHandle p1dep,
+    std::vector<WorkerThread::JobHandle> &out
+){
+    if (skeleton.free != 2 && (skeleton.free == 1 || skeleton.free == 3 || id == 0 || (normalsupdatedelay <= 0) || animTarget == getupfromfrontanim || animTarget == getupfrombackanim || animCurrent == getupfromfrontanim || animCurrent == getupfrombackanim)) {
+        normalsupdatedelay = 1;
+        if (playerdetail || skeleton.free == 3) {
+            //skeleton.drawmodel.CalculateNormals(0);
+            _dophase_calcnormals(skeleton.drawmodel);
+        }
+        if (!playerdetail || skeleton.free == 3) {
+            //skeleton.drawmodellow.CalculateNormals(0);
+            _dophase_calcnormals(skeleton.drawmodellow);
+        }
+        if (skeleton.clothes) {
+            //skeleton.drawmodelclothes.CalculateNormals(0);
+            _dophase_calcnormals(skeleton.drawmodelclothes);
+        }
+    } else if(phase == 3) {
+        if (playerdetail || skeleton.free == 3) {
+            //skeleton.drawmodel.UpdateVertexArrayNoTexNoNorm();
+            skeleton.drawmodel.submitCalculateNormalsJobs_Phase3(1, out);
+        }
+        if (!playerdetail || skeleton.free == 3) {
+            //skeleton.drawmodellow.UpdateVertexArrayNoTexNoNorm();
+            skeleton.drawmodellow.submitCalculateNormalsJobs_Phase3(1, out);
+        }
+        if (skeleton.clothes) {
+            //skeleton.drawmodelclothes.UpdateVertexArrayNoTexNoNorm();
+            skeleton.drawmodelclothes.submitCalculateNormalsJobs_Phase3(1, out);
+        }
+    }
+}
+#undef _dophase_calcnormals
 
 bool Person::UpdateNormals(){
     MICROPROFILE_SCOPEI("Person", "UpdateNormals", 0x926329);

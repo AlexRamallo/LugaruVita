@@ -113,7 +113,7 @@ float Skeleton::DoConstraints(XYZ* coords, float* scale)
     MICROPROFILE_SCOPEI("Skeleton", "DoConstraints", 0xbdc071);
     const float elasticity = .3;
     XYZ bounceness;
-    const int numrepeats = 3;
+    const int numrepeats = 1;
     float groundlevel = .15;
     unsigned i;
     XYZ temp;

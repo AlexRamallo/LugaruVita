@@ -20,6 +20,8 @@
 	#define PTCHK0(c, m) (c);
 #endif
 
+extern XYZ viewer;
+
 namespace WorkerThread {
 
 #define MAX_JOBS 100
@@ -432,6 +434,35 @@ struct LoadImageJob: Job {
 	}
 };
 
+struct CalcOcclusionJob: Job {
+	Person *player;
+	CalcOcclusionJob(Person *p):Job(), player(p) {/***/}
+	~CalcOcclusionJob() = default;
+	void execute() override {
+		XYZ checkpoint = DoRotation(
+		    player->skeleton.joints[fabs(Random() % player->skeleton.joints.size())].position,
+		    0,
+		    player->yaw,
+		    0
+		) * player->scale + player->coords;
+
+		checkpoint.y += 1;
+		int i = -1;
+		if (player->occluded != 0) {
+		    i = Object::checkcollide(viewer, checkpoint, player->lastoccluded);
+		}
+		if (i == -1) {
+		    i = Object::checkcollide(viewer, checkpoint);
+		}
+		if (i != -1) {
+		    player->occluded += 1;
+		    player->lastoccluded = i;
+		} else {
+		    player->occluded = 0;
+		}
+	}	
+};
+
 JobHandle submitJob(Job *j){
 	return _pushJob(j, -1);
 }
@@ -475,6 +506,12 @@ JobHandle vsubmitJob(JobHandle parent, WorkTask type, va_list args){
     		ImageRec *img = va_arg(args, ImageRec*);
     		std::string filename = va_arg(args, std::string);
     		DO_SUBMIT_JOB(LoadImageJob, img, filename);
+    		break;
+    	}
+
+    	case WRK_CALC_OCCLUSION: {
+    		Person *player = va_arg(args, Person*);
+    		DO_SUBMIT_JOB(CalcOcclusionJob, player);
     		break;
     	}
 

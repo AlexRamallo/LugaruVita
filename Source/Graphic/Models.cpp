@@ -50,6 +50,10 @@ static void *alloc_model(size_t size){
     return ret;
 }
 
+#define CALCNORM_JOB_SPLIT_DENOM 4
+#define NORM_VERTS_JOB_SPLIT_DENOM 3
+#define UPDATE_VERT_JOB_SPLIT_DENOM 3
+
 
 /**
  * Load cache keeps files in memory until cleared, to avoid loading the same
@@ -1057,6 +1061,229 @@ void Model::Rotate(float xang, float yang, float zang)
         }
     }
     boundingsphereradius = fast_sqrt(boundingsphereradius);
+}
+
+struct CalculateNormalsJob: WorkerThread::Job {
+    int start_idx, end_idx;
+    Model *model;
+    bool facenormalise;
+    CalculateNormalsJob(int s, int e, Model *m, bool fn):
+        Job(),
+        start_idx(s),
+        end_idx(e),
+        model(m),
+        facenormalise(fn)
+    {
+        //--
+    }
+    void execute() override {
+        MICROPROFILE_SCOPEI("Model", "CalculateNormalsJob", 0xe4a77c4);
+        std::vector<TexturedTriangle> &Triangles = model->Triangles;
+        XYZ *vertex = model->vertex;
+        XYZ *normals = model->normals;
+
+        for(int i = start_idx; i <= end_idx; i++){
+            XYZ v0 = vertex[Triangles[i].vertex[1]] - vertex[Triangles[i].vertex[0]];
+            XYZ v1 = vertex[Triangles[i].vertex[2]] - vertex[Triangles[i].vertex[0]];
+            cross3_neon(&v0.x, &v1.x, &Triangles[i].facenormal.x);
+
+            normals[Triangles[i].vertex[0]].x += Triangles[i].facenormal.x;
+            normals[Triangles[i].vertex[0]].y += Triangles[i].facenormal.y;
+            normals[Triangles[i].vertex[0]].z += Triangles[i].facenormal.z;
+
+            normals[Triangles[i].vertex[1]].x += Triangles[i].facenormal.x;
+            normals[Triangles[i].vertex[1]].y += Triangles[i].facenormal.y;
+            normals[Triangles[i].vertex[1]].z += Triangles[i].facenormal.z;
+
+            normals[Triangles[i].vertex[2]].x += Triangles[i].facenormal.x;
+            normals[Triangles[i].vertex[2]].y += Triangles[i].facenormal.y;
+            normals[Triangles[i].vertex[2]].z += Triangles[i].facenormal.z;
+            if (facenormalise) {
+                Normalise(&Triangles[i].facenormal);
+            }
+        }
+    }
+};
+
+struct NormalizeVertsJob: WorkerThread::Job {
+    int start_idx, end_idx;
+    Model *model;
+    NormalizeVertsJob(int s, int e, Model *m):
+        Job(),
+        start_idx(s),
+        end_idx(e),
+        model(m)
+    {
+        //--
+    }
+    void execute() override {
+        MICROPROFILE_SCOPEI("Model", "NormalizeVertsJob", 0xe4a77c4);
+        for (int i = start_idx; i <= end_idx; i++) {
+            Normalise(&model->normals[i]);
+            model->normals[i] *= -1;
+        }
+    }
+};
+
+struct UpdateVertexJob: WorkerThread::Job {
+    int type, start_idx, end_idx;
+    Model *model;
+    UpdateVertexJob(int t, int s, int e, Model *m):
+        Job(),
+        type(t),
+        start_idx(s),
+        end_idx(e),
+        model(m)
+    {
+        //--
+    }
+    void update_notex(std::vector<TexturedTriangle> &Triangles, XYZ *vertex, XYZ *normals, GLfloat *vArray){
+        MICROPROFILE_SCOPEI("Model", "update_notex", 0xe4a77c4);
+        if (model->type != normaltype && model->type != decalstype) {
+            return;
+        }
+        if (model->flat) {
+            for (unsigned int i = start_idx; i <= end_idx; i++) {
+                unsigned int j = i * 24;
+                vArray[j + 2] = Triangles[i].facenormal.x * -1;
+                vArray[j + 3] = Triangles[i].facenormal.y * -1;
+                vArray[j + 4] = Triangles[i].facenormal.z * -1;
+                vArray[j + 5] = vertex[Triangles[i].vertex[0]].x;
+                vArray[j + 6] = vertex[Triangles[i].vertex[0]].y;
+                vArray[j + 7] = vertex[Triangles[i].vertex[0]].z;
+
+                vArray[j + 10] = Triangles[i].facenormal.x * -1;
+                vArray[j + 11] = Triangles[i].facenormal.y * -1;
+                vArray[j + 12] = Triangles[i].facenormal.z * -1;
+                vArray[j + 13] = vertex[Triangles[i].vertex[1]].x;
+                vArray[j + 14] = vertex[Triangles[i].vertex[1]].y;
+                vArray[j + 15] = vertex[Triangles[i].vertex[1]].z;
+
+                vArray[j + 18] = Triangles[i].facenormal.x * -1;
+                vArray[j + 19] = Triangles[i].facenormal.y * -1;
+                vArray[j + 20] = Triangles[i].facenormal.z * -1;
+                vArray[j + 21] = vertex[Triangles[i].vertex[2]].x;
+                vArray[j + 22] = vertex[Triangles[i].vertex[2]].y;
+                vArray[j + 23] = vertex[Triangles[i].vertex[2]].z;
+            }
+        } else {
+            for (unsigned int i = start_idx; i <= end_idx; i++) {
+                unsigned int j = i * 24;
+                vArray[j + 2] = normals[Triangles[i].vertex[0]].x;
+                vArray[j + 3] = normals[Triangles[i].vertex[0]].y;
+                vArray[j + 4] = normals[Triangles[i].vertex[0]].z;
+                vArray[j + 5] = vertex[Triangles[i].vertex[0]].x;
+                vArray[j + 6] = vertex[Triangles[i].vertex[0]].y;
+                vArray[j + 7] = vertex[Triangles[i].vertex[0]].z;
+
+                vArray[j + 10] = normals[Triangles[i].vertex[1]].x;
+                vArray[j + 11] = normals[Triangles[i].vertex[1]].y;
+                vArray[j + 12] = normals[Triangles[i].vertex[1]].z;
+                vArray[j + 13] = vertex[Triangles[i].vertex[1]].x;
+                vArray[j + 14] = vertex[Triangles[i].vertex[1]].y;
+                vArray[j + 15] = vertex[Triangles[i].vertex[1]].z;
+
+                vArray[j + 18] = normals[Triangles[i].vertex[2]].x;
+                vArray[j + 19] = normals[Triangles[i].vertex[2]].y;
+                vArray[j + 20] = normals[Triangles[i].vertex[2]].z;
+                vArray[j + 21] = vertex[Triangles[i].vertex[2]].x;
+                vArray[j + 22] = vertex[Triangles[i].vertex[2]].y;
+                vArray[j + 23] = vertex[Triangles[i].vertex[2]].z;
+            }
+        }
+    }
+
+    void update_notexnonorm(std::vector<TexturedTriangle> &Triangles, XYZ *vertex, GLfloat *vArray){
+        MICROPROFILE_SCOPEI("Model", "update_notexnonorm", 0xe4a77c4);
+        if (model->type != normaltype && model->type != decalstype) {
+            return;
+        }
+        for (unsigned int i = start_idx; i <= end_idx; i++) {
+            unsigned int j = i * 24;
+            vArray[j + 5] = vertex[Triangles[i].vertex[0]].x;
+            vArray[j + 6] = vertex[Triangles[i].vertex[0]].y;
+            vArray[j + 7] = vertex[Triangles[i].vertex[0]].z;
+
+            vArray[j + 13] = vertex[Triangles[i].vertex[1]].x;
+            vArray[j + 14] = vertex[Triangles[i].vertex[1]].y;
+            vArray[j + 15] = vertex[Triangles[i].vertex[1]].z;
+
+            vArray[j + 21] = vertex[Triangles[i].vertex[2]].x;
+            vArray[j + 22] = vertex[Triangles[i].vertex[2]].y;
+            vArray[j + 23] = vertex[Triangles[i].vertex[2]].z;
+        }
+    }
+    void execute() override {
+        switch(type){
+            default:
+                update_notex(model->Triangles, model->vertex, model->normals, model->vArray);
+                break;
+            case 1:
+                update_notexnonorm(model->Triangles, model->vertex, model->vArray);
+                break;
+        }
+    }
+};
+
+void Model::submitCalculateNormalsJobs_Phase1(
+    bool facenormalise,
+    WorkerThread::JobHandle dep,
+    std::vector<WorkerThread::JobHandle> &out
+){
+    for (int i = 0; i < vertexNum; i++) {
+        normals[i].x = 0;
+        normals[i].y = 0;
+        normals[i].z = 0;
+    }
+
+    //Phase 1 (calculate normals)
+    int numtris = Triangles.size();
+    int p1_job_size = numtris / CALCNORM_JOB_SPLIT_DENOM;
+    if(p1_job_size == 0){
+        p1_job_size = 1;
+    }
+    for (unsigned int i = 0; i < numtris; i+=p1_job_size) {
+        int end = i + p1_job_size - 1;
+        if(end >= numtris){
+            end = numtris - 1;
+        }
+        if(dep >= 0){
+            out.push_back(WorkerThread::submitDependentJob<CalculateNormalsJob>(dep, i, end, this, facenormalise));
+        }else{
+            out.push_back(WorkerThread::submitJob<CalculateNormalsJob>(i, end, this, facenormalise));
+        }
+    }
+}
+
+void Model::submitCalculateNormalsJobs_Phase2(std::vector<WorkerThread::JobHandle> &out){
+    //Phase 2 (normalize verts)
+    int p2_job_size = vertexNum / NORM_VERTS_JOB_SPLIT_DENOM;
+    if(p2_job_size == 0){
+        p2_job_size = 1;
+    }
+    for (unsigned int i = 0; i < vertexNum; i+=p2_job_size) {
+        int end = i + p2_job_size - 1;
+        if(end >= vertexNum){
+            end = vertexNum - 1;
+        }
+        out.push_back(WorkerThread::submitJob<NormalizeVertsJob>(i, end, this));
+    }
+}
+
+void Model::submitCalculateNormalsJobs_Phase3(int type, std::vector<WorkerThread::JobHandle> &out){
+    int numtris = Triangles.size();
+    int job_size = numtris / UPDATE_VERT_JOB_SPLIT_DENOM;
+    if(job_size == 0){
+        job_size = 1;
+    }
+    for (unsigned int i = 0; i < numtris; i+=job_size) {
+        int end = i + job_size - 1;
+        if(end >= numtris){
+            end = numtris - 1;
+        }
+
+        out.push_back(WorkerThread::submitJob<UpdateVertexJob>(type, i, end, this));
+    }
 }
 
 void Model::CalculateNormals(bool facenormalise)

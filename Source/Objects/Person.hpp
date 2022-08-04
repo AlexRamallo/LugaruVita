@@ -426,6 +426,8 @@ public:
     WorkerThread::JobHandle submitApplyClothesJob(std::map<std::string, ImageRec*> *imgcache);
     void addClothes(std::vector<ImageRec*> &textures);
 
+    void submitCalculateNormalsJobs(int phase, WorkerThread::JobHandle dep, std::vector<WorkerThread::JobHandle> &out);
+
     void doAI();
 
     bool catchKnife();

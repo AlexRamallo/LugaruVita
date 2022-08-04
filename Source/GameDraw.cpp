@@ -358,12 +358,13 @@ int Game::DrawGLScene(StereoSide side)
 
     Sprite::submitAnimationJob(spritejobs);
 
-
+//*
 {MICROPROFILE_SCOPEI("DrawGLScene", "shadow-decal", 0xb500ff);
         //make shadow decals on terrain and Object::objects
         static XYZ point;
         static float size, opacity, rotation;
         rotation = 0;
+        /*
         for (unsigned int k = 0; k < Person::players.size(); k++) {
             if (!Person::players[k]->skeleton.free && Person::players[k]->playerdetail && Person::players[k]->howactive < typesleeping) {
                 if (frustum.SphereInFrustum(Person::players[k]->coords.x, Person::players[k]->coords.y + Person::players[k]->scale * 3, Person::players[k]->coords.z, Person::players[k]->scale * 7) && Person::players[k]->occluded < 25) {
@@ -427,7 +428,7 @@ int Game::DrawGLScene(StereoSide side)
                     }
                 }
             }
-
+            
             if (!Person::players[k]->playerdetail) {
                 if (frustum.SphereInFrustum(Person::players[k]->coords.x, Person::players[k]->coords.y, Person::players[k]->coords.z, Person::players[k]->scale * 5)) {
                     point = Person::players[k]->coords;
@@ -446,8 +447,24 @@ int Game::DrawGLScene(StereoSide side)
                 }
             }
         }
+        */
+        //simple shadow for player only
+        auto p1 = Person::players[0];
+        point = p1->coords;
+        size = .7;
+        opacity = .4 - (p1->coords.y - terrain.getHeight(p1->coords.x, p1->coords.z)) / 5;
+        terrain.MakeDecal(shadowdecal, point, size, opacity * .7, rotation);
+        for (unsigned int l = 0; l < terrain.patchobjects[p1->whichpatchx][p1->whichpatchz].size(); l++) {
+            int patchx = p1->whichpatchx;
+            int patchz = p1->whichpatchz;
+            unsigned int j = terrain.patchobjects[patchx][patchz][l];
+            point = DoRotation(p1->coords - Object::objects[j]->position, 0, -Object::objects[j]->yaw, 0);
+            size = .7;
+            opacity = .4f;
+            Object::objects[j]->model.MakeDecal(shadowdecal, &point, &size, &opacity, &rotation);
+        }
 }//MICROPROFILE
-
+//*/
 {MICROPROFILE_SCOPEI("DrawGLScene", "terrain", 0xb500ff);
         //Terrain
         glEnable(GL_TEXTURE_2D);
@@ -481,76 +498,53 @@ int Game::DrawGLScene(StereoSide side)
             glCullFace(GL_FRONT);
             glDepthMask(1);
 
+            float pdistance[max_players_ct];
+            WorkerThread::JobHandle occludejobs[max_players_ct];
+            memset(occludejobs, -1, max_players_ct * sizeof(WorkerThread::JobHandle));
+
             for (unsigned k = 0; k < Person::players.size(); k++) {
                 MICROPROFILE_SCOPEI("DrawGLScene", "models-draw-person", 0xb500ff);
                 if (k == 0 || !Tutorial::active) {
-                    //glEnable(GL_BLEND);
-                    //glEnable(GL_LIGHTING);
-                    terrainlight = terrain.getLighting(Person::players[k]->coords.x, Person::players[k]->coords.z);
-                    distance = distsq(&viewer, &Person::players[k]->coords);
-                    distance = (viewdistance * viewdistance - (distance - (viewdistance * viewdistance * fadestart)) * (1 / (1 - fadestart))) / viewdistance / viewdistance;
-                    glColor4f(terrainlight.x, terrainlight.y, terrainlight.z, distance);
-                    if (distance >= 1) {
-                        glDisable(GL_BLEND);
+                    pdistance[k] = distsq(&viewer, &Person::players[k]->coords);
+                    pdistance[k] = (viewdistance * viewdistance - (pdistance[k] - (viewdistance * viewdistance * fadestart)) * (1 / (1 - fadestart))) / viewdistance / viewdistance;
+                    if (pdistance[k] >= .5) {
+                        Person *player = Person::players[k].get();
+                        occludejobs[k] = WorkerThread::submitJob(WorkerThread::WRK_CALC_OCCLUSION, player);
                     }
-                    if (distance >= .5) {
-                        {MICROPROFILE_SCOPEI("Draw", "occlusion", 0xaaaaff);
+                }
+            }
 
-                        checkpoint = DoRotation(
-                            Person::players[k]->skeleton.joints[fabs(Random() % Person::players[k]->skeleton.joints.size())].position,
-                            0,
-                            Person::players[k]->yaw,
-                            0
-                        ) * Person::players[k]->scale + Person::players[k]->coords;
+            for(int i = 0; i < max_players_ct; i++){
+                if(occludejobs[i] != -1){
+                    WorkerThread::join(occludejobs[i], true);
+                }
+            }
 
-                        checkpoint.y += 1;
-                        int i = -1;
-                        if (Person::players[k]->occluded != 0) {
-                            i = Object::checkcollide(viewer, checkpoint, Person::players[k]->lastoccluded);
-                        }
-                        if (i == -1) {
-                            i = Object::checkcollide(viewer, checkpoint);
-                        }
-                        if (i != -1) {
-                            Person::players[k]->occluded += 1;
-                            Person::players[k]->lastoccluded = i;
-                        } else {
-                            Person::players[k]->occluded = 0;
-                        }
-                        
-                        }//MICROPROFILE
-
-                        Person::players[k]->occluded = 0;
-                        if (Person::players[k]->occluded < 25) {
-                            if(Person::players[k]->isVisible()){
-                                MICROPROFILE_SCOPEI("Draw", "submit job", 0xaaaaff);
-                                Person::players[k]->PreUpdateSkeleton();
-                                
+            for (unsigned k = 0; k < Person::players.size(); k++) {
+                if (k == 0 || !Tutorial::active) {
+                    Person *player = Person::players[k].get();
+                    if (pdistance[k] >= .5) {
+                        if (player->occluded < 25) {
+                            if(player->isVisible()){
+                                player->PreUpdateSkeleton();                                
                                 //submit job for updating skeleton
                                 hndl_skeleton[num_draw_targs] = WorkerThread::submitJob(
                                     WorkerThread::WorkTask::WRK_UPDATE_SKELETON,
                                     k
                                 );
-
                                 draw_targets[num_draw_targs++] = k;
                             }
                         }
                     }
                 }
             }
+
+            std::vector<WorkerThread::JobHandle> wtjobs;
             
-            /**
-             * submit jobs for updating normals, which depends on the skeleton job
-             * we do it out here so that the skeleton update jobs above get priority,
-             * which should lead to more efficient scheduling
-             * */
+            //Phase 1
             for(int i = 0; i < num_draw_targs; i++){
                 ASSERT(hndl_skeleton[i] != -1);
-                hndl_normals[i] = WorkerThread::submitDependentJob(
-                    hndl_skeleton[i],
-                    WorkerThread::WorkTask::WRK_UPDATE_SKELETON_NORMALS,
-                    draw_targets[i]
-                );
+                Person::players[draw_targets[i]]->submitCalculateNormalsJobs(1, hndl_skeleton[i], wtjobs);
             }
 
             //join update skeleton jobs
@@ -560,18 +554,48 @@ int Game::DrawGLScene(StereoSide side)
                 WorkerThread::join(hndl_skeleton[i], true);
             }
 
-            //join update normals jobs
+            for(auto job: wtjobs){
+                WorkerThread::join(job, true);
+            }
+            wtjobs.clear();
+
+            //Phase 2
             for(int i = 0; i < num_draw_targs; i++){
-                MICROPROFILE_SCOPEI("Draw", "join worker", 0xff0000);
-                ASSERT(hndl_normals[i] != -1);
-                WorkerThread::join(hndl_normals[i], true);
+                Person::players[draw_targets[i]]->submitCalculateNormalsJobs(2, -1, wtjobs);
+            }
+            for(auto job: wtjobs){
+                WorkerThread::join(job, true);
+            }
+            wtjobs.clear();
+
+            //Phase 3
+            for(int i = 0; i < num_draw_targs; i++){
+                Person::players[draw_targets[i]]->submitCalculateNormalsJobs(3, -1, wtjobs);
+            }
+            for(auto job: wtjobs){
+                WorkerThread::join(job, true);
             }
 
             //draw all players on main thread
             for(int i = 0; i < num_draw_targs; i++){
                 MICROPROFILE_SCOPEI("Draw", "draw joined", 0xffaa00);
                 ASSERT(draw_targets[i] != -1);
-                Person::players[draw_targets[i]]->DrawSkeleton();
+
+                int k = draw_targets[i];
+                glEnable(GL_BLEND);
+                glEnable(GL_LIGHTING);
+
+                terrainlight = terrain.getLighting(Person::players[k]->coords.x, Person::players[k]->coords.z);
+                distance = distsq(&viewer, &Person::players[k]->coords);
+                distance = (viewdistance * viewdistance - (distance - (viewdistance * viewdistance * fadestart)) * (1 / (1 - fadestart))) / viewdistance / viewdistance;
+                
+                glColor4f(terrainlight.x, terrainlight.y, terrainlight.z, distance);
+                
+                if (distance >= 1) {
+                    glDisable(GL_BLEND);
+                }
+
+                Person::players[k]->DrawSkeleton();
             }
         }
 

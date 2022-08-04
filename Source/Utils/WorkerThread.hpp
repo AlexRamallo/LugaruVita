@@ -3,7 +3,7 @@
 #include "Utils/Log.h"
 
 namespace WorkerThread{
-	static const int MAX_DEPENDENTS = 4;
+	static const int MAX_DEPENDENTS = 16;
 
 	enum WorkTask {
 		WRK_NONE,
@@ -12,7 +12,8 @@ namespace WorkerThread{
 		WRK_DIE,
 		WRK_UPDATE_SKELETON,
 		WRK_UPDATE_SKELETON_NORMALS,
-		WRK_LOAD_IMAGE
+		WRK_LOAD_IMAGE,
+		WRK_CALC_OCCLUSION
 	};
 
 	enum JobState {

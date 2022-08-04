@@ -134,6 +134,10 @@ public:
 
     WorkerThread::JobHandle submitTransformJob();
 
+    void submitCalculateNormalsJobs_Phase1(bool facenormalise, WorkerThread::JobHandle dep, std::vector<WorkerThread::JobHandle> &out);
+    void submitCalculateNormalsJobs_Phase2(std::vector<WorkerThread::JobHandle> &out);
+    void submitCalculateNormalsJobs_Phase3(int type, std::vector<WorkerThread::JobHandle> &out);
+
     static void initModelCache();
     static void clearModelCache();
 private:

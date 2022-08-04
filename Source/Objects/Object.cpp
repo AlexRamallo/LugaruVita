@@ -250,6 +250,7 @@ void Object::doShadows(XYZ lightloc)
 
 void Object::handleRot(int divide)
 {
+    MICROPROFILE_SCOPEI("Object", "handleRot", 0x88ff00);
     messedwith -= multiplier;
     if (rotxvel || rotx) {
         if (rotx > 0) {
@@ -357,6 +358,7 @@ void Object::draw()
             if (distance > 0) {
 
                 if (occluded < 6) {
+                    {MICROPROFILE_SCOPEI("Object", "transform", 0x00aa11);
                     glMatrixMode(GL_MODELVIEW);
                     glPushMatrix();
                     if (!model.color) {
@@ -404,6 +406,9 @@ void Object::draw()
                         }
                     }
                     glRotatef(yaw, 0, 1, 0);
+
+                    }//MICROPROFILE
+
                     glColor4f((1 - shadowed) / 2 + .5, (1 - shadowed) / 2 + .5, (1 - shadowed) / 2 + .5, distance);
                     if (distance >= 1) {
                         glDisable(GL_BLEND);
@@ -700,6 +705,7 @@ void Object::DoShadows()
 
 int Object::checkcollide(XYZ startpoint, XYZ endpoint)
 {
+    MICROPROFILE_SCOPEI("Object", "checkcollide-1", 0x008fff);
     float minx, minz, maxx, maxz, miny, maxy;
 
     minx = min(startpoint.x, endpoint.x) - 1;
@@ -709,7 +715,7 @@ int Object::checkcollide(XYZ startpoint, XYZ endpoint)
     maxy = max(startpoint.y, endpoint.y) + 1;
     maxz = max(startpoint.z, endpoint.z) + 1;
 
-    for (unsigned int i = 0; i < objects.size(); i++) {
+    for (unsigned int i = 0, ct = objects.size(); i < ct; i++) {
         if (checkcollide(startpoint, endpoint, i, minx, miny, minz, maxx, maxy, maxz) != -1) {
             return (int)i;
         }
@@ -720,6 +726,7 @@ int Object::checkcollide(XYZ startpoint, XYZ endpoint)
 
 int Object::checkcollide(XYZ startpoint, XYZ endpoint, int what)
 {
+    MICROPROFILE_SCOPEI("Object", "checkcollide-2", 0x008fff);
     float minx, minz, maxx, maxz, miny, maxy;
 
     minx = min(startpoint.x, endpoint.x) - 1;
@@ -734,6 +741,7 @@ int Object::checkcollide(XYZ startpoint, XYZ endpoint, int what)
 
 int Object::checkcollide(XYZ startpoint, XYZ endpoint, int what, float minx, float miny, float minz, float maxx, float maxy, float maxz)
 {
+    MICROPROFILE_SCOPEI("Object", "checkcollide-3", 0x008fff);
     XYZ colpoint, colviewer, coltarget;
 
     if (what == 1000) {

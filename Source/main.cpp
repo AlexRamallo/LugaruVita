@@ -58,7 +58,7 @@ using namespace Game;
 #if PLATFORM_VITA
 
 extern "C" {
-    unsigned int _newlib_heap_size_user = 128 * 1024 * 1024;
+    unsigned int _newlib_heap_size_user = 144 * 1024 * 1024;
 
     //increase if flickering occurs
     #define VGL_VERTEX_POOL_SIZE 32 * 1024 * 1024
@@ -505,7 +505,7 @@ void DoUpdate()
         count = 2;
     }
     
-    count = 2;//Big speed up (gameplay consequences?)
+    count = 1;//Big speed up (gameplay consequences?)
 
     realmultiplier = multiplier;
     multiplier *= gamespeed;
