@@ -71,6 +71,7 @@ extern "C" {
 PVRTexLoader *pvr_loader = nullptr;
 #endif
 
+extern bool did_just_load;
 extern float multiplier;
 extern float realmultiplier;
 extern int slomo;
@@ -526,6 +527,12 @@ void DoUpdate()
     multiplier /= (float)count;
 
     DoMouse();
+
+    if(did_just_load){
+        did_just_load = false;
+        multiplier = 0.001;
+        count = 10;
+    }
 
     TickOnce();
 

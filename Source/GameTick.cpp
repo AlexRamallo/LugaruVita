@@ -65,6 +65,7 @@ using namespace Game;
 #define snprintf(buf, size, format, ...) _sprintf_p(buf, size, format)
 #endif
 
+extern bool did_just_load;
 extern float multiplier;
 extern XYZ viewer;
 extern int environment;
@@ -504,6 +505,7 @@ bool Game::LoadLevel(int which)
         ret = LoadLevel("mapsave");
     }
 
+    did_just_load = true;
     return ret;
 }
 

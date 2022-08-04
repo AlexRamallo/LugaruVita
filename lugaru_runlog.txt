@@ -19,8 +19,12 @@ Spawning 2 worker threads
 Game::LoadStuff()
 Loading font texture... Textures/Font.png
 Loading font texture... Textures/FontMono.png
-Loading model...Models/ThrowingKnife.solid
-odels/ThrowingKnife.solidLoLaodaidnign gm omdoedle.l....M.odels/Sword.solid
-MModels/ThrowingKnife.solid
-ooading model...Models/Sword.solid
+LLooaaddiinngg  mmooddeell......MModels/ThrowingKni
+odels/ThrowingKnife.solid
+
+Looaaddiinngg  mmooddeell......MModels/ThrowingKni
+odels/ThrowingKnife.solid
+
 Loading model...Models/Staff.solid
+did_just_load is true! Clamping multiplier from 0.48
+did_just_load is true! Clamping multiplier from 0.48

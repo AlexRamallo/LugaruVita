@@ -43,6 +43,7 @@ float precipdelay = 0;
 float gamespeed = 0;
 float oldgamespeed = 0;
 int difficulty = 0;
+bool did_just_load = false;
 float multiplier = 0;
 float realmultiplier = 0;
 float screenwidth = 0, screenheight = 0;
