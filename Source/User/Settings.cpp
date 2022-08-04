@@ -45,7 +45,7 @@ void DefaultSettings()
     autoslomo = 1;
     decalstoggle = true;
     invertmouse = 0;
-    bloodtoggle = 0;
+    bloodtoggle = 1;
     foliage = 1;
     musictoggle = 1;
     trilinear = 1;

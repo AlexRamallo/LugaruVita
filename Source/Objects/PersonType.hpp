@@ -24,6 +24,8 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 #include "Audio/Sounds.hpp"
 #include "Math/XYZ.hpp"
 
+#define BLOOD_TEX_SIZE 256
+
 enum person_type
 {
     rabbittype = 0,
@@ -66,7 +68,7 @@ public:
     unsigned int maxRunSpeed;
     unsigned int knifeCatchingType;
 
-    GLubyte bloodText[512 * 512 * 3] = { 0 };
+    GLubyte bloodText[BLOOD_TEX_SIZE * BLOOD_TEX_SIZE * 3] = { 0 };
 
     PersonType();
     bool hasAnimTalkIdle();

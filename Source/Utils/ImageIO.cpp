@@ -61,6 +61,28 @@ ImageRec::~ImageRec()
     data = NULL;
 }
 
+GLuint ImageRec::getWidth() {
+    if(is_pvr){
+        return pvr_header.Width;
+    }else{
+        return sizeX;
+    }
+}
+GLuint ImageRec::getHeight() {
+    if(is_pvr){
+        return pvr_header.Height;
+    }else{
+        return sizeY;
+    }
+}
+GLuint ImageRec::getBitsPerPixel() {
+    if(is_pvr){
+        return pvr_header.getBitsPerPixel();
+    }else{
+        return bpp;
+    }
+}
+
 int get_filetype(const char *filename){
     static const uint8_t png[8] = {137,80,78,71,13,10,26,10};
     static const uint8_t pvr[3] = {'P', 'V', 'R'};

@@ -1108,151 +1108,163 @@ void Terrain::draw(int layer)
 
 void Terrain::drawdecals()
 {
-    if (decalstoggle) {
-        static float distancemult;
-        static int lasttype;
+    MICROPROFILE_SCOPEI("Terrain", "drawdecals", 0x50c2aa);
+    if (!decalstoggle) {
+        return;
+    }
+    static float distancemult;
+    static int lasttype;
 
-        static float viewdistsquared;
-        static bool blend;
+    static float viewdistsquared;
+    static bool blend;
 
-        int viewdist = MAX(viewdistance, max_view_distance);
-        viewdistsquared = viewdist * viewdist;
-        blend = 1;
+    int viewdist = MAX(viewdistance, max_view_distance);
+    viewdistsquared = viewdist * viewdist;
+    blend = 1;
 
-        lasttype = -1;
-        glEnable(GL_BLEND);
-        glDisable(GL_LIGHTING);
-        glDisable(GL_CULL_FACE);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        glDepthMask(0);
-        for (unsigned int i = 0; i < decals.size(); i++) {
-            if (decals[i].type == blooddecalfast && decals[i].alivetime < 2) {
-                decals[i].alivetime = 2;
-            }
-            if (decals[i].type != lasttype) {
-                if (decals[i].type == shadowdecal || decals[i].type == shadowdecalpermanent) {
-                    shadowtexture.bind();
-                    if (!blend) {
-                        blend = 1;
-                        glAlphaFunc(GL_GREATER, 0.0001);
-                        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-                    }
-                }
-                if (decals[i].type == footprintdecal) {
-                    footprinttexture.bind();
-                    if (!blend) {
-                        blend = 1;
-                        glAlphaFunc(GL_GREATER, 0.0001);
-                        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-                    }
-                }
-                if (decals[i].type == bodyprintdecal) {
-                    bodyprinttexture.bind();
-                    if (!blend) {
-                        blend = 1;
-                        glAlphaFunc(GL_GREATER, 0.0001);
-                        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-                    }
-                }
-                if (decals[i].type == blooddecal || decals[i].type == blooddecalslow) {
-                    bloodtexture.bind();
-                    if (blend) {
-                        blend = 0;
-                        glAlphaFunc(GL_GREATER, 0.15);
-                        glBlendFunc(GL_ONE, GL_ZERO);
-                    }
-                }
-                if (decals[i].type == blooddecalfast) {
-                    bloodtexture2.bind();
-                    if (blend) {
-                        blend = 0;
-                        glAlphaFunc(GL_GREATER, 0.15);
-                        glBlendFunc(GL_ONE, GL_ZERO);
-                    }
-                }
-            }
-            if (decals[i].type == shadowdecal || decals[i].type == shadowdecalpermanent) {
-                distancemult = (viewdistsquared - (distsq(&viewer, &decals[i].position) - (viewdistsquared * fadestart)) * (1 / (1 - fadestart))) / viewdistsquared;
-                if (distancemult >= 1) {
-                    glColor4f(1, 1, 1, decals[i].opacity);
-                }
-                if (distancemult < 1) {
-                    glColor4f(1, 1, 1, decals[i].opacity * distancemult);
-                }
-            }
-            if (decals[i].type == footprintdecal || decals[i].type == bodyprintdecal) {
-                distancemult = (viewdistsquared - (distsq(&viewer, &decals[i].position) - (viewdistsquared * fadestart)) * (1 / (1 - fadestart))) / viewdistsquared;
-                if (distancemult >= 1) {
-                    glColor4f(1, 1, 1, decals[i].opacity);
-                    if (decals[i].alivetime > 3) {
-                        glColor4f(1, 1, 1, decals[i].opacity * (5 - decals[i].alivetime) / 2);
-                    }
-                }
-                if (distancemult < 1) {
-                    glColor4f(1, 1, 1, decals[i].opacity * distancemult);
-                    if (decals[i].alivetime > 3) {
-                        glColor4f(1, 1, 1, decals[i].opacity * (5 - decals[i].alivetime) / 2 * distancemult);
-                    }
-                }
-            }
-            if ((decals[i].type == blooddecal || decals[i].type == blooddecalfast || decals[i].type == blooddecalslow)) {
-                distancemult = (viewdistsquared - (distsq(&viewer, &decals[i].position) - (viewdistsquared * fadestart)) * (1 / (1 - fadestart))) / viewdistsquared;
-                if (distancemult >= 1) {
-                    glColor4f(decals[i].brightness, decals[i].brightness, decals[i].brightness, decals[i].opacity);
-                    if (decals[i].alivetime < 4) {
-                        glColor4f(decals[i].brightness, decals[i].brightness, decals[i].brightness, decals[i].opacity * decals[i].alivetime * .25);
-                    }
-                    if (decals[i].alivetime > 58) {
-                        glColor4f(decals[i].brightness, decals[i].brightness, decals[i].brightness, decals[i].opacity * (60 - decals[i].alivetime) / 2);
-                    }
-                }
-                if (distancemult < 1) {
-                    glColor4f(decals[i].brightness, decals[i].brightness, decals[i].brightness, decals[i].opacity * distancemult);
-                    if (decals[i].alivetime < 4) {
-                        glColor4f(decals[i].brightness, decals[i].brightness, decals[i].brightness, decals[i].opacity * decals[i].alivetime * distancemult * .25);
-                    }
-                    if (decals[i].alivetime > 58) {
-                        glColor4f(decals[i].brightness, decals[i].brightness, decals[i].brightness, decals[i].opacity * (60 - decals[i].alivetime) / 2 * distancemult);
-                    }
-                }
-            }
-            lasttype = decals[i].type;
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+    lasttype = -1;
+    glEnable(GL_BLEND);
+    glDisable(GL_LIGHTING);
+    glDisable(GL_CULL_FACE);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glDepthMask(0);
 
-            glMatrixMode(GL_MODELVIEW);
-            glPushMatrix();
-            glBegin(GL_TRIANGLES);
-            for (int j = 0; j < 3; j++) {
-                glTexCoord2f(decals[i].texcoords[j][0], decals[i].texcoords[j][1]);
-                glVertex3f(decals[i].vertex[j].x, decals[i].vertex[j].y, decals[i].vertex[j].z);
-            }
-            glEnd();
-            glPopMatrix();
+    {MICROPROFILE_SCOPEI("Terrain", "render", 0x50c2aa);
+
+    for (unsigned int i = 0; i < decals.size(); i++) {
+        if (decals[i].type == blooddecalfast && decals[i].alivetime < 2) {
+            decals[i].alivetime = 2;
         }
-        for (int i = decals.size() - 1; i >= 0; i--) {
-            decals[i].alivetime += multiplier;
-            if (decals[i].type == blooddecalslow) {
-                decals[i].alivetime -= multiplier * 2 / 3;
+        if (decals[i].type != lasttype) {
+            if (decals[i].type == shadowdecal || decals[i].type == shadowdecalpermanent) {
+                shadowtexture.bind();
+                if (!blend) {
+                    blend = 1;
+                    glAlphaFunc(GL_GREATER, 0.0001);
+                    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+                }
+            }
+            if (decals[i].type == footprintdecal) {
+                footprinttexture.bind();
+                if (!blend) {
+                    blend = 1;
+                    glAlphaFunc(GL_GREATER, 0.0001);
+                    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+                }
+            }
+            if (decals[i].type == bodyprintdecal) {
+                bodyprinttexture.bind();
+                if (!blend) {
+                    blend = 1;
+                    glAlphaFunc(GL_GREATER, 0.0001);
+                    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+                }
+            }
+            if (decals[i].type == blooddecal || decals[i].type == blooddecalslow) {
+                bloodtexture.bind();
+                if (blend) {
+                    blend = 0;
+                    glAlphaFunc(GL_GREATER, 0.15);
+                    glBlendFunc(GL_ONE, GL_ZERO);
+                }
             }
             if (decals[i].type == blooddecalfast) {
-                decals[i].alivetime += multiplier * 4;
-            }
-            if (decals[i].type == shadowdecal) {
-                DeleteDecal(i);
-            }
-            if (decals[i].type == footprintdecal && decals[i].alivetime >= 5) {
-                DeleteDecal(i);
-            }
-            if (decals[i].type == bodyprintdecal && decals[i].alivetime >= 5) {
-                DeleteDecal(i);
-            }
-            if ((decals[i].type == blooddecal || decals[i].type == blooddecalfast || decals[i].type == blooddecalslow) && decals[i].alivetime >= 60) {
-                DeleteDecal(i);
+                bloodtexture2.bind();
+                if (blend) {
+                    blend = 0;
+                    glAlphaFunc(GL_GREATER, 0.15);
+                    glBlendFunc(GL_ONE, GL_ZERO);
+                }
             }
         }
-        glAlphaFunc(GL_GREATER, 0.0001);
+        if (decals[i].type == shadowdecal || decals[i].type == shadowdecalpermanent) {
+            distancemult = (viewdistsquared - (distsq(&viewer, &decals[i].position) - (viewdistsquared * fadestart)) * (1 / (1 - fadestart))) / viewdistsquared;
+            if (distancemult >= 1) {
+                glColor4f(1, 1, 1, decals[i].opacity);
+            }
+            if (distancemult < 1) {
+                glColor4f(1, 1, 1, decals[i].opacity * distancemult);
+            }
+        }
+        if (decals[i].type == footprintdecal || decals[i].type == bodyprintdecal) {
+            distancemult = (viewdistsquared - (distsq(&viewer, &decals[i].position) - (viewdistsquared * fadestart)) * (1 / (1 - fadestart))) / viewdistsquared;
+            if (distancemult >= 1) {
+                glColor4f(1, 1, 1, decals[i].opacity);
+                if (decals[i].alivetime > 3) {
+                    glColor4f(1, 1, 1, decals[i].opacity * (5 - decals[i].alivetime) / 2);
+                }
+            }
+            if (distancemult < 1) {
+                glColor4f(1, 1, 1, decals[i].opacity * distancemult);
+                if (decals[i].alivetime > 3) {
+                    glColor4f(1, 1, 1, decals[i].opacity * (5 - decals[i].alivetime) / 2 * distancemult);
+                }
+            }
+        }
+        if ((decals[i].type == blooddecal || decals[i].type == blooddecalfast || decals[i].type == blooddecalslow)) {
+            distancemult = (viewdistsquared - (distsq(&viewer, &decals[i].position) - (viewdistsquared * fadestart)) * (1 / (1 - fadestart))) / viewdistsquared;
+            if (distancemult >= 1) {
+                glColor4f(decals[i].brightness, decals[i].brightness, decals[i].brightness, decals[i].opacity);
+                if (decals[i].alivetime < 4) {
+                    glColor4f(decals[i].brightness, decals[i].brightness, decals[i].brightness, decals[i].opacity * decals[i].alivetime * .25);
+                }
+                if (decals[i].alivetime > 58) {
+                    glColor4f(decals[i].brightness, decals[i].brightness, decals[i].brightness, decals[i].opacity * (60 - decals[i].alivetime) / 2);
+                }
+            }
+            if (distancemult < 1) {
+                glColor4f(decals[i].brightness, decals[i].brightness, decals[i].brightness, decals[i].opacity * distancemult);
+                if (decals[i].alivetime < 4) {
+                    glColor4f(decals[i].brightness, decals[i].brightness, decals[i].brightness, decals[i].opacity * decals[i].alivetime * distancemult * .25);
+                }
+                if (decals[i].alivetime > 58) {
+                    glColor4f(decals[i].brightness, decals[i].brightness, decals[i].brightness, decals[i].opacity * (60 - decals[i].alivetime) / 2 * distancemult);
+                }
+            }
+        }
+        lasttype = decals[i].type;
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+
+        glMatrixMode(GL_MODELVIEW);
+        glPushMatrix();
+        glBegin(GL_TRIANGLES);
+        for (int j = 0; j < 3; j++) {
+            glTexCoord2f(decals[i].texcoords[j][0], decals[i].texcoords[j][1]);
+            glVertex3f(decals[i].vertex[j].x, decals[i].vertex[j].y, decals[i].vertex[j].z);
+        }
+        glEnd();
+        glPopMatrix();
     }
+    
+    }//MICROPROFILE
+
+    {MICROPROFILE_SCOPEI("Terrain", "lifetime", 0x50c2aa);
+
+    for (int i = decals.size() - 1; i >= 0; i--) {
+        decals[i].alivetime += multiplier;
+        if (decals[i].type == blooddecalslow) {
+            decals[i].alivetime -= multiplier * 2 / 3;
+        }
+        if (decals[i].type == blooddecalfast) {
+            decals[i].alivetime += multiplier * 4;
+        }
+        if (decals[i].type == shadowdecal) {
+            DeleteDecal(i);
+        }
+        if (decals[i].type == footprintdecal && decals[i].alivetime >= 5) {
+            DeleteDecal(i);
+        }
+        if (decals[i].type == bodyprintdecal && decals[i].alivetime >= 5) {
+            DeleteDecal(i);
+        }
+        if ((decals[i].type == blooddecal || decals[i].type == blooddecalfast || decals[i].type == blooddecalslow) && decals[i].alivetime >= 60) {
+            DeleteDecal(i);
+        }
+    }
+
+    }//MICROPROFILE
+    glAlphaFunc(GL_GREATER, 0.0001);
 }
 
 void Terrain::deleteDeadDecals()
@@ -1553,6 +1565,8 @@ Terrain::Terrain():
     vArray(nullptr)
 {
     size = 0;
+
+    decals.reserve(max_decals);
 
     scale = 1.0f;
     type = 0;

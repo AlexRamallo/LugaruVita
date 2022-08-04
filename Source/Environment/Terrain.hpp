@@ -38,7 +38,7 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 #define mixed 1
 #define allsecond 2
 
-#define max_decals 1000
+#define max_decals 50
 
 #define snowyenvironment 0
 #define grassyenvironment 1

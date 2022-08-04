@@ -479,7 +479,7 @@ int Game::DrawGLScene(StereoSide side)
         terraintexture2.bind();
         terrain.draw(1);
 
-        terrain.drawdecals();
+        //terrain.drawdecals();
 }//MICROPROFILE
 
 {MICROPROFILE_SCOPEI("DrawGLScene", "models", 0xb500ff);
@@ -700,6 +700,17 @@ int Game::DrawGLScene(StereoSide side)
             WorkerThread::join(spritejobs[i], true);
         }
         Sprite::Draw();
+}//MICROPROFILE
+
+{MICROPROFILE_SCOPEI("DrawGLScene", "terrain-decals", 0xb500ff);
+        glEnable(GL_TEXTURE_2D);
+        glDepthMask(1);
+        glEnable(GL_DEPTH_TEST);
+        glEnable(GL_CULL_FACE);
+        glDisable(GL_BLEND);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        terrain.drawdecals();
 }//MICROPROFILE
 
         //waypoints, pathpoints in editor

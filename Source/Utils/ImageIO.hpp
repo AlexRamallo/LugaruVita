@@ -56,6 +56,10 @@ public:
 		PVRHeader pvr_header;
 	};
 
+	GLuint getWidth();
+	GLuint getHeight();
+	GLuint getBitsPerPixel();
+
     ImageRec();
     ~ImageRec();
 

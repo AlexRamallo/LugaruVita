@@ -6,7 +6,18 @@
 		"convert": false
     },
     "Textures/FontMono.png": {
-		"convert": false
+        "convert": false
+    },
+    
+    "Textures/BloodFur.png": {
+        "format": "r8g8b8,UBN,sRGB",
+        "resize": "256,256",
+        "mipmap": false
+    },
+    "Textures/WolfBloodFur.png": {
+        "format": "r8g8b8,UBN,sRGB",
+        "resize": "256,256",
+        "mipmap": false
     },
 
     "Textures/Fur.jpg": {

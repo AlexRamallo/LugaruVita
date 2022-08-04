@@ -383,7 +383,22 @@ GLsizei PVRHeader::getBitsPerPixel() const{
 		}
 		return ret;
 	}else{
-		return 0; //TODO
+		switch(PixelFormat){
+			case 0: //PVRTC 2bpp RGB 
+				return 2;
+			case 1: //PVRTC 2bpp RGBA 
+				return 2;
+			case 2: //PVRTC 4bpp RGB 
+				return 4;
+			case 3: //PVRTC 4bpp RGBA 
+				return 4;
+			case 4: //PVRTC-II 2bpp 
+				return 2;
+			case 5: //PVRTC-II 4bpp
+				return 4;
+			default:
+				return 0; //TODO
+		}
 	}
 }
 

@@ -34,7 +34,7 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 #include <pthread.h>
 #include "Thirdparty/microprofile/microprofile.h"
 
-#define LOG_MUTEX false
+#define LOG_MUTEX true
 
 extern float screenwidth, screenheight;
 extern float viewdistance;
@@ -202,7 +202,7 @@ void Game::deleteGame()
 void LoadSave(const std::string& fileName, GLubyte* array)
 {
     LOGFUNC;
-
+    LOG_TOGGLE(true);
     LOG(std::string("Loading (S)...") + fileName);
 
     //Load Image
@@ -212,20 +212,22 @@ void LoadSave(const std::string& fileName, GLubyte* array)
     //Load Image
     ImageRec texture;
     if (!load_image(Folders::getResourcePath(fileName).c_str(), texture)) {
+        LOG("\tFailed to load %s", fileName.c_str());
         texdetail = temptexdetail;
         return;
     }
     texdetail = temptexdetail;
 
-    int bytesPerPixel = texture.bpp / 8;
+    int bytesPerPixel = texture.getBitsPerPixel() / 8;
 
     int tempnum = 0;
-    for (int i = 0; i < (int)(texture.sizeY * texture.sizeX * bytesPerPixel); i++) {
+    for (int i = 0; i < (int)(texture.getHeight() * texture.getWidth() * bytesPerPixel); i++) {
         if ((i + 1) % 4 || bytesPerPixel == 3) {
             array[tempnum] = texture.data[i];
             tempnum++;
         }
     }
+    LOG_TOGGLE(false);
 }
 
 //***************> ResizeGLScene() <******/

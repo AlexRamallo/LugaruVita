@@ -729,8 +729,8 @@ void Person::DoBlood(float howmuch, int which)
 {
     MICROPROFILE_SCOPEI("Person", "DoBlood", 0xaaffaa);
     // FIXME: should abstract out inputs
-    static int bleedxint, bleedyint;
-    static XYZ bloodvel;
+    unsigned int bleedxint, bleedyint;
+    XYZ bloodvel;
     if (bloodtoggle && !Tutorial::active) {
         if (bleeding <= 0 && spurt) {
             spurt = 0;
@@ -779,10 +779,19 @@ void Person::DoBlood(float howmuch, int which)
             bleeding = howmuch + (float)abs(Random() % 100) / 200 - .25;
             bleedxint = 0;
             bleedyint = 0;
-            while (PersonType::types[creature].bloodText[bleedxint * 512 * 3 + bleedyint * 3 + 0] > which + 4 || PersonType::types[creature].bloodText[bleedxint * 512 * 3 + bleedyint * 3 + 0] < which - 4 || bleedxint < 10 || bleedyint < 10 || bleedxint > 500 || bleedyint > 500) {
-                bleedxint = abs(Random() % 512);
-                bleedyint = abs(Random() % 512);
+
+            while (
+                PersonType::types[creature].bloodText[bleedxint * BLOOD_TEX_SIZE * 3 + bleedyint * 3 + 0] > which + 4 ||
+                PersonType::types[creature].bloodText[bleedxint * BLOOD_TEX_SIZE * 3 + bleedyint * 3 + 0] < which - 4 ||
+                bleedxint < 10 ||
+                bleedyint < 10 ||
+                bleedxint > 500 ||
+                bleedyint > 500
+            ){
+                bleedxint = abs(Random() % BLOOD_TEX_SIZE);
+                bleedyint = abs(Random() % BLOOD_TEX_SIZE);
             }
+
             bleedy = bleedxint;
             bleedx = bleedyint;
             bleedy /= realtexdetail;
@@ -802,8 +811,8 @@ void Person::DoBlood(float howmuch, int which)
 void Person::DoBloodBig(float howmuch, int which)
 {
     MICROPROFILE_SCOPEI("Person", "DoBloodBig", 0xaaffaa);
-    static int bleedxint, bleedyint, i, j;
-    static XYZ bloodvel;
+    int bleedxint, bleedyint, i, j;
+    XYZ bloodvel;
     if (howmuch && id == 0) {
         blooddimamount = 1;
     }
@@ -890,14 +899,14 @@ void Person::DoBloodBig(float howmuch, int which)
             offsetx = 20;
         }
 
-        int startx = 512;
-        int starty = 512;
+        int startx = BLOOD_TEX_SIZE;
+        int starty = BLOOD_TEX_SIZE;
         int endx = 0;
         int endy = 0;
         GLubyte color;
-        for (i = 0; i < 512; i++) {
-            for (j = 0; j < 512; j++) {
-                if (PersonType::types[creature].bloodText[i * 512 * 3 + j * 3 + 0] <= which + 4 && PersonType::types[creature].bloodText[i * 512 * 3 + j * 3 + 0] >= which - 4) {
+        for (i = 0; i < BLOOD_TEX_SIZE; i++) {
+            for (j = 0; j < BLOOD_TEX_SIZE; j++) {
+                if (PersonType::types[creature].bloodText[i * BLOOD_TEX_SIZE * 3 + j * 3 + 0] <= which + 4 && PersonType::types[creature].bloodText[i * BLOOD_TEX_SIZE * 3 + j * 3 + 0] >= which - 4) {
                     if (i < startx) {
                         startx = i;
                     }
@@ -925,11 +934,11 @@ void Person::DoBloodBig(float howmuch, int which)
         if (starty < 0) {
             starty = 0;
         }
-        if (endx > 512 - 1) {
-            endx = 512 - 1;
+        if (endx > BLOOD_TEX_SIZE - 1) {
+            endx = BLOOD_TEX_SIZE - 1;
         }
-        if (endy > 512 - 1) {
-            endy = 512 - 1;
+        if (endy > BLOOD_TEX_SIZE - 1) {
+            endy = BLOOD_TEX_SIZE - 1;
         }
         if (endx < startx) {
             endx = startx;
@@ -947,7 +956,7 @@ void Person::DoBloodBig(float howmuch, int which)
         int where;
         for (i = startx; i < endx; i++) {
             for (j = starty; j < endy; j++) {
-                if (PersonType::types[creature].bloodText[(i * texdetailint - offsetx) * 512 * 3 + (j * texdetailint - offsety) * 3 + 0] <= which + 4 && PersonType::types[creature].bloodText[(i * texdetailint - offsetx) * 512 * 3 + (j * texdetailint - offsety) * 3 + 0] >= which - 4) {
+                if (PersonType::types[creature].bloodText[(i * texdetailint - offsetx) * BLOOD_TEX_SIZE * 3 + (j * texdetailint - offsety) * 3 + 0] <= which + 4 && PersonType::types[creature].bloodText[(i * texdetailint - offsetx) * BLOOD_TEX_SIZE * 3 + (j * texdetailint - offsety) * 3 + 0] >= which - 4) {
                     color = Random() % 85 + 170;
                     where = i * skeleton.skinsize * 3 + j * 3;
                     if (skeleton.skinText[where + 0] > color / 2) {
@@ -963,9 +972,9 @@ void Person::DoBloodBig(float howmuch, int which)
 
         bleedxint = 0;
         bleedyint = 0;
-        while (PersonType::types[creature].bloodText[bleedxint * 512 * 3 + bleedyint * 3 + 0] > which + 4 || PersonType::types[creature].bloodText[bleedxint * 512 * 3 + bleedyint * 3 + 0] < which - 4 || bleedxint < 10 || bleedyint < 10 || bleedxint > 500 || bleedyint > 500) {
-            bleedxint = abs(Random() % 512);
-            bleedyint = abs(Random() % 512);
+        while (PersonType::types[creature].bloodText[bleedxint * BLOOD_TEX_SIZE * 3 + bleedyint * 3 + 0] > which + 4 || PersonType::types[creature].bloodText[bleedxint * BLOOD_TEX_SIZE * 3 + bleedyint * 3 + 0] < which - 4 || bleedxint < 10 || bleedyint < 10 || bleedxint > 500 || bleedyint > 500) {
+            bleedxint = abs(Random() % BLOOD_TEX_SIZE);
+            bleedyint = abs(Random() % BLOOD_TEX_SIZE);
         }
         bleedy = bleedxint + offsetx;
         bleedx = bleedyint + offsety;
@@ -1097,17 +1106,17 @@ bool Person::DoBloodBigWhere(float howmuch, int which, XYZ where)
         // texture manipulation follows
 
         int offsetx = 0, offsety = 0;
-        offsetx = (1 + coordsy) * 512 - 291;
-        offsety = coordsx * 512 - 437;
+        offsetx = (1 + coordsy) * BLOOD_TEX_SIZE - 291;
+        offsety = coordsx * BLOOD_TEX_SIZE - 437;
 
-        int startx = 512;
-        int starty = 512;
+        int startx = BLOOD_TEX_SIZE;
+        int starty = BLOOD_TEX_SIZE;
         int endx = 0;
         int endy = 0;
         GLubyte color;
-        for (i = 0; i < 512; i++) {
-            for (j = 0; j < 512; j++) {
-                if (PersonType::types[creature].bloodText[i * 512 * 3 + j * 3 + 0] <= which + 4 && PersonType::types[creature].bloodText[i * 512 * 3 + j * 3 + 0] >= which - 4) {
+        for (i = 0; i < BLOOD_TEX_SIZE; i++) {
+            for (j = 0; j < BLOOD_TEX_SIZE; j++) {
+                if (PersonType::types[creature].bloodText[i * BLOOD_TEX_SIZE * 3 + j * 3 + 0] <= which + 4 && PersonType::types[creature].bloodText[i * BLOOD_TEX_SIZE * 3 + j * 3 + 0] >= which - 4) {
                     if (i < startx) {
                         startx = i;
                     }
@@ -1134,11 +1143,11 @@ bool Person::DoBloodBigWhere(float howmuch, int which, XYZ where)
         if (starty < 0) {
             starty = 0;
         }
-        if (endx > 512 - 1) {
-            endx = 512 - 1;
+        if (endx > BLOOD_TEX_SIZE - 1) {
+            endx = BLOOD_TEX_SIZE - 1;
         }
-        if (endy > 512 - 1) {
-            endy = 512 - 1;
+        if (endy > BLOOD_TEX_SIZE - 1) {
+            endy = BLOOD_TEX_SIZE - 1;
         }
         if (endx < startx) {
             endx = startx;
@@ -1156,7 +1165,7 @@ bool Person::DoBloodBigWhere(float howmuch, int which, XYZ where)
         int where;
         for (i = startx; i < endx; i++) {
             for (j = starty; j < endy; j++) {
-                if (PersonType::types[creature].bloodText[(i * texdetailint - offsetx) * 512 * 3 + (j * texdetailint - offsety) * 3 + 0] <= which + 4 && PersonType::types[creature].bloodText[(i * texdetailint - offsetx) * 512 * 3 + (j * texdetailint - offsety) * 3 + 0] >= which - 4) {
+                if (PersonType::types[creature].bloodText[(i * texdetailint - offsetx) * BLOOD_TEX_SIZE * 3 + (j * texdetailint - offsety) * 3 + 0] <= which + 4 && PersonType::types[creature].bloodText[(i * texdetailint - offsetx) * BLOOD_TEX_SIZE * 3 + (j * texdetailint - offsety) * 3 + 0] >= which - 4) {
                     color = Random() % 85 + 170;
                     where = i * skeleton.skinsize * 3 + j * 3;
                     if (skeleton.skinText[where + 0] > color / 2) {
@@ -1164,7 +1173,7 @@ bool Person::DoBloodBigWhere(float howmuch, int which, XYZ where)
                     }
                     skeleton.skinText[where + 1] = 0;
                     skeleton.skinText[where + 2] = 0;
-                } else if (PersonType::types[creature].bloodText[(i * texdetailint - offsetx) * 512 * 3 + (j * texdetailint - offsety) * 3 + 0] <= 160 + 4 && PersonType::types[creature].bloodText[(i * texdetailint - offsetx) * 512 * 3 + (j * texdetailint - offsety) * 3 + 0] >= 160 - 4) {
+                } else if (PersonType::types[creature].bloodText[(i * texdetailint - offsetx) * BLOOD_TEX_SIZE * 3 + (j * texdetailint - offsety) * 3 + 0] <= 160 + 4 && PersonType::types[creature].bloodText[(i * texdetailint - offsetx) * BLOOD_TEX_SIZE * 3 + (j * texdetailint - offsety) * 3 + 0] >= 160 - 4) {
                     color = Random() % 85 + 170;
                     where = i * skeleton.skinsize * 3 + j * 3;
                     if (skeleton.skinText[where + 0] > color / 2) {
@@ -1178,8 +1187,8 @@ bool Person::DoBloodBigWhere(float howmuch, int which, XYZ where)
         skeleton.drawmodel.textureptr.bind();
         DoMipmaps();
 
-        bleedy = (1 + coordsy) * 512;
-        bleedx = coordsx * 512;
+        bleedy = (1 + coordsy) * BLOOD_TEX_SIZE;
+        bleedx = coordsx * BLOOD_TEX_SIZE;
         bleedy /= realtexdetail;
         bleedx /= realtexdetail;
         if (bleedx < 0) {
@@ -1659,7 +1668,7 @@ void Person::DoHead()
 {
     //static XYZ rotatearound;
     //static XYZ head_facing;
-    static const float lookspeed = 500;
+    const float lookspeed = 500;
 
     if (!freeze && !winfreeze) {
 
@@ -1770,9 +1779,9 @@ void Person::DoHead()
 void Person::RagDoll(bool checkcollision)
 {
     MICROPROFILE_SCOPEI("Person", "RagDoll", 0xaaffaa);
-    static XYZ change;
-    static int i;
-    static float speed;
+    XYZ change;
+    int i;
+    float speed;
     if (!skeleton.free) {
         if (id == 0) {
             numfalls++;
@@ -1948,8 +1957,8 @@ void Person::FootLand(bodypart whichfoot, float opacity)
         cerr << "FootLand called on wrong bodypart" << endl;
         return;
     }
-    static XYZ terrainlight;
-    static XYZ footvel, footpoint;
+    XYZ terrainlight;
+    XYZ footvel, footpoint;
     if (opacity >= 1 || skiddelay <= 0) {
         if (opacity > 1) {
             footvel = 0;
@@ -2000,7 +2009,7 @@ void Person::Puff(int whichlabel)
 {
     MICROPROFILE_SCOPEI("Person", "Puff", 0xaaffaa);
 
-    static XYZ footvel, footpoint;
+    XYZ footvel, footpoint;
 
     footvel = 0;
     footpoint = DoRotation(jointPos(whichlabel), 0, yaw, 0) * scale + coords;
@@ -2025,7 +2034,7 @@ void Person::DoAnimations()
 {
     MICROPROFILE_SCOPEI("Person", "DoAnimations", 0xaaffaa);
     if (!skeleton.free) {
-        static float oldtarget;
+        float oldtarget;
 
         if (isIdle() && animCurrent != getIdle()) {
             normalsupdatedelay = 0;
@@ -4501,14 +4510,14 @@ void Person::DoAnimations()
 void Person::DoStuff()
 {
     MICROPROFILE_SCOPEI("Person", "DoStuff", 0xee8800);
-    static XYZ terrainnormal;
-    static XYZ flatfacing;
-    static XYZ flatvelocity;
-    static float flatvelspeed;
-    static int bloodsize;
-    static int startx, starty, endx, endy;
-    static GLubyte color;
-    static XYZ bloodvel;
+    XYZ terrainnormal;
+    XYZ flatfacing;
+    XYZ flatvelocity;
+    float flatvelspeed;
+    int bloodsize;
+    int startx, starty, endx, endy;
+    GLubyte color;
+    XYZ bloodvel;
 
     onfiredelay -= multiplier;
     if (onfiredelay < 0 && onfire) {
@@ -7171,14 +7180,14 @@ int Person::DrawSkeleton()
 int Person::SphereCheck(XYZ* p1, float radius, XYZ* p, XYZ* move, float* rotate, Model* model)
 {
     MICROPROFILE_SCOPEI("Person", "SphereCheck", 0xaaffaa);
-    static float distance;
-    static float olddistance;
-    static int intersecting;
-    static int firstintersecting;
-    static XYZ point;
-    static XYZ oldp1;
-    static XYZ start, end;
-    static float slopethreshold = -.4;
+    float distance;
+    float olddistance;
+    int intersecting;
+    int firstintersecting;
+    XYZ point;
+    XYZ oldp1;
+    XYZ start, end;
+    float slopethreshold = -.4;
 
     firstintersecting = -1;
 
