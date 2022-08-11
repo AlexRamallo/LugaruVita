@@ -490,6 +490,7 @@ void Setenvironment(int which)
 
 bool Game::LoadLevel(int which)
 {
+    LOG("Multiplier LoadLevel A: %f", multiplier);
     stealthloading = 0;
     whichlevel = which;
 
@@ -505,6 +506,7 @@ bool Game::LoadLevel(int which)
         ret = LoadLevel("mapsave");
     }
 
+    LOG("Multiplier LoadLevel B: %f", multiplier);
     did_just_load = true;
     return ret;
 }
@@ -902,6 +904,7 @@ bool Game::LoadLevel(const std::string& name, bool tutorial)
             Person::players[i]->forwardkeydown = 0;
             Person::players[i]->leftkeydown = 0;
             Person::players[i]->backkeydown = 0;
+            Person::players[i]->dodgekeydown = 0;
             Person::players[i]->rightkeydown = 0;
             Person::players[i]->jumpkeydown = 0;
             Person::players[i]->crouchkeydown = 0;
@@ -2111,8 +2114,9 @@ void doAerialAcrobatics()
             Person::players[k]->collide -= multiplier * 30;
 
             //clip to terrain
-            Person::players[k]->coords.y = max(Person::players[k]->coords.y, terrain.getHeight(Person::players[k]->coords.x, Person::players[k]->coords.z));
-
+            float th = terrain.getHeight(Person::players[k]->coords.x, Person::players[k]->coords.z);
+            Person::players[k]->coords.y = max(Person::players[k]->coords.y, th);
+            //Huge hotspot here when there are many objects + players
             for (unsigned int l = 0; l < terrain.patchobjects[Person::players[k]->whichpatchx][Person::players[k]->whichpatchz].size(); l++) {
                 unsigned int i = terrain.patchobjects[Person::players[k]->whichpatchx][Person::players[k]->whichpatchz][l];
                 if (Object::objects[i]->type != rocktype ||
@@ -2126,9 +2130,10 @@ void doAerialAcrobatics()
                     } else {
                         lowpoint.y += 1.3;
                     }
-                    if (Person::players[k]->coords.y < terrain.getHeight(Person::players[k]->coords.x, Person::players[k]->coords.z) &&
-                        Person::players[k]->coords.y > terrain.getHeight(Person::players[k]->coords.x, Person::players[k]->coords.z) - .1) {
-                        Person::players[k]->coords.y = terrain.getHeight(Person::players[k]->coords.x, Person::players[k]->coords.z);
+
+                    float th = terrain.getHeight(Person::players[k]->coords.x, Person::players[k]->coords.z);
+                    if (Person::players[k]->coords.y < th && Person::players[k]->coords.y > th - .1) {
+                        Person::players[k]->coords.y = th;
                     }
                     if (Person::players[k]->SphereCheck(&lowpoint, 1.3, &colpoint, &Object::objects[i]->position, &Object::objects[i]->yaw, &Object::objects[i]->model) != -1) {
                         flatfacing = lowpoint - Person::players[k]->coords;
@@ -2511,7 +2516,8 @@ void doAttacks()
             //attack key pressed
             if (Person::players[k]->attackkeydown) {
                 //dodge backward
-                if (Person::players[k]->backkeydown &&
+                //if (Person::players[k]->backkeydown &&
+                if (Person::players[k]->dodgekeydown &&
                     Person::players[k]->animTarget != backhandspringanim &&
                     (Person::players[k]->isIdle() ||
                      Person::players[k]->isStop() ||
@@ -3248,12 +3254,14 @@ void doPlayerCollisions()
 void Game::Tick()
 {
     MICROPROFILE_SCOPEI("Game", "Tick", 0xff008f);
+
+    float mult_start = multiplier;
+
     static XYZ facing, flatfacing;
     static int target;
 
     /* Pump SDL input events and process non-gameplay related ones */
     ProcessInput();
-
     /*
     Values of mainmenu :
     1 Main menu
@@ -3294,6 +3302,9 @@ void Game::Tick()
     if (mainmenu) {
         Menu::Tick();
     }
+
+    //fixes clipping through objects right after load
+    multiplier = mult_start;
 
     if (!mainmenu) {
         if (hostile == 1) {
@@ -3467,6 +3478,7 @@ void Game::Tick()
                 Person::players[0]->forwardkeydown = Input::isKeyDown(forwardkey);
                 Person::players[0]->leftkeydown = Input::isKeyDown(leftkey);
                 Person::players[0]->backkeydown = Input::isKeyDown(backkey);
+                Person::players[0]->dodgekeydown = Input::isKeyDown(dodgekey);
                 Person::players[0]->rightkeydown = Input::isKeyDown(rightkey);
                 Person::players[0]->jumpkeydown = Input::isKeyDown(jumpkey);
                 Person::players[0]->crouchkeydown = Input::isKeyDown(crouchkey);
@@ -3476,6 +3488,7 @@ void Game::Tick()
                 Person::players[0]->forwardkeydown = 0;
                 Person::players[0]->leftkeydown = 0;
                 Person::players[0]->backkeydown = 0;
+                Person::players[0]->dodgekeydown = 0;
                 Person::players[0]->rightkeydown = 0;
                 Person::players[0]->jumpkeydown = 0;
                 Person::players[0]->crouchkeydown = 0;
@@ -3878,6 +3891,7 @@ void Game::Tick()
                         Person::players[i]->forwardkeydown = 0;
                         Person::players[i]->leftkeydown = 0;
                         Person::players[i]->backkeydown = 0;
+                        Person::players[i]->dodgekeydown = 0;
                         Person::players[i]->rightkeydown = 0;
                         Person::players[i]->jumpkeydown = 0;
                         Person::players[i]->attackkeydown = 0;
@@ -3889,6 +3903,7 @@ void Game::Tick()
                         Person::players[i]->forwardkeydown = 0;
                         Person::players[i]->leftkeydown = 0;
                         Person::players[i]->backkeydown = 0;
+                        Person::players[i]->dodgekeydown = 0;
                         Person::players[i]->rightkeydown = 0;
                         Person::players[i]->jumpkeydown = 0;
                         Person::players[i]->crouchkeydown = 0;
@@ -4271,6 +4286,7 @@ void Game::Tick()
                         Person::players[i]->forwardkeydown = 0;
                         Person::players[i]->leftkeydown = 0;
                         Person::players[i]->backkeydown = 0;
+                        Person::players[i]->dodgekeydown = 0;
                         Person::players[i]->rightkeydown = 0;
                         Person::players[i]->jumpkeydown = 0;
                         Person::players[i]->crouchkeydown = 0;
@@ -5205,8 +5221,9 @@ void Game::TickOnceAfter()
             }
             cameradist = findDistance(&viewer, &target);
             viewer.y = max((double)viewer.y, terrain.getHeight(viewer.x, viewer.z) + .6);
-            if (cameraloc.y < terrain.getHeight(cameraloc.x, cameraloc.z)) {
-                cameraloc.y = terrain.getHeight(cameraloc.x, cameraloc.z);
+            float th = terrain.getHeight(cameraloc.x, cameraloc.z);
+            if (cameraloc.y < th) {
+                cameraloc.y = th;
             }
         }
         if (camerashake > .8) {

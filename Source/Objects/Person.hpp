@@ -184,6 +184,7 @@ public:
     bool rightkeydown;
     bool leftkeydown;
     bool backkeydown;
+    bool dodgekeydown;
     bool jumpkeydown;
     bool jumptogglekeydown;
     bool crouchkeydown;

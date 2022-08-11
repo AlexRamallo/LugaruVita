@@ -30,6 +30,7 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <vector>
 #include <tuple>
+#include <sstream>
 
 #include <pthread.h>
 #include "Thirdparty/microprofile/microprofile.h"
@@ -89,6 +90,39 @@ void LOG_TOGGLE(char set){
 static pthread_mutex_t mtxLog;
 static bool did_init_log = false;
 #endif
+
+#if LOG_BUF
+static const int log_buf_size = 1000;
+static std::vector<std::string> log_buf(log_buf_size);
+static int log_head = 0;
+
+void LOG_FLUSH(){
+    std::stringstream ss;
+    std::string last_msg;
+    int repeat_ct = 0;
+    for(int i = 0; i < log_buf_size; i++){
+        std::string &msg = log_buf[(log_head + i) % log_buf_size];
+        
+        if(msg != std::string()){
+            if(msg == last_msg){
+                repeat_ct++;
+            }else if(repeat_ct > 0){
+                ss << "[x" << repeat_ct+1 << "] " << msg;
+                repeat_ct = 0;
+                last_msg = std::string();
+            }else{
+                last_msg = msg;
+                ss << msg;
+            }
+        }
+    }
+
+    std::cout << ss.str();
+}
+#else
+void LOG_FLUSH(){}
+#endif
+
 void LOG(const std::string &fmt, ...)
 {  
 #ifndef NDEBUG
@@ -99,7 +133,10 @@ void LOG(const std::string &fmt, ...)
         ASSERT(!pthread_mutex_init(&mtxLog, NULL));
     }
 #endif
+
+#if !LOG_BUF
     if(!log_enabled) return;
+#endif
 
 #if LOG_MUTEX
     ASSERT(!pthread_mutex_lock(&mtxLog));
@@ -109,40 +146,50 @@ void LOG(const std::string &fmt, ...)
     va_list args;
     va_start(args, fmt);
     bool is_fmt = false;
+
+    std::stringstream ss;
+
     for(char c: fmt){
         if(is_fmt){
             is_fmt = false;
             if (c == 'd') {
                 int i = va_arg(args, int);
-                std::cout << i;
+                ss << i;
             } else if (c == 'c') {
                 // note automatic conversion to integral type
                 int c = va_arg(args, int);
-                std::cout << static_cast<char>(c);
+                ss << static_cast<char>(c);
             } else if (c == 'f') {
                 double d = va_arg(args, double);
-                std::cout << d;
+                ss << d;
             } else if (c == 'p') {
                 void* d = va_arg(args, void*);
-                std::cout << d;
+                ss << d;
             } else if(c == 's') {
                 char *s = va_arg(args, char*);
-                std::cout << s;
+                ss << s;
             } else if(c == '%') {
-                std::cout << '%';
+                ss << '%';
             } else{
-                std::cout << '%' << c;
+                ss << '%' << c;
             }
         }else{
             if(c == '%'){
                 is_fmt = true;
             }else{
-                std::cout << c;
+                ss << c;
             }
         }
     }
-    std::cout << std::endl;
+    ss << std::endl;
     va_end(args);
+
+    #if LOG_BUF
+    log_buf[log_head] = ss.str();
+    log_head = (log_head + 1) % log_buf.size();
+    #else
+    std::cout << ss.str();
+    #endif
 
 #if LOG_MUTEX
     ASSERT(!pthread_mutex_unlock(&mtxLog));
@@ -248,9 +295,15 @@ GLvoid Game::ReSizeGLScene(float fov, float pnear)
     glLoadIdentity();
 }
 
+extern pthread_t main_thread;
+
 void Game::LoadingScreen()
 {
     if (!visibleloading) {
+        return;
+    }
+
+    if(pthread_self() != main_thread){
         return;
     }
 

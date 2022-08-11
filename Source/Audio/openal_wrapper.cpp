@@ -323,7 +323,8 @@ static void* decode_to_pcm(const char* _fname, ALenum& format, ALsizei& size, AL
     strcat(fname, ".ogg");
 
     // just in case...
-    FILE* io = fopen(fname, "rb");
+    //FILE* io = fopen(fname, "rb");
+    FILE* io = FileCache::readFile(fname);
     if (io == NULL) {
         return NULL;
     }

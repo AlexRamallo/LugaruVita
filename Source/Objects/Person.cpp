@@ -196,6 +196,7 @@ Person::Person()
     , rightkeydown(false)
     , leftkeydown(false)
     , backkeydown(false)
+    , dodgekeydown(false)
     , jumpkeydown(false)
     , jumptogglekeydown(false)
     , crouchkeydown(false)
@@ -7199,7 +7200,8 @@ int Person::SphereCheck(XYZ* p1, float radius, XYZ* p, XYZ* move, float* rotate,
     if (*rotate) {
         *p1 = DoRotation(*p1, 0, -*rotate, 0);
     }
-    for (int i = 0; i < 4; i++) {
+//  for (int i = 0; i < 4; i++) { //will this break anything?
+    for (int i = 0; i < 1; i++) {
         for (unsigned int j = 0; j < model->Triangles.size(); j++) {
             if (model->Triangles[j].facenormal.y <= slopethreshold) {
                 intersecting = 0;

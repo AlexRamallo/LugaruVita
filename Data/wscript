@@ -1,3 +1,0 @@
-
-def configure(conf):
-	conf.find_program("PVRTexToolCLI", var="PVRTT", mandatory=True)

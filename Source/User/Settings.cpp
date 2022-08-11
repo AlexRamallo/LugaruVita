@@ -26,17 +26,15 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 
 using namespace Game;
 
-int max_terriain_layers;
+int max_terrain_layers;
 int max_view_distance;
 
 void DefaultSettings()
 {
-    max_terriain_layers = 1;
-    max_view_distance = 80;
-    detail = 0;
+    max_terrain_layers = 1;
+    max_view_distance = 1000;
     ismotionblur = 0;
-    //detail = 2;
-    //ismotionblur = 1;
+    detail = 2;
     usermousesensitivity = 1;
     newscreenwidth = kContextWidth = 960;
     newscreenheight = kContextHeight = 544;
@@ -66,6 +64,7 @@ void DefaultSettings()
     leftkey = SDL_SCANCODE_A;
     forwardkey = SDL_SCANCODE_W;
     backkey = SDL_SCANCODE_S;
+    dodgekey = SDL_SCANCODE_X;
     rightkey = SDL_SCANCODE_D;
     drawkey = SDL_SCANCODE_E;
     throwkey = SDL_SCANCODE_Q;

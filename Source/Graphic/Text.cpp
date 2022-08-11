@@ -112,7 +112,7 @@ void Text::_glPrint(float x, float y, const std::string& string, int set, float 
     int off = base - 32 + (128 * set) + offset;
     float cx;
     float cy;
-    for (int i = 0; i < string.size(); i++) {
+    for (int i = start; i < end; i++) {
         int Ch = string[i] + off;
         if (Ch < 256) {
             cx = float(Ch % 16) / 16.0f;

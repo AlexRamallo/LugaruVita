@@ -135,7 +135,7 @@ extern float changedelay;
 
 extern bool waiting;
 
-extern unsigned short crouchkey, jumpkey, forwardkey, backkey, leftkey, rightkey, drawkey, throwkey, attackkey;
+extern unsigned short crouchkey, jumpkey, forwardkey, backkey, dodgekey, leftkey, rightkey, drawkey, throwkey, attackkey;
 extern unsigned short consolekey;
 extern unsigned short startkey, selectkey;
 

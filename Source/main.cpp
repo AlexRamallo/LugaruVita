@@ -22,6 +22,10 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "Utils/WorkerThread.hpp"
 
+#if PACK_ASSETS
+    #include <physfs.h>
+#endif
+
 #include "Game.hpp"
 
 #include "Audio/openal_wrapper.hpp"
@@ -41,6 +45,8 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 #include <string.h>
 #include <time.h>
 #include <assert.h>
+
+#include <signal.h>
 
 extern "C" {
     #include <math_neon.h>
@@ -72,6 +78,7 @@ PVRTexLoader *pvr_loader = nullptr;
 #endif
 
 extern bool did_just_load;
+extern float gravity;
 extern float multiplier;
 extern float realmultiplier;
 extern int slomo;
@@ -183,8 +190,8 @@ void update_analog_sticks(){
     deltah_vel += rstick_x;
     deltav_vel += rstick_y;
 
-    deltah += deltah_vel * 7;
-    deltav += deltav_vel * 5;
+    deltah += deltah_vel * 350 * multiplier;
+    deltav += deltav_vel * 250 * multiplier;
 
     deltah_vel *= 0.6f;
     deltav_vel *= 0.6f;
@@ -465,8 +472,8 @@ void DoFrameRate(int update)
     if (multiplier < .001) {
         multiplier = .001;
     }
-    if (multiplier > 10) {
-        multiplier = 10;
+    if (multiplier > 0.03) {
+        multiplier = 0.03;
     }
     if (update) {
         frametime = currTime; // reset for next time interval
@@ -495,8 +502,14 @@ void DoUpdate()
     static float oldmult;
 
     DoFrameRate(1);
-    if (multiplier > .6) {
-        multiplier = .6;
+    //if (multiplier > .1) {
+    //    multiplier = .1;
+    //}
+
+    if(did_just_load){
+        did_just_load = false;
+        multiplier = 0.001f;
+        oldmult = 0.001f;
     }
 
     fps = 1 / multiplier;
@@ -523,22 +536,18 @@ void DoUpdate()
     if (slomo && !mainmenu) {
         multiplier *= slomospeed;
     }
+
     oldmult = multiplier;
     multiplier /= (float)count;
 
     DoMouse();
-
-    if(did_just_load){
-        did_just_load = false;
-        multiplier = 0.001;
-        count = 10;
-    }
 
     TickOnce();
 
     for (int i = 0; i < count; i++) {
         Tick();
     }
+
     multiplier = oldmult;
 
     TickOnceAfter();
@@ -732,7 +741,7 @@ const option::Descriptor usage[] =
 option::Option commandLineOptions[commandLineOptionsNumber];
 option::Option* commandLineOptionsBuffer;
 
-int _main(int argc, char** argv)
+int lugaru_main(int argc, char** argv)
 {
     #if PLATFORM_VITA
         MicroProfileSetForceEnable(true);
@@ -884,10 +893,15 @@ int _main(int argc, char** argv)
     return 0;
 }
 
+pthread_t main_thread;
+
 int main(int argc, char** argv){
+    main_thread = pthread_self();
     vglSetVertexPoolSize(VGL_VERTEX_POOL_SIZE);
 
     MicroProfileOnThreadCreate("MainThread");
+
+    #ifndef NDEBUG
     //*
     std::ofstream ofs{"ux0:data/lugaru_runlog.txt"}; 
     std::cout.rdbuf(ofs.rdbuf());
@@ -897,12 +911,21 @@ int main(int argc, char** argv){
     freopen("ux0:data/lugaru_runlog.txt", "a", stdout);
     freopen("ux0:data/lugaru_runlog.txt", "a", stderr);
     //*/
+    #endif
 
-    //Account::add("VitaMasterRace");
-    //Account::saveFile("ux0:data/lugaru1.acct");
-    Account::loadFile("ux0:data/lugaru1.acct");
+    #if PACK_ASSETS
+    if(!PHYSFS_Init(nullptr)){
+        std::cout << "Failed to initialize PhysFS\n";
+        return -1;
+    }
 
-    int rc = _main(argc, argv);
+    if(!PHYSFS_mount("app0:Data.zip", "/", 0)){
+        std::cout << "Failed to mount asset pack (app0:Data.zip)\n";
+        return -1;
+    }
+    #endif
+
+    int rc = lugaru_main(argc, argv);
     std::cout << "Main returned with code: " << rc << std::endl;
 
     return rc;

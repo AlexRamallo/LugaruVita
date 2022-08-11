@@ -49,24 +49,26 @@ std::string Folders::getScreenshotDir()
 std::string Folders::getUserDataPath()
 {
     std::string userDataPath;
-#ifdef _WIN32
-    char path[MAX_PATH];
-    // %APPDATA% (%USERPROFILE%\Application Data)
-    if (SUCCEEDED(SHGetFolderPathA(nullptr, CSIDL_APPDATA, nullptr, 0, path))) {
-        userDataPath = std::string(path) + "/Lugaru/";
-    } else {
-        return dataDir;
-    }
-#elif (defined(__APPLE__) && defined(__MACH__))
-    const char* homePath = getHomeDirectory();
-    if (homePath == NULL) {
-        userDataPath = ".";
-    } else {
-        userDataPath = std::string(homePath) + "/Library/Application Support/Lugaru";
-    }
-#else // Linux
-    userDataPath = getGenericDirectory("XDG_DATA_HOME", ".local/share");
-#endif
+    #ifdef _WIN32
+        char path[MAX_PATH];
+        // %APPDATA% (%USERPROFILE%\Application Data)
+        if (SUCCEEDED(SHGetFolderPathA(nullptr, CSIDL_APPDATA, nullptr, 0, path))) {
+            userDataPath = std::string(path) + "/Lugaru/";
+        } else {
+            return dataDir;
+        }
+    #elif (defined(__APPLE__) && defined(__MACH__))
+        const char* homePath = getHomeDirectory();
+        if (homePath == NULL) {
+            userDataPath = ".";
+        } else {
+            userDataPath = std::string(homePath) + "/Library/Application Support/Lugaru";
+        }
+    #elif defined(PLATFORM_VITA)
+        userDataPath = std::string("ux0:data/lugaru");
+    #else // Linux
+        userDataPath = getGenericDirectory("XDG_DATA_HOME", ".local/share");
+    #endif
     makeDirectory(userDataPath);
     return userDataPath;
 }
@@ -74,14 +76,14 @@ std::string Folders::getUserDataPath()
 std::string Folders::getConfigFilePath()
 {
     std::string configFolder;
-#if defined(_WIN32) || (defined(__APPLE__) && defined(__MACH__))
-    configFolder = getUserDataPath();
-#elif PLATFORM_VITA
-    configFolder = "ux0:data/lugaru";
-#else // Linux
-    configFolder = getGenericDirectory("XDG_CONFIG_HOME", ".config");
-    makeDirectory(configFolder);
-#endif
+    #if defined(_WIN32) || (defined(__APPLE__) && defined(__MACH__))
+        configFolder = getUserDataPath();
+    #elif PLATFORM_VITA
+        configFolder = "ux0:data/lugaru";
+    #else // Linux
+        configFolder = getGenericDirectory("XDG_CONFIG_HOME", ".config");
+        makeDirectory(configFolder);
+    #endif
     return configFolder + "/config.txt";
 }
 

@@ -5,7 +5,7 @@
 
 	Requires PVRTexTool and Python 'Pillow' library
 """
-import shutil, math, json, waflib
+import os, shutil, math, json, waflib
 from waflib import Configure, Build
 from PIL import Image
 
@@ -17,6 +17,7 @@ use_packages = [
 	"jsoncpp",
 	"vorbis",
 	"vorbisfile",
+	"physfs",
 ]
 
 platform_libs = [
@@ -44,6 +45,7 @@ platform_libs = [
 	"taihen_stub",
 	"SceAudio_stub",
 	"SceAudioIn_stub",
+	"SceExcpmgrForKernel_stub"
 ]
 
 #Subcontexts for release build so we have separate build folders
@@ -66,6 +68,7 @@ def options(opt):
 	opt.add_option('--profiling', dest='MICROPROFILE_ENABLED', action='store_true', default=False, help='enable profiling macros')
 	opt.add_option('--no-audio', dest='AUDIO_DISABLED', action='store_true', default=False, help='disable audio')
 	opt.add_option('--tex-quality', dest='TEXQUALITY', default='pvrtcfastest', help='default PVRTC encoding quality')
+	opt.add_option('--no-pack', dest='SKIP_PACK', action='store_true', help='Don\'t package assets into a zip inside the VPK')
 	opt.recurse("vitagl")
 
 def opt_to_def(ctx, key):
@@ -84,6 +87,7 @@ def configure(conf):
 	conf.find_program("PVRTexToolCLI", var="PVRTT", mandatory=True)
 	conf.load("color_gcc")
 	conf.load("vitasdk", tooldir='.')
+	conf.find_program('zip', var='ZIP', mandatory=True)
 
 	conf.env.DESTDIR = "./INSTALL"
 	conf.env.PROJECT_TITLEID = "LUGARU069"
@@ -100,10 +104,17 @@ def configure(conf):
 	]
 	
 	conf.env.append_unique('CXXFLAGS', "--std=gnu++11")
+	conf.env.append_unique('DEFINES', 'LOG_BUF=1');
+
+	if not conf.options.SKIP_PACK:
+		conf.env.append_unique('DEFINES', 'PACK_ASSETS=1')
+	else:
+		conf.env.append_unique('DEFINES', 'PACK_ASSETS=0')
 
 	if 'release' in conf.cmd:
 		conf.env.append_unique('CFLAGS', '-O0')
-		conf.env.append_unique('CFLAGS', '-g')
+		#conf.env.append_unique('CFLAGS', '-g')
+		#conf.env.append_unique('CFLAGS', '-flto')
 		conf.env.append_unique('DEFINES', 'MICROPROFILE_WEBSERVER=0');
 		conf.env.append_unique('DEFINES', 'NDEBUG=1');
 	else:
@@ -142,6 +153,17 @@ def build(bld):
 	if 'release' not in bld.variant:
 		defs.extend(["DEBUG", "_DEBUG"])
 
+	bld(
+		rule = generate_version_header,
+		source = "Source/Version.hpp.in",
+		target = "Source/Version.hpp",
+		major = 1,
+		minor = 3,
+		patch = 0,
+		suffix = "-dev",
+		release = "Vita Homebrew"
+	)
+
 	srcs = bld.path.ant_glob(["Source/**/*.cpp", "Source/**/*.c"])
 	incs = bld.path.ant_glob(["Source/**"], dir=True, src=False)
 	bld(
@@ -149,7 +171,7 @@ def build(bld):
 		includes = ["Source"] + incs,
 		features = "c cxx",
 		target = "Entrypoint",
-		use = use_packages + ["vitaGL"],
+		use = use_packages + ["vitaGL", "Source/Version.hpp"],
 		defines = defs,
 	)
 
@@ -166,9 +188,8 @@ def build(bld):
 		features='cxx cxxprogram %s' % variant,
 		vita_title_id = bld.env.PROJECT_TITLEID,
 		vita_title_string = bld.env.PROJECT_NAME,
-		assets = bld.path.find_node("Data").get_bld(),
-		#strip = 'release' in bld.variant
-		strip = False
+		assets = bld.path.find_node("Data").get_bld().change_ext(".zip"),
+		strip = 'release' in bld.variant
 	)
 
 	if bld.is_install > 0:
@@ -220,6 +241,7 @@ def get_rule(node, key = None, defval = None):
 
 def build_assets(bld):
 	data_dir = bld.path.find_node("Data")
+	data_out = data_dir.get_bld()
 
 	#glob patterns for image files
 	img_glob = ['**/*%s' % e for e in ['.jpg', '.png']]
@@ -240,7 +262,7 @@ def build_assets(bld):
 
 	#convert images
 	for img in images:
-		tg = bld(rule = do_encode_pvrtc, source = img, rename = False)
+		tg = bld(rule = do_encode_pvr, source = img, rename = False)
 		#Ensure files are reprocessed if we modify the rules file
 		tg.post()
 		for task in tg.tasks:
@@ -254,6 +276,25 @@ def build_assets(bld):
 		for task in tg.tasks:
 			task.dep_nodes.append(rulesfile)
 
+	#create asset package
+	#warning: laziness below
+	if not bld.env.SKIP_PACK:
+		import threading
+		datafiles = [n.get_bld() for n in images + other]
+		ziplock = threading.Lock()
+		def write_file_to_package(task):
+			task.no_errcheck_out = True
+			with ziplock:
+				task.exec_command(f"{task.env.ZIP[0]} -0ur {task.generator.datazip} {task.inputs[0]}")
+		#zip each file individually for fast partial rebuilds
+		for file in datafiles:
+			bld(
+				rule = write_file_to_package,
+				cwd = data_out.parent.abspath(),
+				source = file,
+				datazip = data_out
+			)
+
 def do_copy(task):
 	for n in task.inputs:
 		if get_rule(n, 'copy', True) == False:
@@ -262,7 +303,7 @@ def do_copy(task):
 		out.parent.mkdir()
 		shutil.copy(n.abspath(), out.abspath())
 
-def do_encode_pvrtc(task):
+def do_encode_pvr(task):
 	default_opts = {
 		'format': 'PVRTCII_4BPP,UBN,sRGB',
 		'quality': task.generator.bld.options.TEXQUALITY,
@@ -348,3 +389,42 @@ def get_constrained_pot(size, d_min, d_max):
 		return (math.pow(2, w), math.pow(2, h))
 	else:
 		return (math.pow(2, h), math.pow(2, w))
+
+def generate_version_header(task):
+	insrc = task.inputs[0].read()
+
+	major = str(getattr(task.generator, "major", "1"))
+	minor = str(getattr(task.generator, "minor", "3"))
+	patch = str(getattr(task.generator, "patch", "0"))
+	suffix = str(getattr(task.generator, "suffix", ""))
+	release_version = str(getattr(task.generator, "release", ""))
+	vhash = "" #TODO
+
+	if "_debug" in task.generator.bld.variant:
+		build_type = "debug"
+	else:
+		build_type = "release"
+
+	version = f"{major}.{minor}"
+
+	if patch != "0":
+		version += f".{patch}"
+
+	verstr = f"{version}{suffix}"
+	if vhash != "":
+		verstr = f"{verstr} (git {vhash})"
+	if release_version != "":
+		verstr = f"{verstr} [{release_version}]"
+
+	insrc = insrc.replace("@LUGARU_VERSION_MAJOR@", major)
+	insrc = insrc.replace("@LUGARU_VERSION_MINOR@", minor)
+	insrc = insrc.replace("@LUGARU_VERSION_PATCH@", patch)
+	insrc = insrc.replace("@LUGARU_VERSION_NUMBER@", version)
+	insrc = insrc.replace("@LUGARU_VERSION_SUFFIX@", suffix)
+	insrc = insrc.replace("@LUGARU_VERSION_HASH@", vhash)
+	insrc = insrc.replace("@LUGARU_VERSION_RELEASE@", release_version)
+	insrc = insrc.replace("@LUGARU_VERSION_STRING@", verstr)
+	insrc = insrc.replace("@CMAKE_BUILD_TYPE@", major)
+
+	task.outputs[0].write(insrc)
+	task.generator.export_includes = task.outputs

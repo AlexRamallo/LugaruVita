@@ -119,9 +119,23 @@ float consoleblinkdelay = 0;
 bool consoleblink = 0;
 unsigned consoleselected = 0;
 
-unsigned short crouchkey = 0, jumpkey = 0, forwardkey = 0, backkey = 0, leftkey = 0, rightkey = 0, drawkey = 0, throwkey = 0, attackkey = 0;
+unsigned short crouchkey = 0;
+unsigned short jumpkey = 0;
+unsigned short forwardkey = 0;
+unsigned short dodgekey = 0;
+unsigned short backkey = 0;
+unsigned short leftkey = 0;
+unsigned short rightkey = 0;
+unsigned short drawkey = 0;
+unsigned short throwkey = 0;
+unsigned short attackkey = 0;
+
+int analog_move_dir = 0;
+
 unsigned short consolekey = 0;
-unsigned short startkey = 0, selectkey = 0;
+
+unsigned short startkey = 0;
+unsigned short selectkey = 0;
 
 int loading = 0;
 

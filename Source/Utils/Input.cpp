@@ -54,11 +54,13 @@ void Input::Tick()
 #endif
 	SDL_GameController *ctl = getController();
 
+	/*
 	Uint8 mb = SDL_GetMouseState(NULL, NULL);
 	for (int i = 1; i < 6; i++) {
 		keyPressed[SDL_NUM_SCANCODES + i] = !keyDown[SDL_NUM_SCANCODES + i] && (mb & SDL_BUTTON(i));
 		keyDown[SDL_NUM_SCANCODES + i] = (mb & SDL_BUTTON(i));
 	}
+	*/
 
 	#define handle_key(k, s){\
 		int st = SDL_GameControllerGetButton(ctl, s);\
@@ -76,6 +78,9 @@ void Input::Tick()
 	handle_key(Game::drawkey, SDL_CONTROLLER_BUTTON_Y);
 	handle_key(Game::attackkey, SDL_CONTROLLER_BUTTON_X);
 	handle_key(Game::throwkey, SDL_CONTROLLER_BUTTON_B);
+
+	//back roll with attack+leftshoulder, not attack+backkey since that's annoying with joystick
+	handle_key(Game::dodgekey, SDL_CONTROLLER_BUTTON_LEFTSHOULDER);
 	
 	handle_key(Game::startkey, SDL_CONTROLLER_BUTTON_START);
 	handle_key(Game::selectkey, SDL_CONTROLLER_BUTTON_BACK);
@@ -110,6 +115,9 @@ void Input::Tick()
 
     if(mpst == 1){
     	mpst = 2;
+    	#if LOG_BUF
+    		LOG_FLUSH();
+    	#endif
         const char *dest = "ux0:data/microprofile_dump.html";
         MicroProfileDumpFile(dest, MicroProfileDumpTypeHtml, 100);
         SDL_Delay(500);
@@ -134,7 +142,8 @@ bool Input::isKeyPressed(int k)
 }
 
 const char* Input::keyToChar(unsigned short i)
-{
+{	
+	/*
 	if (i < SDL_NUM_SCANCODES) {
 		return SDL_GetKeyName(SDL_GetKeyFromScancode(SDL_Scancode(i)));
 	} else if (i == MOUSEBUTTON_LEFT) {
@@ -150,6 +159,24 @@ const char* Input::keyToChar(unsigned short i)
 	} else {
 		return "unknown";
 	}
+	*/
+
+	#define handle(k, v) if(i == k) { return v; }
+
+	handle(Game::backkey, "Down");
+	handle(Game::forwardkey, "Up");
+	handle(Game::leftkey, "Left");
+	handle(Game::rightkey, "Right");
+	handle(Game::attackkey, "Square");
+	handle(Game::throwkey, "Circle");
+	handle(Game::jumpkey, "Cross");
+	handle(Game::drawkey, "Triangle");
+	handle(Game::crouchkey, "Right Shoulder");
+	handle(Game::dodgekey, "Left Shoulder");
+	handle(Game::startkey, "Start");
+	handle(Game::selectkey, "Select");
+
+	return "unknown";
 }
 
 bool Input::MouseClicked()

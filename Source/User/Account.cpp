@@ -22,6 +22,7 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "Platform/Platform.hpp"
 #include "Utils/binio.h"
+#include "Utils/Log.h"
 
 #include <fstream>
 #include <iostream>
@@ -116,6 +117,8 @@ Account::Account(FILE* tfile)
 
 void Account::save(FILE* tfile)
 {
+    LOG("Account::save");
+    
     fpackf(tfile, "Bi", difficulty);
     fpackf(tfile, "Bi", progress);
     fpackf(tfile, "Bi", campaignProgress.size());
@@ -248,21 +251,23 @@ void Account::loadFile(string filename)
     int iactive;
     errno = 0;
 
+    LOG("Account::loadFile(%s)", filename.c_str());
+
     tfile = fopen(filename.c_str(), "rb");
 
     if (tfile) {
         funpackf(tfile, "Bi", &numaccounts);
         funpackf(tfile, "Bi", &iactive);
-        printf("Loading %d accounts\n", numaccounts);
+        LOG("Loading %d accounts\n", numaccounts);
         for (int i = 0; i < numaccounts; i++) {
-            printf("Loading account %d/%d\n", i, numaccounts);
+            LOG("Loading account %d/%d\n", i, numaccounts);
             accounts.emplace_back(tfile);
         }
 
         fclose(tfile);
         setActive(iactive);
     } else {
-        perror(("Couldn't load users from " + filename).c_str());
+        LOG("Couldn't load users from %s", filename.c_str());
         i_active = -1;
     }
 }
@@ -272,18 +277,20 @@ void Account::saveFile(string filename)
     FILE* tfile;
     errno = 0;
 
+    LOG("Account::saveFile(%s)", filename.c_str());
+
     tfile = fopen(filename.c_str(), "wb");
     if (tfile) {
         fpackf(tfile, "Bi", getNbAccounts());
         fpackf(tfile, "Bi", i_active);
 
         for (int i = 0; i < getNbAccounts(); i++) {
-            printf("writing account %d/%d (%s)\n", i + 1, getNbAccounts(), accounts[i].getName().c_str());
+            LOG("writing account %d/%d (%s)\n", i + 1, getNbAccounts(), accounts[i].getName().c_str());
             accounts[i].save(tfile);
         }
 
         fclose(tfile);
     } else {
-        perror(("Couldn't save users in " + filename).c_str());
+        LOG("Couldn't save users in %s", filename.c_str());
     }
 }

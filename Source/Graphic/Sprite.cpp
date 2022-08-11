@@ -329,6 +329,8 @@ void Sprite::doAnimate(float (&mmodel)[4][4], int start_idx, int end_idx){
 			sprite->oldposition = sprite->position;
 		}
 	}
+
+	multiplier = tempmult;
 }
 
 void Sprite::setLastSpriteSpecial(int s){

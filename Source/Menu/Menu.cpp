@@ -381,23 +381,28 @@ void Menu::Load()
             addImage(0, Mainmenuitems[0], 150, 480 - 128, 256, 128);
             addButtonImage(1, Mainmenuitems[mainmenu == 1 ? 1 : 5], 18, 480 - 152 - 32, 128, 32);
             addButtonImage(2, Mainmenuitems[2], 18, 480 - 228 - 32, 112, 32);
-            addButtonImage(3, Mainmenuitems[mainmenu == 1 ? 3 : 6], 18, 480 - 306 - 32, mainmenu == 1 ? 68 : 132, 32);
-            addLabel(-1, VERSION_NUMBER + VERSION_SUFFIX, 640 - 100, 10);
+            //addButtonImage(3, Mainmenuitems[mainmenu == 1 ? 3 : 6], 18, 480 - 306 - 32, mainmenu == 1 ? 68 : 132, 32);
+            //Note: no quit button for Vita
+            if(mainmenu == 2){
+                addButtonImage(3, Mainmenuitems[6], 18, 480 - 306 - 32, 132, 32);
+            }
+            addLabel(-1, VERSION_STRING, 640 - (11 * VERSION_STRING.size()), 10);
+            //addLabel(-1, VERSION_NUMBER + VERSION_SUFFIX, 640 - 100, 10);
             break;
         case 3:
-            addButton(0, "", 10 + 20, 440);
-            addButton(14, "", 10 + 400, 440);
-            addButton(1, "", 10 + 60, 405);
-            addButton(2, "", 10 + 70, 370);
-            addButton(4, "", 10, 335);
-            addButton(5, "", 10 + 60, 300);
-            addButton(6, "", 10 + 70, 265);
-            addButton(9, "", 10, 230);
-            addButton(10, "", 20, 195);
-            addButton(11, "", 10 + 60, 160);
-            addButton(13, "", 30, 125);
-            addButton(7, "-Configure Controls-", 10 + 15, 90);
-            addButton(12, "-Configure Stereo -", 10 + 15, 55);
+            //addButton(0, "", 10 + 20, 440); //resolution
+            //addButton(14, "", 10 + 400, 440); //fullscreen
+            addButton(1, "", 10 + 60, 405); //detail
+            addButton(2, "", 10 + 70, 370); //blood
+            addButton(5, "", 10 + 60, 300); //decals
+            addButton(6, "", 10 + 70, 265); //music
+            addButton(9, "", 10, 230); //invert mouse
+            addButton(10, "", 20, 195); //mouse speed
+            addButton(11, "", 10 + 60, 160); //volume
+            addButton(13, "", 30, 335); //damage bar
+            //addButton(7, "-Configure Controls-", 10 + 15, 90);
+            //addButton(4, "", 10, 90); //blur effects
+            addButton(12, "-Configure Stereo -", 10 + 15, 125);
             addButton(8, "Back", 10, 10);
             updateSettingsMenu();
             break;

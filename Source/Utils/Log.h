@@ -7,6 +7,10 @@
 void LOG_TOGGLE(char set);
 void LOG(const std::string& fmt, ...);
 
+#if LOG_BUF
+void LOG_FLUSH();
+#endif
+
 #ifdef NDEBUG
 	#define ASSERT(cond)
 #else

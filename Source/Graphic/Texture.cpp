@@ -131,7 +131,9 @@ void TextureRes::loadData(){
 	ASSERT(loadimg == nullptr);
 	ImageRec *img = new ImageRec();
 	loadimg = (void*) img;
-	load_image(filename.c_str(), *img);
+	if(!load_image(filename.c_str(), *img)){
+		LOG("WARN: failed to load texture: %s", filename.c_str());
+	}
 }
 
 void TextureRes::uploadTexture(){

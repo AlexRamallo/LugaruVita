@@ -34,22 +34,42 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 
 typedef long long __int64;
 typedef __int64 LARGE_INTEGER;
-static int QueryPerformanceFrequency(LARGE_INTEGER* liptr)
-{
-    ASSERT(sizeof(__int64) == 8);
-    ASSERT(sizeof(LARGE_INTEGER) == 8);
-    *liptr = 1000;
-    return (1);
-}
 
-static int QueryPerformanceCounter(LARGE_INTEGER* liptr)
-{
-    struct timeval tv;
-    gettimeofday(&tv, NULL);
-    *liptr = ((((LARGE_INTEGER)tv.tv_sec) * 1000) +
-              (((LARGE_INTEGER)tv.tv_usec) / 1000));
-    return (1);
-}
+#ifdef PLATFORM_VITA
+    #include <psp2/kernel/processmgr.h>
+
+    static int QueryPerformanceFrequency(LARGE_INTEGER* liptr)
+    {
+        *liptr = 1000000;
+        return (1);
+    }
+
+    static int QueryPerformanceCounter(LARGE_INTEGER* liptr)
+    {
+        *liptr = sceKernelGetProcessTimeWide();
+        return (1);
+    }
+
+#else
+
+    static int QueryPerformanceFrequency(LARGE_INTEGER* liptr)
+    {
+        ASSERT(sizeof(__int64) == 8);
+        ASSERT(sizeof(LARGE_INTEGER) == 8);
+        *liptr = 1000;
+        return (1);
+    }
+
+    static int QueryPerformanceCounter(LARGE_INTEGER* liptr)
+    {
+        struct timeval tv;
+        gettimeofday(&tv, NULL);
+        *liptr = ((((LARGE_INTEGER)tv.tv_sec) * 1000) +
+                  (((LARGE_INTEGER)tv.tv_usec) / 1000));
+        return (1);
+    }
+
+#endif
 
 class AppTime
 {

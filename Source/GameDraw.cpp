@@ -502,6 +502,7 @@ int Game::DrawGLScene(StereoSide side)
             WorkerThread::JobHandle occludejobs[max_players_ct];
             memset(occludejobs, -1, max_players_ct * sizeof(WorkerThread::JobHandle));
 
+            //Submit jobs for calculating occlusion
             for (unsigned k = 0; k < Person::players.size(); k++) {
                 MICROPROFILE_SCOPEI("DrawGLScene", "models-draw-person", 0xb500ff);
                 if (k == 0 || !Tutorial::active) {
@@ -514,12 +515,14 @@ int Game::DrawGLScene(StereoSide side)
                 }
             }
 
+            //Join occlusion jobs
             for(int i = 0; i < max_players_ct; i++){
                 if(occludejobs[i] != -1){
                     WorkerThread::join(occludejobs[i], true);
                 }
             }
 
+            //Submit jobs for updating skeletons
             for (unsigned k = 0; k < Person::players.size(); k++) {
                 if (k == 0 || !Tutorial::active) {
                     Person *player = Person::players[k].get();
@@ -670,6 +673,9 @@ int Game::DrawGLScene(StereoSide side)
                         Person::players[k]->occluded = 0;
                     }
                     if (Person::players[k]->occluded < 25) {
+                        Person::players[k]->PreUpdateSkeleton();
+                        Person::players[k]->UpdateSkeleton();
+                        Person::players[k]->UpdateNormals();
                         Person::players[k]->DrawSkeleton();
                     }
                 }
@@ -1492,7 +1498,7 @@ int Game::DrawGLScene(StereoSide side)
             string = "Score:     " + to_string(int(bonustotal - startbonustotal));
             text->glPrintOutlined(1024 / 30, 768 * 6 / 8, string, 1, 2, 1024, 768);
 
-            string = "Press Escape to return to menu or Space to continue";
+            string = std::string("Press ") + Input::keyToChar(Game::startkey) + " to return to menu or " + Input::keyToChar(Game::jumpkey) + " to continue";
             text->glPrintOutlined(640 / 2 - string.size() * 5, 480 * 1 / 16, string, 1, 1, 640, 480);
 
             int wontime = (int)round(wonleveltime);

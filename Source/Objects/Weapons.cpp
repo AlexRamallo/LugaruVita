@@ -102,17 +102,17 @@ void Weapon::setType(int t)
 
 struct WeaponModelTransformJob: WorkerThread::Job {
     Model *model;
-    int type;
+    int weapon_type;
     WeaponModelTransformJob(Model *m, int t):
         Job(),
         model(m),
-        type(t)
+        weapon_type(t)
     {
         //--
     }
     ~WeaponModelTransformJob() = default;
     void execute() override {
-        switch(type){
+        switch(weapon_type){
             default: //throwingknifemodel
                 model->Scale(.001, .001, .001);
                 model->Rotate(90, 0, 0);
@@ -144,6 +144,7 @@ struct WeaponModelTransformJob: WorkerThread::Job {
 void Weapon::Load()
 {
     MICROPROFILE_SCOPEI("Weapon", "Load", 0x888888);
+    //*
     std::vector<std::tuple<WorkerThread::JobHandle, Texture*>> loadTexJobs;
 
     loadTexJobs.emplace_back(knifetextureptr.submitLoadJob("Textures/Knife.png", 0), &knifetextureptr);
@@ -157,7 +158,7 @@ void Weapon::Load()
     WorkerThread::JobHandle modelJobs[3] = {
         throwingknifemodel.submitLoad("Models/ThrowingKnife.solid"),
         swordmodel.submitLoad("Models/Sword.solid"),
-        staffmodel.submitLoad("Models/Staff.solid"),
+        staffmodel.submitLoad("Models/Staff.solid")
     };
 
     WorkerThread::JobHandle transformJobs[3] = {
@@ -175,6 +176,7 @@ void Weapon::Load()
         WorkerThread::join(modelJobs[i], true);
         WorkerThread::join(transformJobs[i], true);
     }
+    //*/
 
     /*
     knifetextureptr.load("Textures/Knife.png", 0);
@@ -207,27 +209,27 @@ void Weapon::Load()
     staffmodel.Rotate(0, 0, 90);
     staffmodel.flat = 1;
     staffmodel.CalculateNormals(1);
-    */
+    //*/
 }
 
 void Weapon::doStuff(int i)
 {
-    static int whichpatchx, whichpatchz, whichhit;
-    static XYZ start, end, colpoint, normalrot, footvel, footpoint;
-    static XYZ terrainnormal;
-    static XYZ vel;
-    static XYZ midp;
-    static XYZ newpoint1, newpoint2;
-    static float friction = 3.5;
-    static float elasticity = .4;
-    static XYZ bounceness;
-    static float frictionness;
-    static float closestdistance;
-    static float distance;
-    static XYZ point[3];
-    static XYZ closestpoint;
-    static XYZ closestswordpoint;
-    static float tempmult;
+    int whichpatchx, whichpatchz, whichhit;
+    XYZ start, end, colpoint, normalrot, footvel, footpoint;
+    XYZ terrainnormal;
+    XYZ vel;
+    XYZ midp;
+    XYZ newpoint1, newpoint2;
+    float friction = 3.5;
+    float elasticity = .4;
+    XYZ bounceness;
+    float frictionness;
+    float closestdistance;
+    float distance;
+    XYZ point[3];
+    XYZ closestpoint;
+    XYZ closestswordpoint;
+    float tempmult;
 
     if (multiplier <= 0) {
         return;

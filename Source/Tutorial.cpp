@@ -661,8 +661,9 @@ void Tutorial::DrawTextInfo()
             string3 = "This is especially useful when they are running away.";
             break;
         case 25:
-            string = "Dodge by pressing back and attack. Dodging is essential";
-            string2 = "against enemies with swords or other long weapons.";
+            string = std::string("Dodge by pressing back + ") + Input::keyToChar(Game::dodgekey) + " + attack.";
+            string2 = "Dodging is essential against";
+            string3 = "enemies with swords or other long weapons.";
             break;
         case 26:
             string = "REVERSALS AND COUNTER-REVERSALS";
@@ -784,8 +785,8 @@ void Tutorial::DrawTextInfo()
     Game::text->glPrintOutlined(1, 1, 1, opacity, screenwidth / 2 - 7.6 * string2.size() * screenwidth / 1024, screenheight / 16 + screenheight * 4 / 5 - 20 * screenwidth / 1024, string2, 1, 1.5 * screenwidth / 1024, screenwidth, screenheight);
     Game::text->glPrintOutlined(1, 1, 1, opacity, screenwidth / 2 - 7.6 * string3.size() * screenwidth / 1024, screenheight / 16 + screenheight * 4 / 5 - 40 * screenwidth / 1024, string3, 1, 1.5 * screenwidth / 1024, screenwidth, screenheight);
 
-    string = "Press 'tab' to skip to the next item.";
-    string2 = "Press escape at any time to";
+    string = "Press Select to skip to the next item.";
+    string2 = "Press Start at any time to";
     string3 = "pause or exit the tutorial.";
 
     Game::text->glPrintOutlined(0.5, 0.5, 0.5, 1, screenwidth / 2 - 7.6 * string.size() * screenwidth / 1024 * .8, 0 + screenheight * 1 / 10, string, 1, 1.5 * screenwidth / 1024 * .8, screenwidth, screenheight);

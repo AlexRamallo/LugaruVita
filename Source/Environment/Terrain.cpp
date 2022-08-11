@@ -42,7 +42,7 @@ extern float blurness;
 extern float targetblurness;
 extern bool skyboxtexture;
 
-extern int max_terriain_layers;
+extern int max_terrain_layers;
 extern int max_view_distance;
 
 //Functions
@@ -50,15 +50,15 @@ extern int max_view_distance;
 int Terrain::lineTerrain(XYZ p1, XYZ p2, XYZ* p)
 {
     MICROPROFILE_SCOPEI("Terrain", "lineTerrain", 0x50c2aa);
-    static int i, j, k;
-    static float distance;
-    static float olddistance;
-    static int intersecting;
-    static int firstintersecting;
-    static XYZ point;
-    static int startx, starty;
-    static int endx, endy;
-    static float highest, lowest;
+    int i, j, k;
+    float distance;
+    float olddistance;
+    int intersecting;
+    int firstintersecting;
+    XYZ point;
+    int startx, starty;
+    int endx, endy;
+    float highest, lowest;
 
     firstintersecting = -1;
     olddistance = 10000;
@@ -429,32 +429,46 @@ bool Terrain::load(const std::string& fileName)
     ImageRec texture;
 
     //Load Image
-    if (!load_image(Folders::getResourcePath(fileName).c_str(), texture)) {
+    std::string tname = Folders::getResourcePath(fileName);
+    LOG("Loading terrain texture %s", tname.c_str());
+    if (!load_image(tname.c_str(), texture)) {
+        LOG("\tFAILED!");
         return false;
     }
 
+    if(texture.is_pvr){
+        if(texture.pvr_header.isCompressed()){
+            LOG("ERROR! compressed terrain texture found: %s", tname.c_str());
+            ASSERT(0 && "compressed terrain texture");
+        }
+    }
+
+    int tex_bpp = texture.getBitsPerPixel();
+    int tex_sizeX = texture.getWidth();
+    int tex_sizeY = texture.getHeight();
+
     //Is it valid?
-    if (texture.bpp > 24) {
-        int bytesPerPixel = texture.bpp / 8;
+    if (tex_bpp > 24) {
+        int bytesPerPixel = tex_bpp / 8;
 
         int tempnum = 0;
-        for (i = 0; i < (long)(texture.sizeY * texture.sizeX * bytesPerPixel); i++) {
+        for (i = 0; i < (long)(tex_sizeY * tex_sizeX * bytesPerPixel); i++) {
             if ((i + 1) % 4) {
                 texture.data[tempnum] = texture.data[i];
                 tempnum++;
             }
         }
     }
-    texture.bpp = 24;
+    tex_bpp = 24;
     Game::LoadingScreen();
 
     texdetail = temptexdetail;
 
-    size = texture.sizeX;
+    size = tex_sizeX;
 
     for (i = 0; i < size; i++) {
         for (j = 0; j < size; j++) {
-            heightmap[size - 1 - i][j] = (float)((texture.data[(i + (j * size)) * texture.bpp / 8])) / 5;
+            heightmap[size - 1 - i][j] = (float)((texture.data[(i + (j * size)) * tex_bpp / 8])) / 5;
         }
     }
 
@@ -973,6 +987,13 @@ XYZ Terrain::getLighting(float pointx, float pointz)
     tilex = pointx;
     tiley = pointz;
 
+    if(tilex + 1 >= max_terrain_size){
+        tilex = max_terrain_size - 2;
+    }
+    if(tiley + 1 >= max_terrain_size){
+        tiley = max_terrain_size - 2;
+    }
+
     height1.x = colors[tilex][tiley][0] * (1 - (pointx - tilex)) + colors[tilex + 1][tiley][0] * (pointx - tilex);
     height1.y = colors[tilex][tiley][1] * (1 - (pointx - tilex)) + colors[tilex + 1][tiley][1] * (pointx - tilex);
     height1.z = colors[tilex][tiley][2] * (1 - (pointx - tilex)) + colors[tilex + 1][tiley][2] * (pointx - tilex);
@@ -985,7 +1006,7 @@ XYZ Terrain::getLighting(float pointx, float pointz)
 
 void Terrain::draw(int layer)
 {
-    if(layer >= max_terriain_layers) return;
+    if(layer >= max_terrain_layers) return;
 
     MICROPROFILE_SCOPEI("Terrain", "draw layer", 0x50c2aa);
     static int i, j;

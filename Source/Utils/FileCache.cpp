@@ -4,6 +4,10 @@
 #include <stdio.h>
 #include <map>
 
+#if PACK_ASSETS
+	#include <physfs.h>
+#endif
+
 namespace FileCache {
 
 struct CacheEntry {

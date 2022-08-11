@@ -41,6 +41,18 @@ Decal::Decal(XYZ _position, decal_type _type, float _opacity, float _rotation, f
     , alivetime(0)
     , brightness(_brightness)
 {
+    if(whichx >= max_terrain_size){
+        whichx = max_terrain_size - 1;
+    }
+    if(whichx < 0){
+        whichx = 0;
+    }
+    if(whichy + 1 >= max_terrain_size){
+        whichy = max_terrain_size - 2;
+    }
+    if(whichy < 0){
+        whichy = 0;
+    }
     float placex, placez;
     placex = (float)whichx * terrain.scale + terrain.scale;
     placez = (float)whichy * terrain.scale;
@@ -79,7 +91,15 @@ Decal::Decal(XYZ _position, decal_type _type, float _opacity, float _rotation, f
 
     vertex[2].x = placex;
     vertex[2].z = placez;
-    vertex[2].y = terrain.heightmap[whichx][whichy + 1] * terrain.scale + .01;
+
+    ASSERT(whichx >= 0);
+    ASSERT(whichx < max_terrain_size);
+
+    ASSERT(whichy >= 0);
+    ASSERT(whichy + 1 < max_terrain_size);
+
+    float hval = terrain.heightmap[whichx][whichy + 1];    
+    vertex[2].y = hval * terrain.scale + .01;
 
     XYZ rot;
     if (rotation) {
