@@ -476,9 +476,8 @@ int Game::DrawGLScene(StereoSide side)
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
         terraintexture.bind();
         terrain.draw(0);
-        terraintexture2.bind();
-        terrain.draw(1);
-
+        //terraintexture2.bind();
+        //terrain.draw(1);
         //terrain.drawdecals();
 }//MICROPROFILE
 
@@ -702,7 +701,7 @@ int Game::DrawGLScene(StereoSide side)
         glDepthMask(0);
 
         //Sprite::Draw();
-        for(int i = 0; i < spritejobs.size(); i++){
+        for(size_t i = 0; i < spritejobs.size(); i++){
             WorkerThread::join(spritejobs[i], true);
         }
         Sprite::Draw();

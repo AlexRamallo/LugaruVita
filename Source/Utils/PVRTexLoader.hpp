@@ -128,7 +128,7 @@ struct PVRHeader {
 	 * Returns true if successful, false if level is out of range
 	 * or texture format is not supported
 	 * */
-	bool getMipMap(int level, PVRMipMapLevel *mipmap) const;
+	bool getMipMap(uint32_t level, PVRMipMapLevel *mipmap) const;
 
 	bool isCompressed() const;
 	GLuint getGLInternalFormat() const;

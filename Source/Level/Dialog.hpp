@@ -22,18 +22,20 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 #define _DIALOG_HPP_
 
 #include "Math/XYZ.hpp"
+#include "Thirdparty/physfs-hpp.h"
 
 #include <stdio.h>
 #include <vector>
+#include <physfs.h>
 #include <json/value.h>
 
 class DialogScene
 {
 public:
-    DialogScene(FILE* tfile);
+    DialogScene(PHYSFS_File* tfile);
     DialogScene(Json::Value);
-    DialogScene(ifstream& ipstream);
-    void save(FILE* tfile);
+    DialogScene(PhysFS::ifstream& ipstream);
+    void save(PHYSFS_File* tfile);
     Json::Value save();
 
     int location;
@@ -53,12 +55,12 @@ public:
 class Dialog
 {
 public:
-    Dialog(FILE* tfile);
+    Dialog(PHYSFS_File* tfile);
     Dialog(Json::Value);
     Dialog(int type, std::string filename);
     void tick(int id);
     void play();
-    void save(FILE* tfile);
+    void save(PHYSFS_File* tfile);
     Json::Value save();
 
     int type;
@@ -67,9 +69,9 @@ public:
     XYZ participantlocation[10];
     float participantyaw[10];
 
-    static void loadDialogs(FILE*);
+    static void loadDialogs(PHYSFS_File*);
     static void loadDialogs(Json::Value);
-    static void saveDialogs(FILE*);
+    static void saveDialogs(PHYSFS_File*);
     static Json::Value saveDialogs();
 
     static bool inDialog() { return (indialogue != -1); }

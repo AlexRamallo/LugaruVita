@@ -101,6 +101,7 @@ def configure(conf):
 		"-ffast-math",
 		"-mtune=cortex-a9",
 		"-mfpu=neon",
+		'-ftree-vectorize'
 	]
 	
 	conf.env.append_unique('CXXFLAGS', "--std=gnu++11")
@@ -112,11 +113,11 @@ def configure(conf):
 		conf.env.append_unique('DEFINES', 'PACK_ASSETS=0')
 
 	if 'release' in conf.cmd:
-		conf.env.append_unique('CFLAGS', '-O0')
+		conf.env.append_unique('CFLAGS', '-O3')
 		#conf.env.append_unique('CFLAGS', '-g')
-		#conf.env.append_unique('CFLAGS', '-flto')
 		conf.env.append_unique('DEFINES', 'MICROPROFILE_WEBSERVER=0');
 		conf.env.append_unique('DEFINES', 'NDEBUG=1');
+		conf.env.append_unique('CXXFLAGS', '-fno-exceptions')
 	else:
 		conf.env.append_unique('CXXFLAGS', '-fno-exceptions')
 		conf.env.append_unique('CFLAGS', '-g')
@@ -144,7 +145,7 @@ def build(bld):
 	bld.recurse("vitagl")
 
 	defs = [
-		"DATA_DIR=\"app0:Data\"",
+		"DATA_DIR=\"/Data\"",
     	"PLATFORM_VITA=1",
     	"PLATFORM_UNIX=1",
     	"BinIO_STDINT_HEADER=<stdint.h>",
@@ -189,7 +190,7 @@ def build(bld):
 		vita_title_id = bld.env.PROJECT_TITLEID,
 		vita_title_string = bld.env.PROJECT_NAME,
 		assets = bld.path.find_node("Data").get_bld().change_ext(".zip"),
-		strip = 'release' in bld.variant
+		strip = False# 'release' in bld.variant
 	)
 
 	if bld.is_install > 0:
@@ -197,8 +198,7 @@ def build(bld):
 		if ip == None:
 			bld.fatal('Must provide device address using --PSVITAIP option')
 
-		assets = bld.path.find_node("Data").get_bld()
-		assets.mkdir()
+		assets = bld.path.get_bld().find_node("Data.zip")
 
 		if not bld.options.SKIP_VPK:
 			bld.vita_upload_vpk(bld.env.PROJECT_TITLEID, bld.env.PROJECT_NAME, ip)
@@ -285,7 +285,7 @@ def build_assets(bld):
 		def write_file_to_package(task):
 			task.no_errcheck_out = True
 			with ziplock:
-				task.exec_command(f"{task.env.ZIP[0]} -0ur {task.generator.datazip} {task.inputs[0]}")
+				task.exec_command(task.env.ZIP + ['-0ur', task.generator.datazip.abspath(), task.inputs[0].path_from(task.generator.datazip.parent)])
 		#zip each file individually for fast partial rebuilds
 		for file in datafiles:
 			bld(

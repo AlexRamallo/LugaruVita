@@ -561,7 +561,7 @@ void Object::ComputeRadius()
     radius = fast_sqrt(maxdistance);
 }
 
-void Object::LoadObjectsFromFile(FILE* tfile, bool skip)
+void Object::LoadObjectsFromFile(PHYSFS_File* tfile, bool skip)
 {
     MICROPROFILE_SCOPEI("Object", "LoadObjectsFromFile", 0x008fff);
     int numobjects;

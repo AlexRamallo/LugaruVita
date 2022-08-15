@@ -25,6 +25,7 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 #include <map>
 #include <string>
 #include <vector>
+#include <physfs.h>
 
 struct CampaignProgress
 {
@@ -57,7 +58,7 @@ public:
     static Account& active();
 
     Account(const std::string& name = "");
-    Account(FILE* tfile);
+    Account(PHYSFS_File* tfile);
 
     void endGame();
     void winCampaignLevel(int choice, int score, float time);
@@ -134,7 +135,7 @@ private:
     static std::vector<Account> accounts;
     static int i_active;
 
-    void save(FILE* tfile);
+    void save(PHYSFS_File* tfile);
 
     int difficulty;
     int progress; // progress in challenge levels

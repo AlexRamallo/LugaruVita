@@ -23,6 +23,7 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 #include "Math/XYZ.hpp"
 
 #include <vector>
+#include <physfs.h>
 
 enum anim_attack_type
 {
@@ -78,10 +79,10 @@ struct AnimationFrameJointInfo
 
 struct AnimationFrame
 {
-    void loadBaseInfo(FILE* tfile);
-    void loadTwist2(FILE* tfile);
-    void loadLabel(FILE* tfile);
-    void loadWeaponTarget(FILE* tfile);
+    void loadBaseInfo(PHYSFS_File* tfile);
+    void loadTwist2(PHYSFS_File* tfile);
+    void loadLabel(PHYSFS_File* tfile);
+    void loadWeaponTarget(PHYSFS_File* tfile);
 
     std::vector<AnimationFrameJointInfo> joints;
     XYZ forward;

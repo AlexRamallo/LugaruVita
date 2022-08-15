@@ -39,7 +39,7 @@ Joint::Joint()
 {
 }
 
-void Joint::load(FILE* tfile, std::vector<Joint>& joints)
+void Joint::load(PHYSFS_File* tfile, std::vector<Joint>& joints)
 {
     int parentID;
 

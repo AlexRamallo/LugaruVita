@@ -47,14 +47,14 @@ class ImageRec
 public:
 	bool is_pvr;
 	GLubyte* data; // Image Data (Up To 32 Bits)
-	union {
-		struct {
+	union infounion {
+		struct nonpvr {
 			GLuint sizeX;
 			GLuint sizeY;
 			GLuint bpp;    // Image Color Depth In Bits Per Pixel.
-		};
+		} img;
 		PVRHeader pvr_header;
-	};
+	} info;
 
 	GLuint getWidth();
 	GLuint getHeight();

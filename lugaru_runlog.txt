@@ -1,0 +1,1944 @@
+--------------------------------------------------------------------------
+Lugaru HD: The Rabbit's Foot, by Wolfire Games and the OSS Lugaru project.
+
+Licensed under the GPL 2.0+ and CC-BY-SA 3.0 and 4.0 licenses.
+More information, updates and bug reports at http://osslugaru.gitlab.io
+
+Version 1.3-dev [Vita Homebrew] -- 1 build
+--------------------------------------------------------------------------
+
+InitGame A
+Account::loadFile(/user/users)
+Loading 1 accounts
+
+Loading account 0/1
+
+InitGame B
+InitGame C
+FadeLoadingScreen...
+	E
+	F
+InitGame D
+Loading font texture... Textures/Font.png
+Loading PNG /Data/Textures/Font.png
+InitGame E
+InitGame F
+Loading font texture... Textures/FontMono.png
+Loading PNG /Data/Textures/FontMono.png
+InitGame G
+	E
+	F
+InitGame H
+Initializing sound system...
+Loading PVR /Data/Textures/Cursor.png
+Loaded cursor!
+Loading PVR /Data/Textures/MapCircle.png
+Loading PVR /Data/Textures/MapBox.png
+Loading PVR /Data/Textures/MapArrow.png
+Loading PVR /Data/Textures/Lugaru.png
+Loading PVR /Data/Textures/NewGame.png
+Loading PVR /Data/Textures/Options.png
+Loading PVR /Data/Textures/Quit.png
+Loading PVR /Data/Textures/Eyelid.png
+Loading PVR /Data/Textures/Resume.png
+Loading PVR /Data/Textures/EndGame.png
+Loaded all menu textures
+	E
+	F
+Menu::Load()
+Loading all animations...
+DECLARE_ANIM(0, Run, 1, 0)
+DECLARE_ANIM(1, Idle, 1, 0)
+DECLARE_ANIM(2, Stop, 1, 0)
+DECLARE_ANIM(3, JumpUp, 2, 0)
+DECLARE_ANIM(4, JumpDown, 2, 0)
+DECLARE_ANIM(5, Landing, 0, 0)
+DECLARE_ANIM(6, LandHard, 0, 0)
+DECLARE_ANIM(7, Climb, 0, 0)
+DECLARE_ANIM(8, HangOn, 0, 0)
+DECLARE_ANIM(9, SpinKick, 1, 1)
+DECLARE_ANIM(10, GetUpFromFront, 0, 0)
+DECLARE_ANIM(11, GetUpFromBack, 0, 0)
+DECLARE_ANIM(12, Crouch, 0, 0)
+DECLARE_ANIM(13, Sneak, 0, 0)
+DECLARE_ANIM(14, Roll, 0, 0)
+DECLARE_ANIM(15, Flip, 2, 0)
+DECLARE_ANIM(16, Flip, 2, 0)
+DECLARE_ANIM(17, SpinKickCaught, 1, 2)
+DECLARE_ANIM(18, SpinKickCatch, 1, 3)
+DECLARE_ANIM(19, LowKick, 1, 1)
+DECLARE_ANIM(20, Sweep, 0, 1)
+DECLARE_ANIM(21, SweepCaught, 0, 2)
+DECLARE_ANIM(22, SweepCatch, 1, 3)
+DECLARE_ANIM(23, RabbitKick, 1, 1)
+DECLARE_ANIM(24, RabbitKickCaught, 1, 2)
+DECLARE_ANIM(25, RabbitKickCatch, 0, 3)
+DECLARE_ANIM(26, Upunch, 1, 1)
+DECLARE_ANIM(27, StaggerBackHigh, 1, 0)
+DECLARE_ANIM(28, UpunchCaught, 1, 2)
+DECLARE_ANIM(29, UpunchCatch, 1, 3)
+DECLARE_ANIM(30, HurtIdle, 1, 0)
+DECLARE_ANIM(31, BackHandspring, 1, 0)
+DECLARE_ANIM(32, FightIdle, 1, 0)
+DECLARE_ANIM(33, Walk, 1, 0)
+DECLARE_ANIM(34, FightSideStep, 1, 0)
+DECLARE_ANIM(35, Kill, 1, 1)
+DECLARE_ANIM(36, SneakAttack, 1, 3)
+DECLARE_ANIM(37, SneakAttacked, 1, 2)
+DECLARE_ANIM(38, DrawRight, 1, 0)
+DECLARE_ANIM(39, SlashStart, 1, 1)
+DECLARE_ANIM(40, CrouchDrawRight, 0, 0)
+DECLARE_ANIM(41, CrouchStab, 0, 1)
+DECLARE_ANIM(42, SlashFollow, 1, 3)
+DECLARE_ANIM(43, SlashFollowed, 1, 2)
+DECLARE_ANIM(44, KnifeThrow, 1, 1)
+DECLARE_ANIM(45, RemoveKnife, 1, 0)
+DECLARE_ANIM(46, CrouchRemoveKnife, 0, 0)
+DECLARE_ANIM(47, JumpCaught, 1, 2)
+DECLARE_ANIM(48, JumpCatch, 1, 3)
+DECLARE_ANIM(49, StaggerBackHard, 1, 0)
+DECLARE_ANIM(50, DropKick, 1, 1)
+DECLARE_ANIM(51, WindUpPunch, 1, 1)
+DECLARE_ANIM(52, WindUpPunchBlocked, 1, 1)
+DECLARE_ANIM(53, BlockHighLeft, 1, 1)
+DECLARE_ANIM(54, BlockHighLeftStrike, 1, 1)
+DECLARE_ANIM(55, BackFlip, 2, 0)
+DECLARE_ANIM(56, WallJumpBack, 2, 0)
+DECLARE_ANIM(57, WallJumpFront, 2, 0)
+DECLARE_ANIM(58, RightFlip, 2, 0)
+DECLARE_ANIM(59, WallJumpRight, 2, 0)
+DECLARE_ANIM(60, LeftFlip, 2, 0)
+DECLARE_ANIM(61, WallJumpLeft, 2, 0)
+DECLARE_ANIM(62, WallJumpRightKick, 2, 0)
+DECLARE_ANIM(63, WallJumpLeftKick, 2, 0)
+DECLARE_ANIM(64, KnifeFightIdle, 1, 0)
+DECLARE_ANIM(65, KnifeSneakAttack, 1, 3)
+DECLARE_ANIM(66, KnifeSneakAttacked, 1, 2)
+DECLARE_ANIM(67, SwordFightIdle, 1, 0)
+DECLARE_ANIM(68, DrawLeft, 1, 0)
+DECLARE_ANIM(69, SwordSlash, 1, 1)
+DECLARE_ANIM(70, SwordGroundStab, 0, 1)
+DECLARE_ANIM(71, DodgeBack, 1, 0)
+DECLARE_ANIM(72, SwordSneakAttack, 1, 3)
+DECLARE_ANIM(73, SwordSneakAttacked, 1, 2)
+DECLARE_ANIM(74, SwordSlashCaught, 1, 2)
+DECLARE_ANIM(75, SwordSlashCatch, 1, 3)
+DECLARE_ANIM(76, KnifeSlashCaught, 1, 2)
+DECLARE_ANIM(77, KnifeSlashCatch, 1, 3)
+DECLARE_ANIM(78, SwordFightIdleBoth, 1, 0)
+DECLARE_ANIM(79, SwordUprightParry, 1, 1)
+DECLARE_ANIM(80, SwordSlashParried, 1, 1)
+DECLARE_ANIM(81, WolfIdle, 1, 0)
+DECLARE_ANIM(82, WolfCrouch, 0, 0)
+DECLARE_ANIM(83, WolfLanding, 0, 0)
+DECLARE_ANIM(84, WolfLandHard, 0, 0)
+DECLARE_ANIM(85, WolfRun, 1, 0)
+DECLARE_ANIM(86, WolfRunning, 1, 0)
+DECLARE_ANIM(87, RabbitRunning, 1, 0)
+DECLARE_ANIM(88, WolfStop, 1, 0)
+DECLARE_ANIM(89, RabbitTackle, 1, 0)
+DECLARE_ANIM(90, RabbitTackling, 1, 3)
+DECLARE_ANIM(91, RabbitTackledBack, 1, 2)
+DECLARE_ANIM(92, RabbitTackledFront, 1, 2)
+DECLARE_ANIM(93, WolfSlap, 1, 1)
+DECLARE_ANIM(94, StaffHit, 1, 1)
+DECLARE_ANIM(95, StaffGroundSmash, 0, 1)
+DECLARE_ANIM(96, SpinWhack, 1, 1)
+DECLARE_ANIM(97, StaffHitCaught, 1, 2)
+DECLARE_ANIM(98, StaffHitCatch, 1, 3)
+DECLARE_ANIM(99, SpinWhackCaught, 1, 2)
+DECLARE_ANIM(100, SpinWhackCatch, 1, 3)
+DECLARE_ANIM(101, Sit, 0, 0)
+DECLARE_ANIM(102, Sleep, 0, 0)
+DECLARE_ANIM(103, TalkIdle, 1, 0)
+DECLARE_ANIM(104, Dying, 0, 0)
+DECLARE_ANIM(105, Dead1, 0, 0)
+DECLARE_ANIM(106, Dead2, 0, 0)
+DECLARE_ANIM(107, Dead3, 0, 0)
+DECLARE_ANIM(108, Dead4, 0, 0)
+DECLARE_ANIM(109, Tempanim, 0, 0)
+Loading PersonType...
+Creating Player...
+Player(INIT) patch X: 0	Z: 0
+InitGame Done!!
+Spawning 2 worker threads
+<<NEW GAME>>
+LoadCampaign called! cur campaign: empire
+Loading PVR /Data/Textures/empire/World.png
+<<Game Menu Selected(37)>>
+Game::LoadStuff()
+Loading PVR /Data/Textures/Fire.jpg
+Loading font texture... Textures/Font.png
+Loading PNG /Data/Textures/Font.png
+Loading font texture... Textures/FontMono.png
+Loading PNG /Data/Textures/FontMono.png
+Loading PVR /Data/Textures/Knife.png
+Loading PVR /Data/Textures/BloodKnife.png
+Loading PVR /Data/Textures/BloodKnifeLight.png
+Loading PVR /Data/Textures/Sword.jpg
+Loading PVR /Data/Textures/SwordBlood.jpg
+Loading PVR /Data/Textures/SwordBloodLight.jpg
+Loading model...Models/ThrowingKnife.solid
+Loading model...Models/ThrowingKnife.solid
+Loading PVR /Data/Textures/Staff.jpg
+Loading model...Models/Sword.solid
+Loading model...Models/Sword.solid
+Loading model...Models/Staff.solid
+Loading model...Models/Staff.solid
+Loading model...Models/Hawk.solid
+Loading model...Models/Hawk.solid
+Loading PVR /Data/Textures/Shadow.png
+Loading PVR /Data/Textures/Blood.png
+Loading PVR /Data/Textures/Break.png
+Loading PVR /Data/Textures/Blood.png
+Loading PVR /Data/Textures/Footprint.png
+Loading PVR /Data/Textures/Bodyprint.png
+Loading model...Models/Eye.solid
+Loading model...Models/Eye.solid
+Loading PVR /Data/Textures/Hawk.png
+Loading PVR /Data/Textures/Cloud.png
+Loading PVR /Data/Textures/CloudImpact.png
+Loading PVR /Data/Textures/BloodParticle.png
+Loading PVR /Data/Textures/SnowFlake.png
+Loading PVR /Data/Textures/Flame.png
+Loading PVR /Data/Textures/BloodFlame.png
+Loading PVR /Data/Textures/Smoke.png
+Loading PVR /Data/Textures/Shine.png
+Loading PVR /Data/Textures/Splinter.png
+Loading PVR /Data/Textures/Leaf.png
+Loading PVR /Data/Textures/Tooth.png
+Loading model...Models/Cornea.solid
+Loading model...Models/Cornea.solid
+Loading model...Models/Iris.solid
+Loading model...Models/Iris.solid
+Loading (S)...Textures/WolfBloodFur.png
+Loading PVR /Data/Textures/WolfBloodFur.png
+Loading (S)...Textures/BloodFur.png
+Loading PVR /Data/Textures/BloodFur.png
+Loading json level... jendraz31.json
+ Setting environment...
+Loading terrain texture /Data/Textures/HeightMap.png
+Loading PVR /Data/Textures/Tree.png
+Loading PVR /Data/Textures/Bush.png
+Loading PNG /Data/Textures/HeightMap.png
+Loading PVR /Data/Textures/Boulder.jpg
+Loading PVR /Data/Textures/GrassBox.jpg
+Loading PVR /Data/Textures/GrassDirt.jpg
+Loading PVR /Data/Textures/MossRock.jpg
+Loading PVR /Data/Textures/Skybox(grass)/Front.jpg
+Loading PVR /Data/Textures/Skybox(grass)/Left.jpg
+Loading PVR /Data/Textures/Skybox(grass)/Back.jpg
+Loading PVR /Data/Textures/Skybox(grass)/Right.jpg
+Loading PVR /Data/Textures/Skybox(grass)/Up.jpg
+Loading PVR /Data/Textures/Skybox(grass)/Down.jpg
+Loading decal... /Data/Models/Wall.solid
+Loading decal... /Data/Models/Wall.solid
+Loading decal... /Data/Models/Wall.solid
+Loading decal... /Data/Models/Weird.solid
+Loading decal... /Data/Models/Weird.solid
+Loading decal... /Data/Models/Wall.solid
+Loading decal... /Data/Models/Wall.solid
+Loading decal... /Data/Models/Wall.solid
+Loading decal... /Data/Models/Wall.solid
+Loading decal... /Data/Models/Weird.solid
+Loading decal... /Data/Models/Weird.solid
+Loading decal... /Data/Models/Weird.solid
+Loading decal... /Data/Models/Wall.solid
+Loading decal... /Data/Models/Wall.solid
+Loading decal... /Data/Models/Wall.solid
+Loading decal... /Data/Models/Wall.solid
+Loading decal... /Data/Models/Wall.solid
+Loading decal... /Data/Models/Wall.solid
+Loading decal... /Data/Models/Wall.solid
+Loading decal... /Data/Models/Wall.solid
+Loading decal... /Data/Models/Chimney.solid
+Loading decal... /Data/Models/Chimney.solid
+Loading decal... /Data/Models/Chimney.solid
+Loading decal... /Data/Models/Box.solid
+Loading decal... /Data/Models/Box.solid
+Loading decal... /Data/Models/Box.solid
+Loading decal... /Data/Models/Box.solid
+Loading decal... /Data/Models/Box.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading decal... /Data/Models/Rock.solid
+Loading decal... /Data/Models/Rock.solid
+Loading decal... /Data/Models/Rock.solid
+Loading decal... /Data/Models/Rock.solid
+Loading decal... /Data/Models/Rock.solid
+Loading decal... /Data/Models/Rock.solid
+Loading decal... /Data/Models/Rock.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/Bush.solid
+Loading model...Models/Bush.solid
+Loading model...Models/Bush.solid
+Loading model...Models/Bush.solid
+Loading model...Models/Bush.solid
+Loading decal... /Data/Models/Rock.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading decal... /Data/Models/Rock.solid
+Loading decal... /Data/Models/Rock.solid
+Loading model...Models/Bush.solid
+Loading model...Models/Bush.solid
+Loading model...Models/Bush.solid
+Loading model...Models/Bush.solid
+Loading model...Models/Bush.solid
+Loading model...Models/Bush.solid
+Loading model...Models/Bush.solid
+Loading model...Models/Body.solid
+Loading model...Models/Body2.solid
+Loading model...Models/Body2.solid
+Loading model...Models/Body.solid
+Loading model...Models/Body3.solid
+Loading model...Models/Body3.solid
+Loading model...Models/Body4.solid
+Loading model...Models/Body4.solid
+Loading model...Models/Body5.solid
+Loading model...Models/Body6.solid
+Loading model...Models/Body6.solid
+Loading model...Models/Body5.solid
+Loading model...Models/Body7.solid
+Loading model...Models/Body.solid
+Loading model...Models/BodyLow.solid
+Loading model...Models/BodyLow.solid
+Loading model...Models/Body7.solid
+Loading model...Models/BodyLow.solid
+Loading model...Models/BodyLow.solid
+Loading model...Models/Belt.solid
+Loading model...Models/Belt.solid
+Loading model...Models/Belt.solid
+Loading model...Models/Belt.solid
+Loading PVR /Data/Textures/FurBrown.jpg
+Loading PVR /Data/Textures/Fur.jpg
+Loading PVR /Data/Textures/FancyPantsCamoArctic.png
+Loading PVR /Data/Textures/HeadBand.png
+Loading model...Models/Body.solid
+Loading model...Models/Body2.solid
+Loading PVR /Data/Textures/LeatherArmor.png
+Loading model...Models/Body3.solid
+Loading model...Models/Body4.solid
+Loading model...Models/Body5.solid
+Loading model...Models/Body6.solid
+Loading model...Models/Body7.solid
+Loading model...Models/Body.solid
+Loading model...Models/BodyLow.solid
+Loading model...Models/BodyLow.solid
+Loading model...Models/Belt.solid
+Loading model...Models/Belt.solid
+Loading PVR /Data/Textures/FurWhite.jpg
+Loading model...Models/Body.solid
+Loading PVR /Data/Textures/FancyPantsCamo.png
+Loading PVR /Data/Textures/Shirt.png
+Loading model...Models/Body2.solid
+Loading model...Models/Body3.solid
+Loading model...Models/Body4.solid
+Loading model...Models/Body5.solid
+Loading model...Models/Body6.solid
+Loading model...Models/Body7.solid
+Loading model...Models/Body.solid
+Loading model...Models/BodyLow.solid
+Loading model...Models/BodyLow.solid
+Loading model...Models/Belt.solid
+Loading model...Models/Belt.solid
+Loading PVR /Data/Textures/FurBlack.jpg
+Loading model...Models/Body.solid
+Loading model...Models/Body2.solid
+Loading model...Models/Body3.solid
+Loading model...Models/Body4.solid
+Loading model...Models/Body5.solid
+Loading model...Models/Body6.solid
+Loading model...Models/Body7.solid
+Loading model...Models/Body.solid
+Loading model...Models/BodyLow.solid
+Loading model...Models/BodyLow.solid
+Loading model...Models/Belt.solid
+Loading model...Models/Belt.solid
+Loading PVR /Data/Textures/FurOtter.jpg
+Loading model...Models/Body.solid
+Loading model...Models/Body2.solid
+Loading model...Models/Body3.solid
+Loading model...Models/Body4.solid
+Loading model...Models/Body5.solid
+Loading model...Models/Body6.solid
+Loading model...Models/Body7.solid
+Loading model...Models/Body.solid
+Loading model...Models/BodyLow.solid
+Loading model...Models/BodyLow.solid
+Loading model...Models/Belt.solid
+Loading model...Models/Belt.solid
+Loading PVR /Data/Textures/FurBlack.jpg
+Loading model...Models/Body.solid
+Loading model...Models/Body2.solid
+Loading model...Models/Body3.solid
+Loading model...Models/Body4.solid
+Loading model...Models/Body5.solid
+Loading model...Models/Body6.solid
+Loading model...Models/Body7.solid
+Loading model...Models/Body.solid
+Loading model...Models/BodyLow.solid
+Loading model...Models/BodyLow.solid
+Loading model...Models/Belt.solid
+Loading model...Models/Belt.solid
+Loading PVR /Data/Textures/FurOpal.jpg
+Loading model...Models/Body.solid
+Loading model...Models/Body2.solid
+Loading model...Models/Body3.solid
+Loading model...Models/Body4.solid
+Loading model...Models/Body5.solid
+Loading model...Models/Body6.solid
+Loading model...Models/Body7.solid
+Loading model...Models/Body.solid
+Loading model...Models/BodyLow.solid
+Loading model...Models/BodyLow.solid
+Loading model...Models/Belt.solid
+Loading model...Models/Belt.solid
+Loading PVR /Data/Textures/FurOpal.jpg
+Loading model...Models/Body.solid
+Loading model...Models/Body2.solid
+Loading model...Models/Body3.solid
+Loading model...Models/Body4.solid
+Loading model...Models/Body5.solid
+Loading model...Models/Body6.solid
+Loading model...Models/Body7.solid
+Loading model...Models/Body.solid
+Loading model...Models/BodyLow.solid
+Loading model...Models/BodyLow.solid
+Loading model...Models/Belt.solid
+Loading model...Models/Belt.solid
+Loading PVR /Data/Textures/FurChocolate.jpg
+Starting background music...
+Loading json level... jendraz31.json
+Loading decal... /Data/Models/Wall.solid
+Loading decal... /Data/Models/Wall.solid
+Loading decal... /Data/Models/Weird.solid
+Loading decal... /Data/Models/Wall.solid
+Loading decal... /Data/Models/Wall.solid
+Loading decal... /Data/Models/Wall.solid
+Loading decal... /Data/Models/Wall.solid
+Loading decal... /Data/Models/Weird.solid
+Loading decal... /Data/Models/Weird.solid
+Loading decal... /Data/Models/Weird.solid
+Loading decal... /Data/Models/Wall.solid
+Loading decal... /Data/Models/Wall.solid
+Loading decal... /Data/Models/Wall.solid
+Loading decal... /Data/Models/Wall.solid
+Loading decal... /Data/Models/Wall.solid
+Loading decal... /Data/Models/Wall.solid
+Loading decal... /Data/Models/Wall.solid
+Loading decal... /Data/Models/Wall.solid
+Loading decal... /Data/Models/Chimney.solid
+Loading decal... /Data/Models/Chimney.solid
+Loading decal... /Data/Models/Box.solid
+Loading decal... /Data/Models/Box.solid
+Loading decal... /Data/Models/Box.solid
+Loading decal... /Data/Models/Box.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading decal... /Data/Models/Rock.solid
+Loading decal... /Data/Models/Rock.solid
+Loading decal... /Data/Models/Rock.solid
+Loading decal... /Data/Models/Rock.solid
+Loading decal... /Data/Models/Rock.solid
+Loading decal... /Data/Models/Rock.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/Bush.solid
+Loading model...Models/Bush.solid
+Loading model...Models/Bush.solid
+Loading model...Models/Bush.solid
+Loading decal... /Data/Models/Rock.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading decal... /Data/Models/Rock.solid
+Loading decal... /Data/Models/Rock.solid
+Loading model...Models/Bush.solid
+Loading model...Models/Bush.solid
+Loading model...Models/Bush.solid
+Loading model...Models/Bush.solid
+Loading model...Models/Bush.solid
+Loading model...Models/Bush.solid
+Loading model...Models/Bush.solid
+Loading model...Models/Body.solid
+Loading model...Models/Body2.solid
+Loading model...Models/Body3.solid
+Loading model...Models/Body4.solid
+Loading model...Models/Body5.solid
+Loading model...Models/Body6.solid
+Loading model...Models/Body7.solid
+Loading model...Models/Body.solid
+Loading model...Models/BodyLow.solid
+Loading model...Models/BodyLow.solid
+Loading model...Models/Belt.solid
+Loading model...Models/Belt.solid
+Loading PVR /Data/Textures/FurBrown.jpg
+Loading PVR /Data/Textures/Fur.jpg
+Loading PVR /Data/Textures/FancyPantsCamoArctic.png
+Loading PVR /Data/Textures/HeadBand.png
+Loading model...Models/Body.solid
+Loading PVR /Data/Textures/LeatherArmor.png
+Loading model...Models/Body2.solid
+Loading model...Models/Body3.solid
+Loading model...Models/Body4.solid
+Loading model...Models/Body5.solid
+Loading model...Models/Body6.solid
+Loading model...Models/Body7.solid
+Loading model...Models/Body.solid
+Loading model...Models/BodyLow.solid
+Loading model...Models/BodyLow.solid
+Loading model...Models/Belt.solid
+Loading model...Models/Belt.solid
+Loading PVR /Data/Textures/FurWhite.jpg
+Loading model...Models/Body.solid
+Loading PVR /Data/Textures/FancyPantsCamo.png
+Loading PVR /Data/Textures/Shirt.png
+Loading model...Models/Body2.solid
+Loading model...Models/Body3.solid
+Loading model...Models/Body4.solid
+Loading model...Models/Body5.solid
+Loading model...Models/Body7.solid
+Loading model...Models/Body6.solid
+Loading model...Models/Body.solid
+Loading model...Models/BodyLow.solid
+Loading model...Models/BodyLow.solid
+Loading model...Models/Belt.solid
+Loading model...Models/Belt.solid
+Loading PVR /Data/Textures/FurBlack.jpg
+Loading model...Models/Body.solid
+Loading model...Models/Body2.solid
+Loading model...Models/Body3.solid
+Loading model...Models/Body4.solid
+Loading model...Models/Body5.solid
+Loading model...Models/Body6.solid
+Loading model...Models/Body7.solid
+Loading model...Models/Body.solid
+Loading model...Models/BodyLow.solid
+Loading model...Models/BodyLow.solid
+Loading model...Models/Belt.solid
+Loading model...Models/Belt.solid
+Loading PVR /Data/Textures/FurOtter.jpg
+Loading model...Models/Body.solid
+Loading model...Models/Body2.solid
+Loading model...Models/Body3.solid
+Loading model...Models/Body4.solid
+Loading model...Models/Body5.solid
+Loading model...Models/Body6.solid
+Loading model...Models/Body7.solid
+Loading model...Models/Body.solid
+Loading model...Models/BodyLow.solid
+Loading model...Models/BodyLow.solid
+Loading model...Models/Belt.solid
+Loading model...Models/Belt.solid
+Loading PVR /Data/Textures/FurBlack.jpg
+Loading model...Models/Body.solid
+Loading model...Models/Body2.solid
+Loading model...Models/Body3.solid
+Loading model...Models/Body4.solid
+Loading model...Models/Body5.solid
+Loading model...Models/Body6.solid
+Loading model...Models/Body7.solid
+Loading model...Models/Body.solid
+Loading model...Models/BodyLow.solid
+Loading model...Models/BodyLow.solid
+Loading model...Models/Belt.solid
+Loading model...Models/Belt.solid
+Loading PVR /Data/Textures/FurOpal.jpg
+Loading model...Models/Body.solid
+Loading model...Models/Body2.solid
+Loading model...Models/Body3.solid
+Loading model...Models/Body4.solid
+Loading model...Models/Body5.solid
+Loading model...Models/Body6.solid
+Loading model...Models/Body7.solid
+Loading model...Models/Body.solid
+Loading model...Models/BodyLow.solid
+Loading model...Models/BodyLow.solid
+Loading model...Models/Belt.solid
+Loading model...Models/Belt.solid
+Loading PVR /Data/Textures/FurOpal.jpg
+Loading model...Models/Body.solid
+Loading model...Models/Body2.solid
+Loading model...Models/Body3.solid
+Loading model...Models/Body4.solid
+Loading model...Models/Body5.solid
+Loading model...Models/Body6.solid
+Loading model...Models/Body7.solid
+Loading model...Models/Body.solid
+Loading model...Models/BodyLow.solid
+Loading model...Models/BodyLow.solid
+Loading model...Models/Belt.solid
+Loading model...Models/Belt.solid
+Loading PVR /Data/Textures/FurChocolate.jpg
+Starting background music...
+Account::saveFile(/user/users)
+writing account 1/1 (Alex)
+
+Account::save
+LoadCampaign called! cur campaign: empire
+Loading PVR /Data/Textures/empire/World.png
+LoadCampaign called! cur campaign: empire
+Loading PVR /Data/Textures/empire/World.png
+<<Game Menu Selected(38)>>
+Loading json level... jendraz32.json
+Loading decal... /Data/Models/Chimney.solid
+Loading decal... /Data/Models/Platform.solid
+Loading decal... /Data/Models/Platform.solid
+Loading decal... /Data/Models/Tunnel.solid
+Loading decal... /Data/Models/Tunnel.solid
+Loading decal... /Data/Models/Tunnel.solid
+Loading decal... /Data/Models/Platform.solid
+Loading decal... /Data/Models/Chimney.solid
+Loading decal... /Data/Models/Chimney.solid
+Loading decal... /Data/Models/Chimney.solid
+Loading decal... /Data/Models/Chimney.solid
+Loading decal... /Data/Models/Chimney.solid
+Loading decal... /Data/Models/Chimney.solid
+Loading decal... /Data/Models/Chimney.solid
+Loading decal... /Data/Models/Chimney.solid
+Loading decal... /Data/Models/Chimney.solid
+Loading decal... /Data/Models/Chimney.solid
+Loading decal... /Data/Models/Chimney.solid
+Loading decal... /Data/Models/Chimney.solid
+Loading model...Models/Body.solid
+Loading model...Models/Body2.solid
+Loading model...Models/Body3.solid
+Loading model...Models/Body4.solid
+Loading model...Models/Body5.solid
+Loading model...Models/Body6.solid
+Loading model...Models/Body7.solid
+Loading model...Models/Body.solid
+Loading model...Models/BodyLow.solid
+Loading model...Models/BodyLow.solid
+Loading model...Models/Belt.solid
+Loading model...Models/Belt.solid
+Loading PVR /Data/Textures/FurBrown.jpg
+Loading PVR /Data/Textures/Fur2.png
+Loading PVR /Data/Textures/LeatherArmor.png
+Loading PVR /Data/Textures/FootWrap.png
+Loading model...Models/Body.solid
+Loading PVR /Data/Textures/LeatherWristRight.png
+Loading PVR /Data/Textures/Pants.png
+Loading model...Models/Body2.solid
+Loading model...Models/Body3.solid
+Loading model...Models/Body4.solid
+Loading model...Models/Body5.solid
+Loading model...Models/Body6.solid
+Loading model...Models/Body7.solid
+Loading model...Models/Body.solid
+Loading model...Models/BodyLow.solid
+Loading model...Models/BodyLow.solid
+Loading model...Models/Belt.solid
+Loading model...Models/Belt.solid
+Loading PVR /Data/Textures/FurBlack.jpg
+Loading PVR /Data/Textures/HeadBand.png
+Loading PVR /Data/Textures/FancyPantsCamo.png
+Loading PVR /Data/Textures/Shirt.png
+Loading model...Models/Body.solid
+Loading model...Models/Body2.solid
+Loading model...Models/Body3.solid
+Loading model...Models/Body4.solid
+Loading model...Models/Body5.solid
+Loading model...Models/Body6.solid
+Loading model...Models/Body7.solid
+Loading model...Models/Body.solid
+Loading model...Models/BodyLow.solid
+Loading model...Models/BodyLow.solid
+Loading model...Models/Belt.solid
+Loading model...Models/Belt.solid
+Loading PVR /Data/Textures/FurWhite.jpg
+Loading model...Models/Body.solid
+Loading model...Models/Body2.solid
+Loading model...Models/Body3.solid
+Loading model...Models/Body4.solid
+Loading model...Models/Body5.solid
+Loading model...Models/Body6.solid
+Loading model...Models/Body7.solid
+Loading model...Models/Body.solid
+Loading model...Models/BodyLow.solid
+Loading model...Models/BodyLow.solid
+Loading model...Models/Belt.solid
+Loading model...Models/Belt.solid
+Loading PVR /Data/Textures/FurOpal.jpg
+Loading model...Models/Body.solid
+Loading model...Models/Body2.solid
+Loading model...Models/Body3.solid
+Loading model...Models/Body4.solid
+Loading model...Models/Body5.solid
+Loading model...Models/Body6.solid
+Loading model...Models/Body7.solid
+Loading model...Models/Body.solid
+Loading model...Models/BodyLow.solid
+Loading model...Models/BodyLow.solid
+Loading model...Models/Belt.solid
+Loading model...Models/Belt.solid
+Loading PVR /Data/Textures/FurSable.jpg
+Loading model...Models/Body.solid
+Loading model...Models/Body2.solid
+Loading model...Models/Body3.solid
+Loading model...Models/Body4.solid
+Loading model...Models/Body5.solid
+Loading model...Models/Body6.solid
+Loading model...Models/Body7.solid
+Loading model...Models/Body.solid
+Loading model...Models/BodyLow.solid
+Loading model...Models/BodyLow.solid
+Loading model...Models/Belt.solid
+Loading model...Models/Belt.solid
+Loading PVR /Data/Textures/FurOtter.jpg
+Loading model...Models/Body.solid
+Loading model...Models/Body2.solid
+Loading model...Models/Body3.solid
+Loading model...Models/Body4.solid
+Loading model...Models/Body5.solid
+Loading model...Models/Body6.solid
+Loading model...Models/Body7.solid
+Loading model...Models/Body.solid
+Loading model...Models/BodyLow.solid
+Loading model...Models/BodyLow.solid
+Loading model...Models/Belt.solid
+Loading model...Models/Belt.solid
+Loading PVR /Data/Textures/FurChocolate.jpg
+Loading model...Models/Body.solid
+Loading model...Models/Body2.solid
+Loading model...Models/Body3.solid
+Loading model...Models/Body4.solid
+Loading model...Models/Body5.solid
+Loading model...Models/Body6.solid
+Loading model...Models/Body7.solid
+Loading model...Models/Body.solid
+Loading model...Models/BodyLow.solid
+Loading model...Models/BodyLow.solid
+Loading model...Models/Belt.solid
+Loading model...Models/Belt.solid
+Loading PVR /Data/Textures/FurChocolate.jpg
+ERROR: found compressed clothing texture (/Data/Textures/Fur2.png)
+Starting background music...
+Loading json level... jendraz32.json
+Loading decal... /Data/Models/Chimney.solid
+Loading decal... /Data/Models/Platform.solid
+Loading decal... /Data/Models/Tunnel.solid
+Loading decal... /Data/Models/Tunnel.solid
+Loading decal... /Data/Models/Platform.solid
+Loading decal... /Data/Models/Chimney.solid
+Loading decal... /Data/Models/Chimney.solid
+Loading decal... /Data/Models/Chimney.solid
+Loading decal... /Data/Models/Chimney.solid
+Loading decal... /Data/Models/Chimney.solid
+Loading decal... /Data/Models/Chimney.solid
+Loading decal... /Data/Models/Chimney.solid
+Loading decal... /Data/Models/Chimney.solid
+Loading decal... /Data/Models/Chimney.solid
+Loading decal... /Data/Models/Chimney.solid
+Loading decal... /Data/Models/Chimney.solid
+Loading decal... /Data/Models/Chimney.solid
+Loading model...Models/Body.solid
+Loading model...Models/Body2.solid
+Loading model...Models/Body3.solid
+Loading model...Models/Body4.solid
+Loading model...Models/Body5.solid
+Loading model...Models/Body6.solid
+Loading model...Models/Body7.solid
+Loading model...Models/Body.solid
+Loading model...Models/BodyLow.solid
+Loading model...Models/BodyLow.solid
+Loading model...Models/Belt.solid
+Loading model...Models/Belt.solid
+Loading PVR /Data/Textures/FurBrown.jpg
+Loading PVR /Data/Textures/Fur2.png
+Loading PVR /Data/Textures/LeatherArmor.png
+Loading PVR /Data/Textures/FootWrap.png
+Loading PVR /Data/Textures/LeatherWristRight.png
+Loading model...Models/Body.solid
+Loading PVR /Data/Textures/Pants.png
+Loading model...Models/Body2.solid
+Loading model...Models/Body3.solid
+Loading model...Models/Body4.solid
+Loading model...Models/Body5.solid
+Loading model...Models/Body6.solid
+Loading model...Models/Body7.solid
+Loading model...Models/Body.solid
+Loading model...Models/BodyLow.solid
+Loading model...Models/BodyLow.solid
+Loading model...Models/Belt.solid
+Loading model...Models/Belt.solid
+Loading PVR /Data/Textures/FurBlack.jpg
+Loading PVR /Data/Textures/HeadBand.png
+Loading PVR /Data/Textures/FancyPantsCamo.png
+Loading PVR /Data/Textures/Shirt.png
+Loading model...Models/Body.solid
+Loading model...Models/Body2.solid
+Loading model...Models/Body3.solid
+Loading model...Models/Body4.solid
+Loading model...Models/Body6.solid
+Loading model...Models/Body5.solid
+Loading model...Models/Body7.solid
+Loading model...Models/Body.solid
+Loading model...Models/BodyLow.solid
+Loading model...Models/BodyLow.solid
+Loading model...Models/Belt.solid
+Loading model...Models/Belt.solid
+Loading PVR /Data/Textures/FurWhite.jpg
+Loading model...Models/Body.solid
+Loading model...Models/Body2.solid
+Loading model...Models/Body3.solid
+Loading model...Models/Body4.solid
+Loading model...Models/Body5.solid
+Loading model...Models/Body6.solid
+Loading model...Models/Body7.solid
+Loading model...Models/Body.solid
+Loading model...Models/BodyLow.solid
+Loading model...Models/BodyLow.solid
+Loading model...Models/Belt.solid
+Loading model...Models/Belt.solid
+Loading PVR /Data/Textures/FurOpal.jpg
+Loading model...Models/Body.solid
+Loading model...Models/Body2.solid
+Loading model...Models/Body3.solid
+Loading model...Models/Body4.solid
+Loading model...Models/Body5.solid
+Loading model...Models/Body6.solid
+Loading model...Models/Body7.solid
+Loading model...Models/Body.solid
+Loading model...Models/BodyLow.solid
+Loading model...Models/BodyLow.solid
+Loading model...Models/Belt.solid
+Loading model...Models/Belt.solid
+Loading PVR /Data/Textures/FurSable.jpg
+Loading model...Models/Body.solid
+Loading model...Models/Body2.solid
+Loading model...Models/Body3.solid
+Loading model...Models/Body4.solid
+Loading model...Models/Body5.solid
+Loading model...Models/Body6.solid
+Loading model...Models/Body7.solid
+Loading model...Models/Body.solid
+Loading model...Models/BodyLow.solid
+Loading model...Models/BodyLow.solid
+Loading model...Models/Belt.solid
+Loading model...Models/Belt.solid
+Loading PVR /Data/Textures/FurOtter.jpg
+Loading model...Models/Body.solid
+Loading model...Models/Body2.solid
+Loading model...Models/Body3.solid
+Loading model...Models/Body4.solid
+Loading model...Models/Body5.solid
+Loading model...Models/Body6.solid
+Loading model...Models/Body7.solid
+Loading model...Models/Body.solid
+Loading model...Models/BodyLow.solid
+Loading model...Models/BodyLow.solid
+Loading model...Models/Belt.solid
+Loading model...Models/Belt.solid
+Loading PVR /Data/Textures/FurChocolate.jpg
+Loading model...Models/Body.solid
+Loading model...Models/Body2.solid
+Loading model...Models/Body3.solid
+Loading model...Models/Body4.solid
+Loading model...Models/Body5.solid
+Loading model...Models/Body6.solid
+Loading model...Models/Body7.solid
+Loading model...Models/Body.solid
+Loading model...Models/BodyLow.solid
+Loading model...Models/BodyLow.solid
+Loading model...Models/Belt.solid
+Loading model...Models/Belt.solid
+Loading PVR /Data/Textures/FurChocolate.jpg
+ERROR: found compressed clothing texture (/Data/Textures/Fur2.png)
+Starting background music...
+Account::saveFile(/user/users)
+writing account 1/1 (Alex)
+
+Account::save
+LoadCampaign called! cur campaign: empire
+Loading PVR /Data/Textures/empire/World.png
+Loading json level... jendraz33.json
+Loading decal... /Data/Models/Chimney.solid
+Loading decal... /Data/Models/Platform.solid
+Loading decal... /Data/Models/Tunnel.solid
+Loading decal... /Data/Models/Platform.solid
+Loading decal... /Data/Models/Rock.solid
+Loading decal... /Data/Models/Rock.solid
+Loading decal... /Data/Models/Rock.solid
+Loading decal... /Data/Models/Rock.solid
+Loading decal... /Data/Models/Box.solid
+Loading decal... /Data/Models/Box.solid
+Loading decal... /Data/Models/Box.solid
+Loading decal... /Data/Models/Box.solid
+Loading decal... /Data/Models/Box.solid
+Loading decal... /Data/Models/Box.solid
+Loading decal... /Data/Models/Box.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading decal... /Data/Models/Tunnel.solid
+Loading decal... /Data/Models/Platform.solid
+Loading model...Models/Body.solid
+Loading model...Models/Body2.solid
+Loading model...Models/Body3.solid
+Loading model...Models/Body4.solid
+Loading model...Models/Body5.solid
+Loading model...Models/Body6.solid
+Loading model...Models/Body7.solid
+Loading model...Models/Body.solid
+Loading model...Models/BodyLow.solid
+Loading model...Models/BodyLow.solid
+Loading model...Models/Belt.solid
+Loading model...Models/Belt.solid
+Loading PVR /Data/Textures/FurBrown.jpg
+Loading PVR /Data/Textures/Fur2.png
+Loading PVR /Data/Textures/LeatherArmor.png
+Loading PVR /Data/Textures/LeatherWristRight.png
+Loading PVR /Data/Textures/FootWrap.png
+Loading model...Models/Wolf.solid
+Loading model...Models/Wolf.solid
+Loading PVR /Data/Textures/Pants.png
+Loading model...Models/Wolf2.solid
+Loading model...Models/Wolf2.solid
+Loading model...Models/Wolf3.solid
+Loading model...Models/Wolf3.solid
+Loading model...Models/Wolf4.solid
+Loading model...Models/Wolf4.solid
+Loading model...Models/Wolf5.solid
+Loading model...Models/Wolf6.solid
+Loading model...Models/Wolf6.solid
+Loading model...Models/Wolf5.solid
+Loading model...Models/Wolf7.solid
+Loading model...Models/Wolf7.solid
+Loading model...Models/Wolf.solid
+Loading model...Models/WolfLow.solid
+Loading model...Models/WolfLow.solid
+Loading model...Models/WolfLow.solid
+Loading model...Models/WolfLow.solid
+Loading PVR /Data/Textures/FurWolfGrey.jpg
+Loading model...Models/Wolf.solid
+Loading model...Models/Wolf2.solid
+Loading model...Models/Wolf3.solid
+Loading model...Models/Wolf4.solid
+Loading model...Models/Wolf5.solid
+Loading model...Models/Wolf6.solid
+Loading model...Models/Wolf7.solid
+Loading model...Models/Wolf.solid
+Loading model...Models/WolfLow.solid
+Loading model...Models/WolfLow.solid
+Loading PVR /Data/Textures/FurWolfSnow.jpg
+Loading model...Models/Wolf.solid
+Loading model...Models/Wolf2.solid
+Loading model...Models/Wolf3.solid
+Loading model...Models/Wolf4.solid
+Loading model...Models/Wolf5.solid
+Loading model...Models/Wolf6.solid
+Loading model...Models/Wolf7.solid
+Loading model...Models/Wolf.solid
+Loading model...Models/WolfLow.solid
+Loading model...Models/WolfLow.solid
+Loading PVR /Data/Textures/FurWolfGrey.jpg
+ERROR: found compressed clothing texture (/Data/Textures/Fur2.png)
+Starting background music...
+<<RESUME>>
+Loading json level... jendraz33.json
+Loading decal... /Data/Models/Chimney.solid
+Loading decal... /Data/Models/Platform.solid
+Loading decal... /Data/Models/Tunnel.solid
+Loading decal... /Data/Models/Platform.solid
+Loading decal... /Data/Models/Rock.solid
+Loading decal... /Data/Models/Rock.solid
+Loading decal... /Data/Models/Rock.solid
+Loading decal... /Data/Models/Rock.solid
+Loading decal... /Data/Models/Box.solid
+Loading decal... /Data/Models/Box.solid
+Loading decal... /Data/Models/Box.solid
+Loading decal... /Data/Models/Box.solid
+Loading decal... /Data/Models/Box.solid
+Loading decal... /Data/Models/Box.solid
+Loading decal... /Data/Models/Box.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading decal... /Data/Models/Tunnel.solid
+Loading decal... /Data/Models/Platform.solid
+Loading model...Models/Body.solid
+Loading model...Models/Body2.solid
+Loading model...Models/Body3.solid
+Loading model...Models/Body4.solid
+Loading model...Models/Body5.solid
+Loading model...Models/Body6.solid
+Loading model...Models/Body7.solid
+Loading model...Models/Body.solid
+Loading model...Models/BodyLow.solid
+Loading model...Models/BodyLow.solid
+Loading model...Models/Belt.solid
+Loading model...Models/Belt.solid
+Loading PVR /Data/Textures/FurBrown.jpg
+Loading PVR /Data/Textures/Fur2.png
+Loading PVR /Data/Textures/LeatherArmor.png
+Loading PVR /Data/Textures/LeatherWristRight.png
+Loading PVR /Data/Textures/FootWrap.png
+Loading model...Models/Wolf.solid
+Loading PVR /Data/Textures/Pants.png
+Loading model...Models/Wolf2.solid
+Loading model...Models/Wolf3.solid
+Loading model...Models/Wolf4.solid
+Loading model...Models/Wolf5.solid
+Loading model...Models/Wolf6.solid
+Loading model...Models/Wolf7.solid
+Loading model...Models/Wolf.solid
+Loading model...Models/WolfLow.solid
+Loading model...Models/WolfLow.solid
+Loading PVR /Data/Textures/FurWolfGrey.jpg
+Loading model...Models/Wolf.solid
+Loading model...Models/Wolf2.solid
+Loading model...Models/Wolf3.solid
+Loading model...Models/Wolf4.solid
+Loading model...Models/Wolf5.solid
+Loading model...Models/Wolf6.solid
+Loading model...Models/Wolf7.solid
+Loading model...Models/Wolf.solid
+Loading model...Models/WolfLow.solid
+Loading model...Models/WolfLow.solid
+Loading PVR /Data/Textures/FurWolfSnow.jpg
+Loading model...Models/Wolf.solid
+Loading model...Models/Wolf2.solid
+Loading model...Models/Wolf3.solid
+Loading model...Models/Wolf4.solid
+Loading model...Models/Wolf5.solid
+Loading model...Models/Wolf6.solid
+Loading model...Models/Wolf7.solid
+Loading model...Models/Wolf.solid
+Loading model...Models/WolfLow.solid
+Loading model...Models/WolfLow.solid
+Loading PVR /Data/Textures/FurWolfGrey.jpg
+ERROR: found compressed clothing texture (/Data/Textures/Fur2.png)
+Starting background music...
+Loading json level... jendraz33.json
+Loading decal... /Data/Models/Chimney.solid
+Loading decal... /Data/Models/Platform.solid
+Loading decal... /Data/Models/Tunnel.solid
+Loading decal... /Data/Models/Platform.solid
+Loading decal... /Data/Models/Rock.solid
+Loading decal... /Data/Models/Rock.solid
+Loading decal... /Data/Models/Rock.solid
+Loading decal... /Data/Models/Rock.solid
+Loading decal... /Data/Models/Box.solid
+Loading decal... /Data/Models/Box.solid
+Loading decal... /Data/Models/Box.solid
+Loading decal... /Data/Models/Box.solid
+Loading decal... /Data/Models/Box.solid
+Loading decal... /Data/Models/Box.solid
+Loading decal... /Data/Models/Box.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading decal... /Data/Models/Tunnel.solid
+Loading decal... /Data/Models/Platform.solid
+Loading model...Models/Body.solid
+Loading model...Models/Body2.solid
+Loading model...Models/Body3.solid
+Loading model...Models/Body4.solid
+Loading model...Models/Body5.solid
+Loading model...Models/Body6.solid
+Loading model...Models/Body7.solid
+Loading model...Models/Body.solid
+Loading model...Models/BodyLow.solid
+Loading model...Models/BodyLow.solid
+Loading model...Models/Belt.solid
+Loading model...Models/Belt.solid
+Loading PVR /Data/Textures/FurBrown.jpg
+Loading PVR /Data/Textures/Fur2.png
+Loading PVR /Data/Textures/LeatherArmor.png
+Loading PVR /Data/Textures/LeatherWristRight.png
+Loading PVR /Data/Textures/FootWrap.png
+Loading model...Models/Wolf.solid
+Loading PVR /Data/Textures/Pants.png
+Loading model...Models/Wolf2.solid
+Loading model...Models/Wolf3.solid
+Loading model...Models/Wolf4.solid
+Loading model...Models/Wolf5.solid
+Loading model...Models/Wolf6.solid
+Loading model...Models/Wolf7.solid
+Loading model...Models/Wolf.solid
+Loading model...Models/WolfLow.solid
+Loading model...Models/WolfLow.solid
+Loading PVR /Data/Textures/FurWolfGrey.jpg
+Loading model...Models/Wolf.solid
+Loading model...Models/Wolf2.solid
+Loading model...Models/Wolf3.solid
+Loading model...Models/Wolf4.solid
+Loading model...Models/Wolf5.solid
+Loading model...Models/Wolf6.solid
+Loading model...Models/Wolf7.solid
+Loading model...Models/Wolf.solid
+Loading model...Models/WolfLow.solid
+Loading model...Models/WolfLow.solid
+Loading PVR /Data/Textures/FurWolfSnow.jpg
+Loading model...Models/Wolf.solid
+Loading model...Models/Wolf2.solid
+Loading model...Models/Wolf3.solid
+Loading model...Models/Wolf4.solid
+Loading model...Models/Wolf5.solid
+Loading model...Models/Wolf6.solid
+Loading model...Models/Wolf7.solid
+Loading model...Models/Wolf.solid
+Loading model...Models/WolfLow.solid
+Loading model...Models/WolfLow.solid
+Loading PVR /Data/Textures/FurWolfGrey.jpg
+ERROR: found compressed clothing texture (/Data/Textures/Fur2.png)
+Starting background music...
+Loading json level... jendraz33.json
+Loading decal... /Data/Models/Chimney.solid
+Loading decal... /Data/Models/Platform.solid
+Loading decal... /Data/Models/Tunnel.solid
+Loading decal... /Data/Models/Platform.solid
+Loading decal... /Data/Models/Rock.solid
+Loading decal... /Data/Models/Rock.solid
+Loading decal... /Data/Models/Rock.solid
+Loading decal... /Data/Models/Rock.solid
+Loading decal... /Data/Models/Box.solid
+Loading decal... /Data/Models/Box.solid
+Loading decal... /Data/Models/Box.solid
+Loading decal... /Data/Models/Box.solid
+Loading decal... /Data/Models/Box.solid
+Loading decal... /Data/Models/Box.solid
+Loading decal... /Data/Models/Box.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading decal... /Data/Models/Tunnel.solid
+Loading decal... /Data/Models/Platform.solid
+Loading model...Models/Body.solid
+Loading model...Models/Body2.solid
+Loading model...Models/Body3.solid
+Loading model...Models/Body4.solid
+Loading model...Models/Body5.solid
+Loading model...Models/Body6.solid
+Loading model...Models/Body7.solid
+Loading model...Models/Body.solid
+Loading model...Models/BodyLow.solid
+Loading model...Models/BodyLow.solid
+Loading model...Models/Belt.solid
+Loading model...Models/Belt.solid
+Loading PVR /Data/Textures/FurBrown.jpg
+Loading PVR /Data/Textures/Fur2.png
+Loading PVR /Data/Textures/LeatherArmor.png
+Loading PVR /Data/Textures/LeatherWristRight.png
+Loading PVR /Data/Textures/FootWrap.png
+Loading model...Models/Wolf.solid
+Loading PVR /Data/Textures/Pants.png
+Loading model...Models/Wolf2.solid
+Loading model...Models/Wolf3.solid
+Loading model...Models/Wolf4.solid
+Loading model...Models/Wolf5.solid
+Loading model...Models/Wolf6.solid
+Loading model...Models/Wolf7.solid
+Loading model...Models/Wolf.solid
+Loading model...Models/WolfLow.solid
+Loading model...Models/WolfLow.solid
+Loading PVR /Data/Textures/FurWolfGrey.jpg
+Loading model...Models/Wolf.solid
+Loading model...Models/Wolf2.solid
+Loading model...Models/Wolf3.solid
+Loading model...Models/Wolf4.solid
+Loading model...Models/Wolf5.solid
+Loading model...Models/Wolf6.solid
+Loading model...Models/Wolf7.solid
+Loading model...Models/Wolf.solid
+Loading model...Models/WolfLow.solid
+Loading model...Models/WolfLow.solid
+Loading PVR /Data/Textures/FurWolfSnow.jpg
+Loading model...Models/Wolf.solid
+Loading model...Models/Wolf2.solid
+Loading model...Models/Wolf3.solid
+Loading model...Models/Wolf4.solid
+Loading model...Models/Wolf5.solid
+Loading model...Models/Wolf6.solid
+Loading model...Models/Wolf7.solid
+Loading model...Models/Wolf.solid
+Loading model...Models/WolfLow.solid
+Loading model...Models/WolfLow.solid
+Loading PVR /Data/Textures/FurWolfGrey.jpg
+ERROR: found compressed clothing texture (/Data/Textures/Fur2.png)
+Starting background music...
+<<RESUME>>
+<<OPTIONS>>
+<<RESUME>>
+Account::saveFile(/user/users)
+writing account 1/1 (Alex)
+
+Account::save
+LoadCampaign called! cur campaign: empire
+Loading PVR /Data/Textures/empire/World.png
+Loading json level... jendraz34.json
+Loading decal... /Data/Models/Chimney.solid
+Loading decal... /Data/Models/Platform.solid
+Loading decal... /Data/Models/Tunnel.solid
+Loading decal... /Data/Models/Platform.solid
+Loading decal... /Data/Models/Rock.solid
+Loading decal... /Data/Models/Rock.solid
+Loading decal... /Data/Models/Rock.solid
+Loading decal... /Data/Models/Rock.solid
+Loading decal... /Data/Models/Box.solid
+Loading decal... /Data/Models/Box.solid
+Loading decal... /Data/Models/Box.solid
+Loading decal... /Data/Models/Box.solid
+Loading decal... /Data/Models/Box.solid
+Loading decal... /Data/Models/Box.solid
+Loading decal... /Data/Models/Box.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading decal... /Data/Models/Tunnel.solid
+Loading decal... /Data/Models/Platform.solid
+Loading model...Models/Body.solid
+Loading model...Models/Body2.solid
+Loading model...Models/Body3.solid
+Loading model...Models/Body4.solid
+Loading model...Models/Body5.solid
+Loading model...Models/Body6.solid
+Loading model...Models/Body7.solid
+Loading model...Models/Body.solid
+Loading model...Models/BodyLow.solid
+Loading model...Models/BodyLow.solid
+Loading model...Models/Belt.solid
+Loading model...Models/Belt.solid
+Loading PVR /Data/Textures/FurBrown.jpg
+Loading PVR /Data/Textures/Fur2.png
+Loading PVR /Data/Textures/LeatherArmor.png
+Loading PVR /Data/Textures/FootWrap.png
+Loading PVR /Data/Textures/LeatherWristRight.png
+Loading model...Models/Wolf.solid
+Loading PVR /Data/Textures/Pants.png
+Loading model...Models/Wolf2.solid
+Loading model...Models/Wolf3.solid
+Loading model...Models/Wolf4.solid
+Loading model...Models/Wolf5.solid
+Loading model...Models/Wolf6.solid
+Loading model...Models/Wolf7.solid
+Loading model...Models/Wolf.solid
+Loading model...Models/WolfLow.solid
+Loading model...Models/WolfLow.solid
+Loading PVR /Data/Textures/FurWolfDark.jpg
+Loading PVR /Data/Textures/LeatherWristLeft.png
+ERROR: found compressed clothing texture (/Data/Textures/Fur2.png)
+Starting background music...
+Loading json level... jendraz34.json
+Loading decal... /Data/Models/Chimney.solid
+Loading decal... /Data/Models/Platform.solid
+Loading decal... /Data/Models/Tunnel.solid
+Loading decal... /Data/Models/Platform.solid
+Loading decal... /Data/Models/Rock.solid
+Loading decal... /Data/Models/Rock.solid
+Loading decal... /Data/Models/Rock.solid
+Loading decal... /Data/Models/Rock.solid
+Loading decal... /Data/Models/Box.solid
+Loading decal... /Data/Models/Box.solid
+Loading decal... /Data/Models/Box.solid
+Loading decal... /Data/Models/Box.solid
+Loading decal... /Data/Models/Box.solid
+Loading decal... /Data/Models/Box.solid
+Loading decal... /Data/Models/Box.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading decal... /Data/Models/Tunnel.solid
+Loading decal... /Data/Models/Platform.solid
+Loading model...Models/Body.solid
+Loading model...Models/Body2.solid
+Loading model...Models/Body3.solid
+Loading model...Models/Body4.solid
+Loading model...Models/Body5.solid
+Loading model...Models/Body6.solid
+Loading model...Models/Body7.solid
+Loading model...Models/Body.solid
+Loading model...Models/BodyLow.solid
+Loading model...Models/BodyLow.solid
+Loading model...Models/Belt.solid
+Loading model...Models/Belt.solid
+Loading PVR /Data/Textures/FurBrown.jpg
+Loading PVR /Data/Textures/Fur2.png
+Loading PVR /Data/Textures/LeatherArmor.png
+Loading PVR /Data/Textures/FootWrap.png
+Loading PVR /Data/Textures/LeatherWristRight.png
+Loading model...Models/Wolf.solid
+Loading PVR /Data/Textures/Pants.png
+Loading model...Models/Wolf2.solid
+Loading model...Models/Wolf3.solid
+Loading model...Models/Wolf4.solid
+Loading model...Models/Wolf5.solid
+Loading model...Models/Wolf6.solid
+Loading model...Models/Wolf7.solid
+Loading model...Models/Wolf.solid
+Loading model...Models/WolfLow.solid
+Loading model...Models/WolfLow.solid
+Loading PVR /Data/Textures/FurWolfDark.jpg
+Loading PVR /Data/Textures/LeatherWristLeft.png
+ERROR: found compressed clothing texture (/Data/Textures/Fur2.png)
+Starting background music...
+Account::saveFile(/user/users)
+writing account 1/1 (Alex)
+
+Account::save
+LoadCampaign called! cur campaign: empire
+Loading PVR /Data/Textures/empire/World.png
+LoadCampaign called! cur campaign: empire
+Loading PVR /Data/Textures/empire/World.png
+<<Game Menu Selected(41)>>
+Loading json level... jendraz35.json
+Loading decal... /Data/Models/Wall.solid
+Loading decal... /Data/Models/Wall.solid
+Loading decal... /Data/Models/Weird.solid
+Loading decal... /Data/Models/Wall.solid
+Loading decal... /Data/Models/Wall.solid
+Loading decal... /Data/Models/Wall.solid
+Loading decal... /Data/Models/Wall.solid
+Loading decal... /Data/Models/Weird.solid
+Loading decal... /Data/Models/Weird.solid
+Loading decal... /Data/Models/Weird.solid
+Loading decal... /Data/Models/Wall.solid
+Loading decal... /Data/Models/Wall.solid
+Loading decal... /Data/Models/Wall.solid
+Loading decal... /Data/Models/Wall.solid
+Loading decal... /Data/Models/Wall.solid
+Loading decal... /Data/Models/Wall.solid
+Loading decal... /Data/Models/Wall.solid
+Loading decal... /Data/Models/Wall.solid
+Loading decal... /Data/Models/Chimney.solid
+Loading decal... /Data/Models/Chimney.solid
+Loading decal... /Data/Models/Box.solid
+Loading decal... /Data/Models/Box.solid
+Loading decal... /Data/Models/Box.solid
+Loading decal... /Data/Models/Box.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading decal... /Data/Models/Rock.solid
+Loading decal... /Data/Models/Rock.solid
+Loading decal... /Data/Models/Rock.solid
+Loading decal... /Data/Models/Rock.solid
+Loading decal... /Data/Models/Rock.solid
+Loading decal... /Data/Models/Rock.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/Bush.solid
+Loading model...Models/Bush.solid
+Loading model...Models/Bush.solid
+Loading model...Models/Bush.solid
+Loading decal... /Data/Models/Rock.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading decal... /Data/Models/Rock.solid
+Loading decal... /Data/Models/Rock.solid
+Loading model...Models/Bush.solid
+Loading model...Models/Bush.solid
+Loading model...Models/Bush.solid
+Loading model...Models/Bush.solid
+Loading model...Models/Bush.solid
+Loading model...Models/Bush.solid
+Loading model...Models/Bush.solid
+Loading model...Models/Body.solid
+Loading model...Models/Body2.solid
+Loading model...Models/Body3.solid
+Loading model...Models/Body4.solid
+Loading model...Models/Body5.solid
+Loading model...Models/Body6.solid
+Loading model...Models/Body7.solid
+Loading model...Models/Body.solid
+Loading model...Models/BodyLow.solid
+Loading model...Models/BodyLow.solid
+Loading model...Models/Belt.solid
+Loading model...Models/Belt.solid
+Loading PVR /Data/Textures/FurBrown.jpg
+Loading PVR /Data/Textures/Fur.jpg
+Loading PVR /Data/Textures/FancyPantsCamoArctic.png
+Loading PVR /Data/Textures/HeadBand.png
+Loading model...Models/Body.solid
+Loading PVR /Data/Textures/LeatherArmor.png
+Loading model...Models/Body2.solid
+Loading model...Models/Body3.solid
+Loading model...Models/Body4.solid
+Loading model...Models/Body5.solid
+Loading model...Models/Body6.solid
+Loading model...Models/Body7.solid
+Loading model...Models/Body.solid
+Loading model...Models/BodyLow.solid
+Loading model...Models/BodyLow.solid
+Loading model...Models/Belt.solid
+Loading model...Models/Belt.solid
+Loading PVR /Data/Textures/FurBrown.jpg
+Loading model...Models/Body.solid
+Loading model...Models/Body2.solid
+Loading PVR /Data/Textures/Gi.png
+Loading model...Models/Body3.solid
+Loading model...Models/Body4.solid
+Loading model...Models/Body5.solid
+Loading model...Models/Body6.solid
+Loading model...Models/Body7.solid
+Loading model...Models/Body.solid
+Loading model...Models/BodyLow.solid
+Loading model...Models/BodyLow.solid
+Loading model...Models/Belt.solid
+Loading model...Models/Belt.solid
+Loading PVR /Data/Textures/FurLynx.jpg
+Loading model...Models/Body.solid
+Loading PVR /Data/Textures/Shirt.png
+Loading PVR /Data/Textures/FootWrap.png
+Loading model...Models/Body2.solid
+Loading model...Models/Body3.solid
+Loading model...Models/Body4.solid
+Loading model...Models/Body5.solid
+Loading model...Models/Body6.solid
+Loading model...Models/Body7.solid
+Loading model...Models/Body.solid
+Loading model...Models/BodyLow.solid
+Loading model...Models/BodyLow.solid
+Loading model...Models/Belt.solid
+Loading model...Models/Belt.solid
+Loading PVR /Data/Textures/FurSable.jpg
+Loading model...Models/Body.solid
+Loading PVR /Data/Textures/FancyPantsCamo.png
+Loading PVR /Data/Textures/LongSleeve.png
+Loading model...Models/Body2.solid
+Loading model...Models/Body3.solid
+Loading model...Models/Body4.solid
+Loading model...Models/Body5.solid
+Loading model...Models/Body7.solid
+Loading model...Models/Body6.solid
+Loading model...Models/Body.solid
+Loading model...Models/BodyLow.solid
+Loading model...Models/BodyLow.solid
+Loading model...Models/Belt.solid
+Loading model...Models/Belt.solid
+Loading PVR /Data/Textures/FurChocolate.jpg
+Loading model...Models/Body.solid
+Loading model...Models/Body2.solid
+Loading model...Models/Body3.solid
+Loading model...Models/Body4.solid
+Loading model...Models/Body5.solid
+Loading model...Models/Body6.solid
+Loading model...Models/Body7.solid
+Loading model...Models/Body.solid
+Loading model...Models/BodyLow.solid
+Loading model...Models/BodyLow.solid
+Loading model...Models/Belt.solid
+Loading model...Models/Belt.solid
+Loading PVR /Data/Textures/FurBlack.jpg
+Loading model...Models/Body.solid
+Loading model...Models/Body2.solid
+Loading model...Models/Body3.solid
+Loading model...Models/Body4.solid
+Loading model...Models/Body5.solid
+Loading model...Models/Body6.solid
+Loading model...Models/Body7.solid
+Loading model...Models/Body.solid
+Loading model...Models/BodyLow.solid
+Loading model...Models/BodyLow.solid
+Loading model...Models/Belt.solid
+Loading model...Models/Belt.solid
+Loading PVR /Data/Textures/FurBrownWhite.jpg
+Loading model...Models/Body.solid
+Loading model...Models/Body2.solid
+Loading model...Models/Body3.solid
+Loading model...Models/Body4.solid
+Loading model...Models/Body5.solid
+Loading model...Models/Body6.solid
+Loading model...Models/Body7.solid
+Loading model...Models/Body.solid
+Loading model...Models/BodyLow.solid
+Loading model...Models/BodyLow.solid
+Loading model...Models/Belt.solid
+Loading model...Models/Belt.solid
+Loading PVR /Data/Textures/FurChocolate.jpg
+Loading PVR /Data/Textures/LeatherWristRight.png
+Loading PVR /Data/Textures/LeatherWristLeft.png
+Starting background music...
+Account::saveFile(/user/users)
+writing account 1/1 (Alex)
+
+Account::save
+LoadCampaign called! cur campaign: empire
+Loading PVR /Data/Textures/empire/World.png
+Loading json level... jendraz36.json
+Loading decal... /Data/Models/Rock.solid
+Loading decal... /Data/Models/Rock.solid
+Loading decal... /Data/Models/Rock.solid
+Loading decal... /Data/Models/Rock.solid
+Loading decal... /Data/Models/Rock.solid
+Loading decal... /Data/Models/Rock.solid
+Loading decal... /Data/Models/Rock.solid
+Loading decal... /Data/Models/Rock.solid
+Loading decal... /Data/Models/Rock.solid
+Loading decal... /Data/Models/Box.solid
+Loading decal... /Data/Models/Box.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/Bush.solid
+Loading model...Models/Bush.solid
+Loading model...Models/Bush.solid
+Loading model...Models/Bush.solid
+Loading model...Models/Bush.solid
+Loading model...Models/Bush.solid
+Loading model...Models/Bush.solid
+Loading model...Models/Bush.solid
+Loading model...Models/Bush.solid
+Loading model...Models/Bush.solid
+Loading model...Models/Bush.solid
+Loading model...Models/Bush.solid
+Loading model...Models/Bush.solid
+Loading model...Models/Bush.solid
+Loading model...Models/Bush.solid
+Loading decal... /Data/Models/Tunnel.solid
+Loading decal... /Data/Models/Box.solid
+Loading decal... /Data/Models/Weird.solid
+Loading decal... /Data/Models/Rock.solid
+Loading decal... /Data/Models/Rock.solid
+Loading decal... /Data/Models/Rock.solid
+Loading decal... /Data/Models/Rock.solid
+Loading decal... /Data/Models/Rock.solid
+Loading decal... /Data/Models/Rock.solid
+Loading decal... /Data/Models/Chimney.solid
+Loading decal... /Data/Models/Box.solid
+Loading model...Models/Spike.solid
+Loading model...Models/Spike.solid
+Loading model...Models/Spike.solid
+Loading decal... /Data/Models/Rock.solid
+Loading decal... /Data/Models/Rock.solid
+Loading decal... /Data/Models/Rock.solid
+Loading decal... /Data/Models/Rock.solid
+Loading decal... /Data/Models/Rock.solid
+Loading decal... /Data/Models/Rock.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/Bush.solid
+Loading model...Models/Bush.solid
+Loading model...Models/Bush.solid
+Loading model...Models/Body.solid
+Loading model...Models/Body2.solid
+Loading model...Models/Body3.solid
+Loading model...Models/Body4.solid
+Loading model...Models/Body5.solid
+Loading model...Models/Body6.solid
+Loading model...Models/Body7.solid
+Loading model...Models/Body.solid
+Loading model...Models/BodyLow.solid
+Loading model...Models/BodyLow.solid
+Loading model...Models/Belt.solid
+Loading model...Models/Belt.solid
+Loading PVR /Data/Textures/FurBrown.jpg
+Loading PVR /Data/Textures/Fur.jpg
+Loading PVR /Data/Textures/FancyPantsCamoArctic.png
+Loading PVR /Data/Textures/HeadBand.png
+Loading model...Models/Body.solid
+Loading PVR /Data/Textures/LeatherArmor.png
+Loading model...Models/Body2.solid
+Loading model...Models/Body3.solid
+Loading model...Models/Body4.solid
+Loading model...Models/Body5.solid
+Loading model...Models/Body6.solid
+Loading model...Models/Body7.solid
+Loading model...Models/Body.solid
+Loading model...Models/BodyLow.solid
+Loading model...Models/BodyLow.solid
+Loading model...Models/Belt.solid
+Loading model...Models/Belt.solid
+Loading PVR /Data/Textures/FurBlack.jpg
+Loading model...Models/Body.solid
+Loading PVR /Data/Textures/FancyPantsCamo.png
+Loading PVR /Data/Textures/Shirt.png
+Loading model...Models/Body2.solid
+Loading model...Models/Body3.solid
+Loading model...Models/Body4.solid
+Loading model...Models/Body5.solid
+Loading model...Models/Body6.solid
+Loading model...Models/Body7.solid
+Loading model...Models/Body.solid
+Loading model...Models/BodyLow.solid
+Loading model...Models/BodyLow.solid
+Loading model...Models/Belt.solid
+Loading model...Models/Belt.solid
+Loading PVR /Data/Textures/FurOtter.jpg
+Loading model...Models/Body.solid
+Loading model...Models/Body2.solid
+Loading model...Models/Body3.solid
+Loading model...Models/Body4.solid
+Loading model...Models/Body5.solid
+Loading model...Models/Body6.solid
+Loading model...Models/Body7.solid
+Loading model...Models/Body.solid
+Loading model...Models/BodyLow.solid
+Loading model...Models/BodyLow.solid
+Loading model...Models/Belt.solid
+Loading model...Models/Belt.solid
+Loading PVR /Data/Textures/FurLynx.jpg
+Loading model...Models/Body.solid
+Loading model...Models/Body2.solid
+Loading model...Models/Body3.solid
+Loading model...Models/Body4.solid
+Loading model...Models/Body5.solid
+Loading model...Models/Body6.solid
+Loading model...Models/Body7.solid
+Loading model...Models/Body.solid
+Loading model...Models/BodyLow.solid
+Loading model...Models/BodyLow.solid
+Loading model...Models/Belt.solid
+Loading model...Models/Belt.solid
+Loading PVR /Data/Textures/FurChocolate.jpg
+Loading model...Models/Body.solid
+Loading model...Models/Body2.solid
+Loading model...Models/Body3.solid
+Loading model...Models/Body4.solid
+Loading model...Models/Body5.solid
+Loading model...Models/Body6.solid
+Loading model...Models/Body7.solid
+Loading model...Models/Body.solid
+Loading model...Models/BodyLow.solid
+Loading model...Models/BodyLow.solid
+Loading model...Models/Belt.solid
+Loading model...Models/Belt.solid
+Loading PVR /Data/Textures/FurSable.jpg
+Loading model...Models/Body.solid
+Loading model...Models/Body2.solid
+Loading model...Models/Body3.solid
+Loading model...Models/Body4.solid
+Loading model...Models/Body5.solid
+Loading model...Models/Body6.solid
+Loading model...Models/Body7.solid
+Loading model...Models/Body.solid
+Loading model...Models/BodyLow.solid
+Loading model...Models/BodyLow.solid
+Loading model...Models/Belt.solid
+Loading model...Models/Belt.solid
+Loading PVR /Data/Textures/FurOpal.jpg
+Loading model...Models/Body.solid
+Loading model...Models/Body2.solid
+Loading model...Models/Body3.solid
+Loading model...Models/Body4.solid
+Loading model...Models/Body5.solid
+Loading model...Models/Body6.solid
+Loading model...Models/Body7.solid
+Loading model...Models/Body.solid
+Loading model...Models/BodyLow.solid
+Loading model...Models/BodyLow.solid
+Loading model...Models/Belt.solid
+Loading model...Models/Belt.solid
+Loading PVR /Data/Textures/FurBrownWhite.jpg
+Starting background music...
+Loading json level... jendraz36.json
+Loading decal... /Data/Models/Rock.solid
+Loading decal... /Data/Models/Rock.solid
+Loading decal... /Data/Models/Rock.solid
+Loading decal... /Data/Models/Rock.solid
+Loading decal... /Data/Models/Rock.solid
+Loading decal... /Data/Models/Rock.solid
+Loading decal... /Data/Models/Rock.solid
+Loading decal... /Data/Models/Rock.solid
+Loading decal... /Data/Models/Rock.solid
+Loading decal... /Data/Models/Box.solid
+Loading decal... /Data/Models/Box.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/Bush.solid
+Loading model...Models/Bush.solid
+Loading model...Models/Bush.solid
+Loading model...Models/Bush.solid
+Loading model...Models/Bush.solid
+Loading model...Models/Bush.solid
+Loading model...Models/Bush.solid
+Loading model...Models/Bush.solid
+Loading model...Models/Bush.solid
+Loading model...Models/Bush.solid
+Loading model...Models/Bush.solid
+Loading model...Models/Bush.solid
+Loading model...Models/Bush.solid
+Loading model...Models/Bush.solid
+Loading model...Models/Bush.solid
+Loading decal... /Data/Models/Tunnel.solid
+Loading decal... /Data/Models/Box.solid
+Loading decal... /Data/Models/Weird.solid
+Loading decal... /Data/Models/Rock.solid
+Loading decal... /Data/Models/Rock.solid
+Loading decal... /Data/Models/Rock.solid
+Loading decal... /Data/Models/Rock.solid
+Loading decal... /Data/Models/Rock.solid
+Loading decal... /Data/Models/Rock.solid
+Loading decal... /Data/Models/Chimney.solid
+Loading decal... /Data/Models/Box.solid
+Loading model...Models/Spike.solid
+Loading model...Models/Spike.solid
+Loading decal... /Data/Models/Rock.solid
+Loading decal... /Data/Models/Rock.solid
+Loading decal... /Data/Models/Rock.solid
+Loading decal... /Data/Models/Rock.solid
+Loading decal... /Data/Models/Rock.solid
+Loading decal... /Data/Models/Rock.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/TreeTrunk.solid
+Loading model...Models/Leaves.solid
+Loading model...Models/Bush.solid
+Loading model...Models/Bush.solid
+Loading model...Models/Bush.solid
+Loading model...Models/Body.solid
+Loading model...Models/Body2.solid
+Loading model...Models/Body3.solid
+Loading model...Models/Body4.solid
+Loading model...Models/Body5.solid
+Loading model...Models/Body6.solid
+Loading model...Models/Body7.solid
+Loading model...Models/Body.solid
+Loading model...Models/BodyLow.solid
+Loading model...Models/BodyLow.solid
+Loading model...Models/Belt.solid
+Loading model...Models/Belt.solid
+Loading PVR /Data/Textures/FurBrown.jpg
+Loading PVR /Data/Textures/Fur.jpg
+Loading PVR /Data/Textures/FancyPantsCamoArctic.png
+Loading PVR /Data/Textures/HeadBand.png
+Loading model...Models/Body.solid
+Loading PVR /Data/Textures/LeatherArmor.png
+Loading model...Models/Body2.solid
+Loading model...Models/Body3.solid
+Loading model...Models/Body4.solid
+Loading model...Models/Body5.solid
+Loading model...Models/Body6.solid
+Loading model...Models/Body7.solid
+Loading model...Models/Body.solid
+Loading model...Models/BodyLow.solid
+Loading model...Models/BodyLow.solid
+Loading model...Models/Belt.solid
+Loading model...Models/Belt.solid
+Loading PVR /Data/Textures/FurBlack.jpg
+Loading model...Models/Body.solid
+Loading PVR /Data/Textures/FancyPantsCamo.png
+Loading PVR /Data/Textures/Shirt.png
+Loading model...Models/Body2.solid
+Loading model...Models/Body3.solid
+Loading model...Models/Body4.solid
+Loading model...Models/Body5.solid
+Loading model...Models/Body7.solid
+Loading model...Models/Body6.solid
+Loading model...Models/Body.solid
+Loading model...Models/BodyLow.solid
+Loading model...Models/BodyLow.solid
+Loading model...Models/Belt.solid
+Loading model...Models/Belt.solid
+Loading PVR /Data/Textures/FurOtter.jpg
+Loading model...Models/Body.solid
+Loading model...Models/Body2.solid
+Loading model...Models/Body3.solid
+Loading model...Models/Body4.solid
+Loading model...Models/Body5.solid
+Loading model...Models/Body6.solid
+Loading model...Models/Body7.solid
+Loading model...Models/Body.solid
+Loading model...Models/BodyLow.solid
+Loading model...Models/BodyLow.solid
+Loading model...Models/Belt.solid
+Loading model...Models/Belt.solid

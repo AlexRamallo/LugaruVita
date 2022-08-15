@@ -26,6 +26,9 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 #include <assert.h>
 #include <unistd.h>
 #include <errno.h>
+#include <limits.h>
+
+#include <physfs.h>
 
 PVRTexLoader::PVRTexLoader()
 {
@@ -38,11 +41,11 @@ void PVRTexLoader::freeTexture(uint8_t *data){
 	}
 }
 
-#define get8(out)  if(fread((void*) out, 1, 1, fd) != 1){ LOG("Failed to read 8 bits (" #out ")"); goto fail; }
-#define get32(out) if(fread((void*) out, 1, 4, fd) != 4){ LOG("Failed to read 32 bits (" #out ")"); goto fail; }
-#define get64(out) if(fread((void*) out, 1, 8, fd) != 8){ LOG("Failed to read 64 bits (" #out ")"); goto fail; }
+#define get8(out)  if(PHYSFS_readBytes(fd, (void*) out, 1) != 1){ LOG("Failed to read 8 bits (" #out ")"); goto fail; }
+#define get32(out) if(PHYSFS_readBytes(fd, (void*) out, 4) != 4){ LOG("Failed to read 32 bits (" #out ")"); goto fail; }
+#define get64(out) if(PHYSFS_readBytes(fd, (void*) out, 8) != 8){ LOG("Failed to read 64 bits (" #out ")"); goto fail; }
 
-static bool read_metadata_block(PVRHeader *header, PVRMetaData *meta, FILE *fd){
+static bool read_metadata_block(PVRHeader *header, PVRMetaData *meta, PHYSFS_File *fd){
 	get8(&meta->FourCC[0]);
 	get8(&meta->FourCC[1]);
 	get8(&meta->FourCC[2]);
@@ -77,7 +80,7 @@ static bool read_metadata_block(PVRHeader *header, PVRMetaData *meta, FILE *fd){
 					header->chtype[3] == header->chtype[0] ){
 					header->ChannelType = header->chtype[0];
 				}else{
-					header->ChannelType = -1;
+					header->ChannelType = UINT_MAX;
 				}
 
 				break;
@@ -93,7 +96,7 @@ static bool read_metadata_block(PVRHeader *header, PVRMetaData *meta, FILE *fd){
 	Populate header with data from file and leave fd pointing
 	to the start of the texture data
 */
-static bool read_header(PVRHeader *header, FILE *fd){
+static bool read_header(PVRHeader *header, PHYSFS_File *fd){
 	if(header == NULL){
 		fprintf(stderr, "Header storage buffer is null!\n");
 		goto fail;
@@ -136,17 +139,17 @@ static bool read_header(PVRHeader *header, FILE *fd){
 
 	if(header->MetaDataSize > 0){
 		header->metadata = (PVRMetaData*) malloc(header->MetaDataSize);
-		long pos_start = ftell(fd);
-		long pos_end;
+		PHYSFS_sint64 pos_start = PHYSFS_tell(fd);
+		PHYSFS_sint64 pos_end;
 		int i = 0;
 		do {
 			if(!read_metadata_block(header, header->metadata + (i++), fd)){
 				LOG("Error while reading metadata block at %d", (int)(header->metadata + (i-1)));
 				goto fail;
 			}
-		} while(ftell(fd) - pos_start < header->MetaDataSize);
+		} while(PHYSFS_tell(fd) - pos_start < header->MetaDataSize);
 
-		pos_end = ftell(fd);
+		pos_end = PHYSFS_tell(fd);
 		if(pos_end != pos_start + header->MetaDataSize){
 			LOG("Error while reading metadata blocks in PVR file.\n\tpos_start: %d\n\tpos_end: %d\n\tMetaDataSize: %d",
 				(int) pos_start, (int) pos_end, (int) header->MetaDataSize
@@ -164,7 +167,7 @@ static bool read_header(PVRHeader *header, FILE *fd){
 	fail:
 		return false;
 }
-
+/*
 static int get_pvr_channel_size(int type){
 	switch(type){
 		case 0:  return 1; //Unsigned Byte Normalised
@@ -182,19 +185,21 @@ static int get_pvr_channel_size(int type){
 		case 12: return 4; //Signed Float
 		case 13: return 4; //Unsigned Float
 	}
-}
-
+} 
+*/
 bool PVRTexLoader::loadTexture(const char *filename, uint8_t **data, PVRHeader *header){
 	//FILE *fd = fopen(filename, "rb");
-	FILE *fd = FileCache::readFile(filename);
+	//FILE *fd = FileCache::readFile(filename);
+	PHYSFS_File *fd = PHYSFS_openRead(filename);
 	if(fd == NULL){
 		LOG("Failed to open \"%s\"", filename);
 		return false;
 	}
 
-	fseek(fd, 0L, SEEK_END);
-	size_t filesize = ftell(fd);
-	rewind(fd);
+	//fseek(fd, 0L, SEEK_END);
+	//size_t filesize = ftell(fd);
+	//rewind(fd);
+	size_t filesize = PHYSFS_fileLength(fd);
 
 	if(!read_header(header, fd)){
 		LOG("Failed to read header for \"%s\"", filename);
@@ -208,21 +213,24 @@ bool PVRTexLoader::loadTexture(const char *filename, uint8_t **data, PVRHeader *
 
 	if(*data == nullptr){
 		LOG("Failed to allocate %d bytes", (int) size);
-		fclose(fd);
+		PHYSFS_close(fd);
 		return false;
 	}
 
-	fread(*data, size, 1, fd);
-
-	if(ferror(fd)){
-		LOG("Error(%d) while reading \"%s\"", errno, filename);
-		fclose(fd);
-		free(*data);
-		*data = NULL;
-		return false;
+	//fread(*data, size, 1, fd);
+	if(PHYSFS_readBytes(fd, *data, size) != size){
+		auto ec = PHYSFS_getLastErrorCode();
+		if(ec != PHYSFS_ERR_OK){
+			LOG("Error(%d) while reading \"%s\": %s", ec, filename, PHYSFS_getErrorByCode(ec));
+			PHYSFS_close(fd);
+			free(*data);
+			*data = NULL;
+			return false;
+		}
 	}
 
-	fclose(fd);
+	PHYSFS_close(fd);
+	ASSERT(0);
 	return true;
 }
 /**
@@ -345,7 +353,7 @@ GLenum get_channel_gl_unitype_ratio(uint32_t unitype, uint8_t order[4], uint8_t 
  * */
 GLenum get_channel_gl_unitype(uint32_t ChannelType) {
 	//Only works if all channels are the same type
-	if(ChannelType != -1){
+	if(ChannelType != UINT_MAX){
 		switch(ChannelType){
 			case 0: //normalized
 			case 2:
@@ -368,6 +376,8 @@ GLenum get_channel_gl_unitype(uint32_t ChannelType) {
 			case 12:
 			case 13://unsigned(?)
 				return GL_FLOAT;
+			default:
+				return GL_INVALID_ENUM;
 		}
 	}else{
 		return 0;//Mixed channel types not supported
@@ -404,10 +414,11 @@ GLsizei PVRHeader::getBitsPerPixel() const{
 
 GLenum PVRHeader::getGLPixelType() const{
 	GLenum ut = get_channel_gl_unitype(ChannelType);
-	if(ChannelType != -1){
+	if(ChannelType != UINT_MAX){
 		return ut;
 	}else{
-		uint8_t order[4], rate[4];
+		uint8_t order[4] = {0, 0, 0, 0};
+		uint8_t rate[4] = {0, 0, 0, 0};
 		getUncompressedChannelOrder(order, rate);
 		return get_channel_gl_unitype_ratio(ut, order, rate);
 	}
@@ -507,7 +518,7 @@ static size_t calc_mipmap_offset(int level, size_t basesz, size_t minsz, size_t 
 	return off;
 }
 
-bool PVRHeader::getMipMap(int level, PVRMipMapLevel *mipmap) const{
+bool PVRHeader::getMipMap(uint32_t level, PVRMipMapLevel *mipmap) const{
 	ASSERT(NumSurfaces == 1 && "Texture arrays are not supported");
 	ASSERT(NumFaces == 1 && "Cube maps are not supported");
 	ASSERT(Depth == 1 && "3D textures are not supported");
@@ -516,7 +527,15 @@ bool PVRHeader::getMipMap(int level, PVRMipMapLevel *mipmap) const{
 		return false;
 	}
 
-	int base_denom = pow(2, level);
+	//WTF: pow returns incorrect results here when optimizations are enabled (on Vita)
+	//int base_denom = pow(2, level);
+	int base_denom;
+	if(level == 0){
+		base_denom = 1;
+	}else{
+		base_denom = 2 << level - 1;
+	}
+
 	mipmap->Width = Width / base_denom;
 	mipmap->Height = Height / base_denom;
 	mipmap->Depth = 1;

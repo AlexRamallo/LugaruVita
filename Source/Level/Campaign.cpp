@@ -24,6 +24,8 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 #include "Utils/Folders.hpp"
 #include "Utils/Log.h"
 
+#include "Thirdparty/physfs-hpp.h"
+
 #include <dirent.h>
 
 using namespace Game;
@@ -37,25 +39,27 @@ std::string campaignEndText[3];
 
 std::vector<std::string> ListCampaigns()
 {
-    errno = 0;
-    DIR* campaigns = opendir(Folders::getResourcePath("Campaigns").c_str());
-    struct dirent* campaign = NULL;
-    if (!campaigns) {
-        perror(("Problem while loading campaigns from " + Folders::getResourcePath("Campaigns")).c_str());
-        exit(EXIT_FAILURE);
-    }
     std::vector<std::string> campaignNames;
-    while ((campaign = readdir(campaigns)) != NULL) {
-        std::string name(campaign->d_name);
+    std::string campaigndir = Folders::getResourcePath("Campaigns");
+    char **rc = PHYSFS_enumerateFiles(campaigndir.c_str());
+    if(rc == nullptr){
+        LOG("Failed to load campaigns at %s", campaigndir.c_str());
+        ASSERT(0 && "Failed to load campaigns");
+    }
+    for (char **i = rc; *i != nullptr; i++){
+        std::string name {*i};
+
         if (name.length() < 5) {
             continue;
         }
+
         if (!name.compare(name.length() - 4, 4, ".txt")) {
             LOG("Found campaign: %s", name.c_str());
             campaignNames.push_back(name.substr(0, name.length() - 4));
         }
     }
-    closedir(campaigns);
+    LOG("Total campaigns: %d", campaignNames.size());
+    PHYSFS_freeList(rc);
     return campaignNames;
 }
 
@@ -65,7 +69,7 @@ void LoadCampaign()
     if (!Account::hasActive()) {
         return;
     }
-    std::ifstream ipstream(Folders::getResourcePath("Campaigns/" + Account::active().getCurrentCampaign() + ".txt"));
+    PhysFS::ifstream ipstream(Folders::getResourcePath("Campaigns/" + Account::active().getCurrentCampaign() + ".txt"));
     if (!ipstream.good()) {
         if (Account::active().getCurrentCampaign() == "main") {
             cerr << "Could not find main campaign!" << endl;
@@ -93,9 +97,9 @@ void LoadCampaign()
         getline(ipstream, campaignEndText[1]);
         getline(ipstream, campaignEndText[2]);
     }
-    ipstream.close();
+    //ipstream.close();
 
-    std::ifstream test(Folders::getResourcePath("Textures/" + Account::active().getCurrentCampaign() + "/World.png"));
+    PhysFS::ifstream test(Folders::getResourcePath("Textures/" + Account::active().getCurrentCampaign() + "/World.png"));
     if (test.good()) {
         Mainmenuitems[7].load("Textures/" + Account::active().getCurrentCampaign() + "/World.png", 0);
     } else {

@@ -34,6 +34,7 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 #include <cmath>
 #include <memory>
 #include <string>
+#include <physfs.h>
 
 #define passivetype 0
 #define guardtype 1
@@ -332,7 +333,7 @@ public:
     bool jumpclimb;
 
     Person();
-    Person(FILE*, int, unsigned);
+    Person(PHYSFS_File*, int, unsigned);
     Person(Json::Value, int, unsigned);
 
     void skeletonLoad();

@@ -20,6 +20,7 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "Audio/openal_wrapper.hpp"
 
+#include "Utils/Log.h"
 #include "Audio/Sounds.hpp"
 #include "Game.hpp"
 #include "Math/XYZ.hpp"
@@ -27,6 +28,84 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <physfs.h>
+
+struct pfs_handle {
+    PHYSFS_File *file;
+    pfs_handle():
+        file(nullptr)
+    {
+        //--
+    }
+
+    bool open(const char *filename){
+        file = PHYSFS_openRead(filename);
+        if(file == nullptr){
+            LOG("OpenAL wrapper pfs_handle failed to open file: %s\n\tError: %s", filename, PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode()));
+            return false;
+        }
+        return true;
+    }
+
+    void close(){
+        if(file != nullptr){
+            PHYSFS_close(file);
+            file = nullptr;
+        }
+    }
+};
+
+static size_t pfs_read(void *ptr, size_t size, size_t nmemb, void *datasource){
+    pfs_handle *handle = (pfs_handle*) datasource;
+    auto res = PHYSFS_readBytes(handle->file, ptr, size * nmemb);
+    if (res == -1){
+        LOG("Error when calling PHYSFS_readBytes: %s", PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode()));
+        ASSERT(0);
+        return 0;
+    }    
+    return ((size_t)res) / size;
+}
+
+static int pfs_seek(void *datasource, ogg_int64_t offset, int whence){
+    pfs_handle *handle = (pfs_handle*) datasource;
+    int start = 0;
+    switch (whence) {
+        case SEEK_SET:
+            start = 0;
+            break;
+        case SEEK_CUR:
+            start = PHYSFS_tell(handle->file);
+            break;
+        case SEEK_END:
+            start = PHYSFS_fileLength(handle->file);
+            break;
+        default:
+            ASSERT(0);
+            return -1;
+    }
+    if(PHYSFS_seek(handle->file, start + offset) == -1){
+        LOG("Error when calling PHYSFS_seek: %s", PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode()));
+        ASSERT(0);
+        return -1;
+    }
+    return 0;
+}
+
+static long pfs_tell(void *datasource){
+    pfs_handle *handle = (pfs_handle*) datasource;
+    int ret = PHYSFS_tell(handle->file);
+    if(ret == -1){
+        LOG("PHYSFS_tell failed: %s", PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode()));
+        ASSERT(0);
+    }
+    return ret;
+}
+static int pfs_close(void *datasource){
+    pfs_handle *handle = (pfs_handle*) datasource;
+    handle->close();
+    delete handle;
+    return 0;
+}
 
 extern float slomofreq;
 
@@ -322,10 +401,23 @@ static void* decode_to_pcm(const char* _fname, ALenum& format, ALsizei& size, AL
     }
     strcat(fname, ".ogg");
 
+    /*
     // just in case...
-    //FILE* io = fopen(fname, "rb");
-    FILE* io = FileCache::readFile(fname);
+    FILE* io = fopen(fname, "rb");
     if (io == NULL) {
+        return NULL;
+    }
+    */
+
+    ov_callbacks pfs_callbacks;
+    pfs_callbacks.read_func = pfs_read;
+    pfs_callbacks.seek_func = pfs_seek;
+    pfs_callbacks.close_func = pfs_close;
+    pfs_callbacks.tell_func = pfs_tell;
+
+    pfs_handle *pfs_file = new pfs_handle();
+    if(!pfs_file->open(fname)){
+        delete pfs_file;
         return NULL;
     }
 
@@ -353,7 +445,8 @@ static void* decode_to_pcm(const char* _fname, ALenum& format, ALsizei& size, AL
     // Uncompress and feed to the AL.
     OggVorbis_File vf;
     memset(&vf, '\0', sizeof(vf));
-    if (ov_open(io, &vf, NULL, 0) == 0) {
+    //if (ov_open(io, &vf, NULL, 0) == 0) {
+    if (ov_open_callbacks(pfs_file, &vf, NULL, 0, pfs_callbacks) == 0) {
         int bitstream = 0;
         vorbis_info* info = ov_info(&vf, -1);
         size = 0;
@@ -369,6 +462,9 @@ static void* decode_to_pcm(const char* _fname, ALenum& format, ALsizei& size, AL
         long rc = 0;
         size_t allocated = 64 * 1024;
         retval = (ALubyte*)malloc(allocated);
+        if(retval == NULL){
+            LOG("Failed to allocate %d bytes while decoding sound %s", allocated, fname);
+        }
         while ((rc = ov_read(&vf, buf, sizeof(buf), bigendian, 2, 1, &bitstream)) != 0) {
             if (rc > 0) {
                 size += rc;
@@ -389,7 +485,9 @@ static void* decode_to_pcm(const char* _fname, ALenum& format, ALsizei& size, AL
         return retval;
     }
 
-    fclose(io);
+    //fclose(io);
+    pfs_file->close();
+    delete pfs_file;
     return NULL;
 }
 

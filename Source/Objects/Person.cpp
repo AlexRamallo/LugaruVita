@@ -362,7 +362,7 @@ Person::Person()
 }
 
 /* Read a person in tfile. Throws an error if it’s not valid */
-Person::Person(FILE* tfile, int mapvers, unsigned i)
+Person::Person(PHYSFS_File* tfile, int mapvers, unsigned i)
     : Person()
 {
     id = i;
@@ -7174,17 +7174,17 @@ int Person::DrawSkeleton()
     }
 
     return 0;
-}
+} 
 
 /* FUNCTION?
  */
 int Person::SphereCheck(XYZ* p1, float radius, XYZ* p, XYZ* move, float* rotate, Model* model)
 {
     MICROPROFILE_SCOPEI("Person", "SphereCheck", 0xaaffaa);
-    float distance;
-    float olddistance;
-    int intersecting;
-    int firstintersecting;
+    float distance = 0;
+    float olddistance = 0;
+    int intersecting = 0;
+    int firstintersecting = 0;
     XYZ point;
     XYZ oldp1;
     XYZ start, end;
@@ -7412,7 +7412,7 @@ struct PersonLoadClothesJob: WorkerThread::Job {
 void Person::submitLoadClothesJobs(std::vector<WorkerThread::JobHandle> &out, std::vector<ImageRec*> &tex_out)
 {
     if (clothes.size() > 0) {
-        for(int i = 0; i < clothes.size(); i++){
+        for(size_t i = 0; i < clothes.size(); i++){
             tex_out.push_back(new ImageRec());
             out.push_back(WorkerThread::submitJob<PersonLoadClothesJob>(clothes[i], tex_out.back()));
         }
@@ -7430,7 +7430,7 @@ struct PersonApplyClothesJob: WorkerThread::Job {
         //--
     }
     void execute() override {
-        for(int i = 0; i < person->clothes.size(); i++){
+        for(size_t i = 0; i < person->clothes.size(); i++){
             person->addClothes(i, (*imgcache)[person->clothes[i]]);
         }
         person->DoMipmaps();
@@ -7444,7 +7444,7 @@ WorkerThread::JobHandle Person::submitApplyClothesJob(std::map<std::string, Imag
 void Person::addClothes(std::vector<ImageRec*> &textures)
 {
     ASSERT(clothes.size() == textures.size());
-    for(int i = 0; i < clothes.size(); i++){
+    for(size_t i = 0; i < clothes.size(); i++){
         addClothes(i, textures[i]);
     }
     DoMipmaps();
@@ -7507,18 +7507,18 @@ bool Person::addClothes(const int& clothesId, const ImageRec *texture)
         int sizeX;
         int sizeY;
         if(texture->is_pvr){
-            if(texture->pvr_header.isCompressed()){
+            if(texture->info.pvr_header.isCompressed()){
                 LOG("ERROR: found compressed clothing texture (%s)", fname.c_str());
                 return 0;
             }else{
-                sizeX = texture->pvr_header.Width + texture->pvr_header.getBorder(0);
-                sizeY = texture->pvr_header.Height + texture->pvr_header.getBorder(1);
-                bytesPerPixel = texture->pvr_header.getBitsPerPixel() / 8;
+                sizeX = texture->info.pvr_header.Width + texture->info.pvr_header.getBorder(0);
+                sizeY = texture->info.pvr_header.Height + texture->info.pvr_header.getBorder(1);
+                bytesPerPixel = texture->info.pvr_header.getBitsPerPixel() / 8;
             }
         }else{
-            sizeX = texture->sizeX;
-            sizeY = texture->sizeY;
-            bytesPerPixel = texture->bpp / 8;
+            sizeX = texture->info.img.sizeX;
+            sizeY = texture->info.img.sizeY;
+            bytesPerPixel = texture->info.img.bpp / 8;
         }
 
         int tempnum = 0;

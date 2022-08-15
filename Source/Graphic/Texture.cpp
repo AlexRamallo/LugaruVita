@@ -36,7 +36,7 @@ void TextureRes::uploadPVR(void *pTexture){
 	ImageRec *texture = (ImageRec*) pTexture;
 	ASSERT(texture->is_pvr);
 
-	//datalen = texture->pvr_header.getImageSize();
+	//datalen = texture->info.pvr_header.getImageSize();
 
 	glDeleteTextures(1, &id);
 	glGenTextures(1, &id);
@@ -50,22 +50,22 @@ void TextureRes::uploadPVR(void *pTexture){
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	}
 	
-	ASSERT(texture->pvr_header.getBorder(0) == texture->pvr_header.getBorder(1) && "PVR texture has uneven borders");
+	ASSERT(texture->info.pvr_header.getBorder(0) == texture->info.pvr_header.getBorder(1) && "PVR texture has uneven borders");
 	
-	int sizeBorder = texture->pvr_header.getBorder();
-	int sizeX = texture->pvr_header.Width + (2 * sizeBorder);
+	int sizeBorder = texture->info.pvr_header.getBorder();
+	int sizeX = texture->info.pvr_header.Width + (2 * sizeBorder);
 	skinsize = sizeX;
 
 	if (isSkin) {
 		MICROPROFILE_SCOPEI("TextureRes", "proc-skin", 0x008fff);
-		if(texture->pvr_header.isCompressed()){
+		if(texture->info.pvr_header.isCompressed()){
 			LOG("ERROR: Compressed PVR skin texture found");
 			return;
 		}
 
 		free(data);
-		int sizeY = texture->pvr_header.Height + sizeBorder;
-		GLsizei bpp = texture->pvr_header.getBitsPerPixel();
+		int sizeY = texture->info.pvr_header.Height + sizeBorder;
+		GLsizei bpp = texture->info.pvr_header.getBitsPerPixel();
 
 		GLuint type = 0;
 		if(bpp == 24){
@@ -75,7 +75,7 @@ void TextureRes::uploadPVR(void *pTexture){
 		}
 
 		const int nb = sizeX * sizeY * (bpp / 8);
-		ASSERT(nb == texture->pvr_header.getImageSize());
+		ASSERT(nb == texture->info.pvr_header.getImageSize());
 
 		ASSERT(type > 0);
 
@@ -90,36 +90,43 @@ void TextureRes::uploadPVR(void *pTexture){
 		}
 		glTexImage2D(GL_TEXTURE_2D, 0, type, sizeX, sizeY, sizeBorder, GL_RGB, GL_UNSIGNED_BYTE, data);
 	} else {
-		if(texture->pvr_header.isCompressed()){
+		if(texture->info.pvr_header.isCompressed()){
 			PVRMipMapLevel mip;
-			for(int level = 0; level < texture->pvr_header.MipMapCount; level++){
-				if(!texture->pvr_header.getMipMap(level, &mip)){
+			for(uint32_t level = 0, ct = texture->info.pvr_header.MipMapCount; level < ct; level++){
+				if(!texture->info.pvr_header.getMipMap(level, &mip)){
+					LOG("Failed to get mipmap level %d / %d for texture", level, ct);
 					ASSERT(!"Failed to get mipmap level");
+					break;
 				}
+				void *ptr = texture->data + mip.offset;
 				glCompressedTexImage2D(
 					GL_TEXTURE_2D,
 					level,
-					texture->pvr_header.getGLInternalFormat(),
+					texture->info.pvr_header.getGLInternalFormat(),
 					mip.Width,
 					mip.Height,
 					0,
 					mip.size,
-					texture->data + mip.offset
+					ptr
 				);
 			}
 		}else{
 			PVRMipMapLevel mip;
-			for(int level = 0; level < texture->pvr_header.MipMapCount; level++){
-				texture->pvr_header.getMipMap(level, &mip);
+			for(uint32_t level = 0, ct = texture->info.pvr_header.MipMapCount; level < ct; level++){
+				if(!texture->info.pvr_header.getMipMap(level, &mip)){
+					LOG("Failed to get mipmap level %d / %d for texture", level, ct);
+					ASSERT(!"Failed to get mipmap level");
+					break;
+				}
 				glTexImage2D(
 					GL_TEXTURE_2D,
 					level,
-					texture->pvr_header.getGLInternalFormat(),
+					texture->info.pvr_header.getGLInternalFormat(),
 					mip.Width,
 					mip.Height,
 					0,
-					texture->pvr_header.getGLPixelFormat(),
-					texture->pvr_header.getGLPixelType(),
+					texture->info.pvr_header.getGLPixelFormat(),
+					texture->info.pvr_header.getGLPixelType(),
 					texture->data + mip.offset
 				);
 			}
@@ -137,14 +144,14 @@ void TextureRes::loadData(){
 }
 
 void TextureRes::uploadTexture(){
-	ASSERT(loadimg != nullptr);
+	ASSERT(loadimg != nullptr); 
 	
 	ImageRec *img = (ImageRec*)loadimg;
 
 	if(!img->is_pvr){
-		skinsize = img->sizeX;
+		skinsize = img->info.img.sizeX;
 		GLuint type = GL_RGBA;
-		if (img->bpp == 24) {
+		if (img->info.img.bpp == 24) {
 			type = GL_RGB;
 		}
 		glDeleteTextures(1, &id);
@@ -157,7 +164,7 @@ void TextureRes::uploadTexture(){
 
 		if (isSkin) {
 			free(data);
-			const int nb = img->sizeY * img->sizeX * (img->bpp / 8);
+			const int nb = img->info.img.sizeY * img->info.img.sizeX * (img->info.img.bpp / 8);
 			data = (GLubyte*)malloc(nb * sizeof(GLubyte));
 			datalen = 0;
 			for (int i = 0; i < nb; i++) {
@@ -165,9 +172,9 @@ void TextureRes::uploadTexture(){
 					data[datalen++] = img->data[i];
 				}
 			}
-			glTexImage2D(GL_TEXTURE_2D, 0, type, img->sizeX, img->sizeY, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+			glTexImage2D(GL_TEXTURE_2D, 0, type, img->info.img.sizeX, img->info.img.sizeY, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
 		} else {
-			glTexImage2D(GL_TEXTURE_2D, 0, type, img->sizeX, img->sizeY, 0, type, GL_UNSIGNED_BYTE, img->data);
+			glTexImage2D(GL_TEXTURE_2D, 0, type, img->info.img.sizeX, img->info.img.sizeY, 0, type, GL_UNSIGNED_BYTE, img->data);
 		}
 	}else{
 		uploadPVR((void*) loadimg);
@@ -184,13 +191,13 @@ void TextureRes::load()
 	//load image into 'texture'
 	if (!load_image(filename.c_str(), texture)) {
 		cerr << "Texture " << filename << " loading failed" << endl;
-		return;
+		return; 
 	}
 
 	if(!texture.is_pvr){
-		skinsize = texture.sizeX;
+		skinsize = texture.info.img.sizeX;
 		GLuint type = GL_RGBA;
-		if (texture.bpp == 24) {
+		if (texture.info.img.bpp == 24) {
 			type = GL_RGB;
 		}
 
@@ -213,7 +220,7 @@ void TextureRes::load()
 
 		if (isSkin) {
 			free(data);
-			const int nb = texture.sizeY * texture.sizeX * (texture.bpp / 8);
+			const int nb = texture.info.img.sizeY * texture.info.img.sizeX * (texture.info.img.bpp / 8);
 			data = (GLubyte*)malloc(nb * sizeof(GLubyte));
 			datalen = 0;
 			for (int i = 0; i < nb; i++) {
@@ -221,9 +228,9 @@ void TextureRes::load()
 					data[datalen++] = texture.data[i];
 				}
 			}
-			glTexImage2D(GL_TEXTURE_2D, 0, type, texture.sizeX, texture.sizeY, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+			glTexImage2D(GL_TEXTURE_2D, 0, type, texture.info.img.sizeX, texture.info.img.sizeY, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
 		} else {
-			glTexImage2D(GL_TEXTURE_2D, 0, type, texture.sizeX, texture.sizeY, 0, type, GL_UNSIGNED_BYTE, texture.data);
+			glTexImage2D(GL_TEXTURE_2D, 0, type, texture.info.img.sizeX, texture.info.img.sizeY, 0, type, GL_UNSIGNED_BYTE, texture.data);
 		}
 	}else{
 		uploadPVR((void*)&texture);
@@ -326,6 +333,7 @@ WorkerThread::JobHandle Texture::submitLoadJob(const string& filename, bool hasM
 WorkerThread::JobHandle Texture::submitLoadJob(const string& filename, bool hasMipmap, GLubyte* array, int* skinsizep){
 	//TODO
 	ASSERT(!"Not implemented");
+	return -1;
 }
 
 void Texture::upload(){

@@ -490,7 +490,6 @@ void Setenvironment(int which)
 
 bool Game::LoadLevel(int which)
 {
-    LOG("Multiplier LoadLevel A: %f", multiplier);
     stealthloading = 0;
     whichlevel = which;
 
@@ -506,7 +505,6 @@ bool Game::LoadLevel(int which)
         ret = LoadLevel("mapsave");
     }
 
-    LOG("Multiplier LoadLevel B: %f", multiplier);
     did_just_load = true;
     return ret;
 }
@@ -618,9 +616,10 @@ bool Game::LoadLevel(const std::string& name, bool tutorial)
     pause_sound(stream_firesound);
 
     int mapvers;
-    FILE* tfile;
+    PHYSFS_File* tfile;
     errno = 0;
-    tfile = Folders::openMandatoryFile(level_path, "rb");
+    //tfile = Folders::openMandatoryFile(level_path, "rb");
+    tfile = PHYSFS_openRead(level_path.c_str());
 
     ResetBeforeLevelLoad(tutorial);
 
@@ -830,7 +829,7 @@ bool Game::LoadLevel(const std::string& name, bool tutorial)
         Game::LoadingScreen();
     }
 
-    fclose(tfile);
+    PHYSFS_close(tfile);
 
     for (unsigned i = 0; i < Person::players.size(); i++) {
         Game::LoadingScreen();
@@ -999,11 +998,11 @@ bool Game::LoadJsonLevel(const std::string& name, bool tutorial)
     pause_sound(stream_firesound);
 
     errno = 0;
-    ifstream map_file(level_path);
+    PhysFS::ifstream map_file(level_path);
     Json::Value map_data;
     map_file >> map_data;
     unsigned mapvers = map_data["version"].asInt();
-    map_file.close();
+    //map_file.close();
 
     ResetBeforeLevelLoad(tutorial);
 
@@ -1079,8 +1078,8 @@ bool Game::LoadJsonLevel(const std::string& name, bool tutorial)
     }
 
     XYZ playerCoords;
-    float playerYaw;
-    float playerTargetYaw;
+    float playerYaw = 0;
+    float playerTargetYaw = 0;
     if (stealthloading) {
         playerCoords    = Person::players[0]->coords;
         playerYaw       = Person::players[0]->yaw;
@@ -1147,7 +1146,7 @@ bool Game::LoadJsonLevel(const std::string& name, bool tutorial)
 
         //player->addClothes();
         //player->submitLoadClothesJobs(player_clothes_jobs, player_clothes_tex[i]);
-        for(int v=0; v<player->clothes.size(); v++){
+        for(size_t v=0; v<player->clothes.size(); v++){
             std::string fname = player->clothes[v];
             if(loaded_clothes[fname] == nullptr){
                 ImageRec *img = new ImageRec();
@@ -1182,11 +1181,11 @@ bool Game::LoadJsonLevel(const std::string& name, bool tutorial)
 
     //Start apply-clothes jobs
     std::vector<WorkerThread::JobHandle> applyClothesJobs;
-    for(int i = 0; i < Person::players.size(); i++){
+    for(size_t i = 0; i < Person::players.size(); i++){
         applyClothesJobs.push_back(Person::players[i]->submitApplyClothesJob(&loaded_clothes));
     }
     //join the apply-clothes jobs
-    for(int i = 0; i < applyClothesJobs.size(); i++){
+    for(size_t i = 0; i < applyClothesJobs.size(); i++){
         WorkerThread::join(applyClothesJobs[i], true);
     }
 

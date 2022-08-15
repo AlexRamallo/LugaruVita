@@ -36,6 +36,8 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 #include <unistd.h>
 #endif
 
+#include <physfs.h>
+
 /* These two are needed for screenshot */
 extern int kContextWidth;
 extern int kContextHeight;
@@ -59,27 +61,27 @@ ImageRec::~ImageRec()
         free(data);
     }
     data = NULL;
-}
+} 
 
 GLuint ImageRec::getWidth() {
     if(is_pvr){
-        return pvr_header.Width;
+        return info.pvr_header.Width;
     }else{
-        return sizeX;
+        return info.img.sizeX;
     }
 }
 GLuint ImageRec::getHeight() {
     if(is_pvr){
-        return pvr_header.Height;
+        return info.pvr_header.Height;
     }else{
-        return sizeY;
+        return info.img.sizeY;
     }
 }
 GLuint ImageRec::getBitsPerPixel() {
     if(is_pvr){
-        return pvr_header.getBitsPerPixel();
+        return info.pvr_header.getBitsPerPixel();
     }else{
-        return bpp;
+        return info.img.bpp;
     }
 }
 
@@ -88,18 +90,25 @@ int get_filetype(const char *filename){
     static const uint8_t pvr[3] = {'P', 'V', 'R'};
 
     //FILE *file = fopen(filename, "rb");
-    FILE *file = FileCache::readFile(filename);
+    //FILE *file = FileCache::readFile(filename);
+    
+    PHYSFS_File *file = PHYSFS_openRead(filename);
     if(file == NULL){
+        auto ec = PHYSFS_getLastErrorCode();
+        LOG("get_filetype failed to PHYSFS_openRead(%s). Error Code: %d, Msg: %s", filename, (int) ec, PHYSFS_getErrorByCode(ec));
         return -1;
     }
 
-    uint8_t buf[8];
-    memset(buf, 0, 8);
-    if(fread(buf, 1, 8, file) != 8){
-        fclose(file);
+    uint8_t buf[8] = {0,0,0,0,0,0,0,0};
+
+    //if(fread(buf, 1, 8, file) != 8){
+    int numread = PHYSFS_readBytes(file, buf, 8);
+    if(numread != 8){
+        LOG("get_filetype numread is short: %d < 8", numread);
+        PHYSFS_close(file);
         return -1;
     }
-    fclose(file);
+    PHYSFS_close(file);
 
     bool is_pvr = true;
     for(int i = 0; i < 3; i++){
@@ -152,20 +161,21 @@ bool load_image(const char* file_name, ImageRec& tex, bool force_pvr)
 
         switch(type){
             default:
+                LOG("Unrecognized type!");
                 return false;
 
             case 1: //PVR
-                //LOG("Loading PVR %s", file_name);
+                LOG("Loading PVR %s", file_name);
                 tex.is_pvr = true;
                 return load_pvr(file_name, tex);
 
             case 2: //PNG
-                //LOG("Loading PNG %s", file_name);
+                LOG("Loading PNG %s", file_name);
                 tex.is_pvr = false;
                 return load_png(file_name, tex);
 
             case 3: //JPEG
-                //LOG("Loading JPEG %s", file_name);
+                LOG("Loading JPEG %s", file_name);
                 tex.is_pvr = false;
                 return load_jpg(file_name, tex);
         }
@@ -190,7 +200,7 @@ bool save_screenshot(const char* file_name)
 
 static bool load_pvr(const char* file_name, ImageRec& tex){
     MICROPROFILE_SCOPEI("ImageIO", "load_pvr", 0xffff3456);
-    return pvr_loader->loadTexture(file_name, &tex.data, &tex.pvr_header);
+    return pvr_loader->loadTexture(file_name, &tex.data, &tex.info.pvr_header);
 }
 
 struct my_error_mgr
@@ -220,10 +230,11 @@ static bool load_jpg(const char* file_name, ImageRec& tex)
     int row_stride;     /* physical row width in output buffer */
     errno = 0;
     //FILE* infile = fopen(file_name, "rb");
-    FILE *infile = FileCache::readFile(file_name);
+    //FILE *infile = FileCache::readFile(file_name);
+    PHYSFS_File *infile = PHYSFS_openRead(file_name);
 
     if (infile == NULL) {
-        perror((std::string("Couldn't open file ") + file_name).c_str());
+        LOG((std::string("Couldn't open file ") + file_name).c_str());
         return false;
     }
 
@@ -231,12 +242,18 @@ static bool load_jpg(const char* file_name, ImageRec& tex)
     jerr.pub.error_exit = my_error_exit;
     if (setjmp(jerr.setjmp_buffer)) {
         jpeg_destroy_decompress(&cinfo);
-        fclose(infile);
+        PHYSFS_close(infile);
         return false;
     }
 
     jpeg_create_decompress(&cinfo);
-    jpeg_stdio_src(&cinfo, infile);
+
+    //read entire file to memory
+    size_t fbuf_len = PHYSFS_fileLength(infile);
+    uint8_t *fbuf = (uint8_t*) malloc(fbuf_len);
+    jpeg_mem_src(&cinfo, fbuf, fbuf_len);
+    //jpeg_stdio_src(&cinfo, infile);
+
     (void)jpeg_read_header(&cinfo, TRUE);
 
     cinfo.out_color_space = JCS_RGB;
@@ -245,9 +262,9 @@ static bool load_jpg(const char* file_name, ImageRec& tex)
     (void)jpeg_start_decompress(&cinfo);
 
     row_stride = cinfo.output_width * cinfo.output_components;
-    tex.sizeX = cinfo.output_width;
-    tex.sizeY = cinfo.output_height;
-    tex.bpp = 24;
+    tex.info.img.sizeX = cinfo.output_width;
+    tex.info.img.sizeY = cinfo.output_height;
+    tex.info.img.bpp = 24;
 
     while (cinfo.output_scanline < cinfo.output_height) {
         buffer[0] = (JSAMPROW)(char*)tex.data +
@@ -257,7 +274,9 @@ static bool load_jpg(const char* file_name, ImageRec& tex)
 
     (void)jpeg_finish_decompress(&cinfo);
     jpeg_destroy_decompress(&cinfo);
-    fclose(infile);
+    PHYSFS_close(infile);
+
+    free(fbuf);
 
     return true;
 }
@@ -270,20 +289,42 @@ static bool load_png(const char* file_name, ImageRec& tex)
     ASSERT(tex.data == NULL);
     tex.data = (GLubyte*)malloc(1024 * 1024 * 4);
 
+    if(tex.data == nullptr){
+        LOG("Failed to allocate space for tex.data when loading PNG file %s", file_name);
+        ASSERT(0);
+        return false;
+    }
+
+    bool retval = false;
     bool hasalpha = false;
     png_structp png_ptr = NULL;
     png_infop info_ptr = NULL;
     png_uint_32 width, height;
     int bit_depth, color_type, interlace_type;
-    bool retval = false;
     png_byte** row_pointers = NULL;
     errno = 0;
     //FILE* fp = fopen(file_name, "rb");
-    FILE *fp = FileCache::readFile(file_name);
+    //FILE *fp = FileCache::readFile(file_name);
+
+    PHYSFS_File *pfs_fp = PHYSFS_openRead(file_name);
+    size_t fbuf_len = PHYSFS_fileLength(pfs_fp);
+    uint8_t *fbuf = (uint8_t*) malloc(fbuf_len);
+
+    if(fbuf == nullptr){
+        LOG("Failed to allocate space when loading PNG file %s", file_name);
+        ASSERT(0);
+        return false;
+    }
+
+    if(PHYSFS_readBytes(pfs_fp, fbuf, fbuf_len) != fbuf_len){
+        LOG("Failed to read PNG file %s", file_name);
+        free(fbuf);
+        return false;
+    }
+    FILE *fp = fmemopen(fbuf, fbuf_len, "rb");
 
     if (fp == NULL) {
-        LOG((std::string("Couldn't open file ") + file_name).c_str());
-        return false;
+        goto png_done;
     }
 
     png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
@@ -348,9 +389,9 @@ static bool load_png(const char* file_name, ImageRec& tex)
         }
     }
 
-    tex.sizeX = width;
-    tex.sizeY = height;
-    tex.bpp = 32;
+    tex.info.img.sizeX = width;
+    tex.info.img.sizeY = height;
+    tex.info.img.bpp = 32;
     retval = true;
 
 png_done:
@@ -361,15 +402,17 @@ png_done:
     if (fp) {
         fclose(fp);
     }
+    PHYSFS_close(pfs_fp);
+    free(fbuf);
     return (retval);
 }
 
 static bool save_screenshot_png(const char* file_name)
 {
+    bool retval = false;
     FILE* fp = NULL;
     png_structp png_ptr = NULL;
     png_infop info_ptr = NULL;
-    bool retval = false;
 
     errno = 0;
     fp = fopen(file_name, "wb");

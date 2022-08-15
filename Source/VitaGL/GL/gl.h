@@ -1,9 +1,5 @@
 #include <vitaGL.h>
 
-#define LOG_ERRORS 2
-#define HAVE_DEBUG_INTERFACE 1
-
-
 //https://docs.huihoo.com/mesa3d/intro.html
 #define GL_FOG_COORDINATE_SOURCE GL_FOG_COORD_SRC
 #define GL_FOG_COORDINATE GL_FOG_COORD

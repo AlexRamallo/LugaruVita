@@ -3,7 +3,7 @@
 	{
 		"center" : [ 743.1896, 87.99147, 709.3239 ],
 		"dialogs" : null,
-		"environment" : 1,
+		"environment" : 0,
 		"fadestart" : 0.6,
 		"hostile" : 1,
 		"hotspots" : 

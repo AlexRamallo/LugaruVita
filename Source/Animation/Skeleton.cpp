@@ -27,6 +27,7 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 #include "Game.hpp"
 #include "Tutorial.hpp"
 #include "Utils/Folders.hpp"
+#include <physfs.h>
 
 extern float multiplier;
 extern float gravity;
@@ -38,6 +39,12 @@ extern int detail;
 
 extern int whichjointstartarray[26];
 extern int whichjointendarray[26];
+
+//emulate fseek(..., ..., SEEK_CUR) behavior
+static void pfs_seek_cur(PHYSFS_File *handle, PHYSFS_uint64 offset){
+    PHYSFS_uint64 curpos = PHYSFS_tell(handle);
+    PHYSFS_seek(handle, curpos + offset);
+}
 
 Skeleton::Skeleton()
     : selected(0)
@@ -113,6 +120,7 @@ float Skeleton::DoConstraints(XYZ* coords, float* scale)
     MICROPROFILE_SCOPEI("Skeleton", "DoConstraints", 0xbdc071);
     const float elasticity = .3;
     XYZ bounceness;
+    //const int numrepeats = 4;
     const int numrepeats = 1;
     float groundlevel = .15;
     unsigned i;
@@ -161,7 +169,7 @@ float Skeleton::DoConstraints(XYZ* coords, float* scale)
         }
 
         float tempmult = multiplier;
-        //multiplier/=numrepeats;
+        multiplier/=numrepeats;
 
         for (int j = 0; j < numrepeats; j++) {
             float r = .05;
@@ -676,7 +684,7 @@ void Skeleton::Load(const std::string& filename, const std::string& lowfilename,
 {
     MICROPROFILE_SCOPEI("Skeleton", "Load", 0xbdc071);
     GLfloat M[16];
-    FILE* tfile;
+    PHYSFS_File* tfile;
     float lSize;
     int j, num_joints, num_muscles;
 
@@ -792,7 +800,8 @@ void Skeleton::Load(const std::string& filename, const std::string& lowfilename,
 
     // load skeleton
 
-    tfile = Folders::openMandatoryFile(Folders::getResourcePath(filename), "rb");
+    tfile = PHYSFS_openRead(Folders::getResourcePath(filename).c_str());
+    ASSERT(tfile != nullptr && "Failed to open skeleton filename");
 
     // read num_joints
     funpackf(tfile, "Bi", &num_joints);
@@ -861,15 +870,17 @@ void Skeleton::Load(const std::string& filename, const std::string& lowfilename,
         }
         model[k].CalculateNormals(0);
     }
-    fclose(tfile);
+    PHYSFS_close(tfile);
 
     // load ???
 
-    tfile = Folders::openMandatoryFile(Folders::getResourcePath(lowfilename), "rb");
+    tfile = PHYSFS_openRead(Folders::getResourcePath(lowfilename).c_str());
+    ASSERT(tfile != nullptr && "Failed to open lowfilename");
 
     // skip joints section
 
-    fseek(tfile, sizeof(num_joints), SEEK_CUR);
+    //fseek(tfile, sizeof(num_joints), SEEK_CUR);
+    pfs_seek_cur(tfile, sizeof(num_joints));
     for (int i = 0; i < num_joints; i++) {
         // skip joint info
         lSize = sizeof(XYZ) + sizeof(float) + sizeof(float) + 1 //sizeof(bool)
@@ -878,25 +889,31 @@ void Skeleton::Load(const std::string& filename, const std::string& lowfilename,
                 + 1                                             //sizeof(bool)
                 + sizeof(int) + sizeof(int) + 1                 //sizeof(bool)
                 + sizeof(int);
-        fseek(tfile, lSize, SEEK_CUR);
+        //fseek(tfile, lSize, SEEK_CUR);
+        pfs_seek_cur(tfile, lSize);
     }
 
     // skip num_muscles
-    fseek(tfile, sizeof(num_muscles), SEEK_CUR);
+    //fseek(tfile, sizeof(num_muscles), SEEK_CUR);
+    pfs_seek_cur(tfile, sizeof(num_muscles));
 
     for (int i = 0; i < num_muscles; i++) {
         // skip muscle info
         lSize = sizeof(float) + sizeof(float) + sizeof(float) + sizeof(float) + sizeof(float) + sizeof(int);
-        fseek(tfile, lSize, SEEK_CUR);
+        //fseek(tfile, lSize, SEEK_CUR);
+        pfs_seek_cur(tfile, lSize);
 
         muscles[i].loadVerticesLow(tfile, modellow.vertexNum);
 
         // skip more stuff
         lSize = 1; //sizeof(bool);
-        fseek(tfile, lSize, SEEK_CUR);
+        //fseek(tfile, lSize, SEEK_CUR);
+        pfs_seek_cur(tfile, lSize);
         lSize = sizeof(int);
-        fseek(tfile, lSize, SEEK_CUR);
-        fseek(tfile, lSize, SEEK_CUR);
+        //fseek(tfile, lSize, SEEK_CUR);
+        pfs_seek_cur(tfile, lSize);
+        //fseek(tfile, lSize, SEEK_CUR);
+        pfs_seek_cur(tfile, lSize);
     }
 
     for (j = 0; j < num_muscles; j++) {
@@ -929,10 +946,12 @@ void Skeleton::Load(const std::string& filename, const std::string& lowfilename,
     // load clothes
 
     if (clothes) {
-        tfile = Folders::openMandatoryFile(Folders::getResourcePath(clothesfilename), "rb");
+        tfile = PHYSFS_openRead(Folders::getResourcePath(clothesfilename).c_str());
+        ASSERT(tfile != nullptr && "Failed to open clothesfilename");
 
         // skip num_joints
-        fseek(tfile, sizeof(num_joints), SEEK_CUR);
+        //fseek(tfile, sizeof(num_joints), SEEK_CUR);
+        pfs_seek_cur(tfile, sizeof(num_joints));
 
         for (int i = 0; i < num_joints; i++) {
             // skip joint info
@@ -942,25 +961,31 @@ void Skeleton::Load(const std::string& filename, const std::string& lowfilename,
                     + 1                                             //sizeof(bool)
                     + sizeof(int) + sizeof(int) + 1                 //sizeof(bool)
                     + sizeof(int);
-            fseek(tfile, lSize, SEEK_CUR);
+            //fseek(tfile, lSize, SEEK_CUR);
+            pfs_seek_cur(tfile, lSize);
         }
 
         // skip num_muscles
-        fseek(tfile, sizeof(num_muscles), SEEK_CUR);
+        //fseek(tfile, sizeof(num_muscles), SEEK_CUR);
+        pfs_seek_cur(tfile, sizeof(num_muscles));
 
         for (int i = 0; i < num_muscles; i++) {
             // skip muscle info
             lSize = sizeof(float) + sizeof(float) + sizeof(float) + sizeof(float) + sizeof(float) + sizeof(int);
-            fseek(tfile, lSize, SEEK_CUR);
+            //fseek(tfile, lSize, SEEK_CUR);
+            pfs_seek_cur(tfile, lSize);
 
             muscles[i].loadVerticesClothes(tfile, modelclothes.vertexNum);
 
             // skip more stuff
             lSize = 1; //sizeof(bool);
-            fseek(tfile, lSize, SEEK_CUR);
+            //fseek(tfile, lSize, SEEK_CUR);
+            pfs_seek_cur(tfile, lSize);
             lSize = sizeof(int);
-            fseek(tfile, lSize, SEEK_CUR);
-            fseek(tfile, lSize, SEEK_CUR);
+            //fseek(tfile, lSize, SEEK_CUR);
+            pfs_seek_cur(tfile, lSize);
+            //fseek(tfile, lSize, SEEK_CUR);
+            pfs_seek_cur(tfile, lSize);
         }
 
         // ???
@@ -992,7 +1017,7 @@ void Skeleton::Load(const std::string& filename, const std::string& lowfilename,
 
         modelclothes.CalculateNormals(0);
     }
-    fclose(tfile);
+    PHYSFS_close(tfile);
 
     for (int i = 0; i < num_joints; i++) {
         for (j = 0; j < num_joints; j++) {

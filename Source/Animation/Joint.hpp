@@ -24,6 +24,7 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 #include "Math/XYZ.hpp"
 
 #include <vector>
+#include <physfs.h>
 
 enum bodypart
 {
@@ -74,7 +75,7 @@ public:
     XYZ velchange;
 
     Joint();
-    void load(FILE* tfile, std::vector<Joint>& joints);
+    void load(PHYSFS_File* tfile, std::vector<Joint>& joints);
 };
 
 #endif

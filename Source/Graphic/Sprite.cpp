@@ -54,8 +54,8 @@ Texture Sprite::toothtexture;
 float Sprite::checkdelay = 0;
 
 static std::vector<Sprite> sprites;
-static int sprites_head = 0;
-static int sprites_count = 0;
+static size_t sprites_head = 0;
+static size_t sprites_count = 0;
 void Sprite::AllocSprites(int count){
 	sprites.resize(count);
 }
@@ -96,8 +96,8 @@ void Sprite::submitAnimationJob(std::vector<WorkerThread::JobHandle> &out){
 	glMatrixMode(GL_MODELVIEW);
 	glGetFloatv(GL_MODELVIEW_MATRIX, &mmodel[0][0]);
 
-	for(int start = 0; start < sprites_count; start += sprites_per_job){
-		int end = start + sprites_per_job;
+	for(size_t start = 0; start < sprites_count; start += sprites_per_job){
+		size_t end = start + sprites_per_job;
 		if(end >= sprites_count){
 			end = sprites_count - 1;
 		}
@@ -359,16 +359,16 @@ void Sprite::setLastSpriteAlivetime(float al){
 void Sprite::Draw()
 {
 	MICROPROFILE_SCOPEI("Sprite", "Draw", 0x008fff);
-	float M[16];
+	//float M[16];
 	XYZ point;
-	float distancemult;
-	int lasttype;
-	int lastspecial;
-	bool check;
-	bool blend;
-	float tempmult;
+	float distancemult = 0;
+	int lasttype = 0;
+	int lastspecial = 0;
+	//bool check = 0;
+	bool blend = 0;
+	//float tempmult = 0;
 	XYZ difference;
-	float lightcolor[3];
+	float lightcolor[3] = {0,0,0};
 	float viewdistsquared = viewdistance * viewdistance;
 	XYZ tempviewer;
 
@@ -393,7 +393,7 @@ void Sprite::Draw()
 	MICROPROFILE_COUNTER_SET("Sprites", sprites_count);
 	{MICROPROFILE_SCOPEI("Sprite", "render", 0x55ff55);
 
-	for (unsigned i = 0; i < sprites_count; i++) {
+	for (size_t i = 0; i < sprites_count; i++) {
 		Sprite *sprite = &sprites[i];
 		if(!sprite->alive){
 			continue;

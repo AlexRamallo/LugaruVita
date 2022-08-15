@@ -49,7 +49,7 @@ Account::Account(const string& name)
     setCurrentCampaign("main");
 }
 
-Account::Account(FILE* tfile)
+Account::Account(PHYSFS_File* tfile)
     : Account("")
 {
     funpackf(tfile, "Bi", &difficulty);
@@ -115,7 +115,7 @@ Account::Account(FILE* tfile)
     }
 }
 
-void Account::save(FILE* tfile)
+void Account::save(PHYSFS_File* tfile)
 {
     LOG("Account::save");
     
@@ -246,14 +246,14 @@ void Account::winLevel(int level, int score, float time)
 
 void Account::loadFile(string filename)
 {
-    FILE* tfile;
+    PHYSFS_File* tfile;
     int numaccounts;
     int iactive;
     errno = 0;
 
     LOG("Account::loadFile(%s)", filename.c_str());
 
-    tfile = fopen(filename.c_str(), "rb");
+    tfile = PHYSFS_openRead(filename.c_str());
 
     if (tfile) {
         funpackf(tfile, "Bi", &numaccounts);
@@ -264,7 +264,7 @@ void Account::loadFile(string filename)
             accounts.emplace_back(tfile);
         }
 
-        fclose(tfile);
+        PHYSFS_close(tfile);
         setActive(iactive);
     } else {
         LOG("Couldn't load users from %s", filename.c_str());
@@ -274,12 +274,12 @@ void Account::loadFile(string filename)
 
 void Account::saveFile(string filename)
 {
-    FILE* tfile;
+    PHYSFS_File* tfile;
     errno = 0;
 
     LOG("Account::saveFile(%s)", filename.c_str());
 
-    tfile = fopen(filename.c_str(), "wb");
+    tfile = PHYSFS_openWrite(filename.c_str());
     if (tfile) {
         fpackf(tfile, "Bi", getNbAccounts());
         fpackf(tfile, "Bi", i_active);
@@ -289,8 +289,8 @@ void Account::saveFile(string filename)
             accounts[i].save(tfile);
         }
 
-        fclose(tfile);
+        PHYSFS_close(tfile);
     } else {
-        LOG("Couldn't save users in %s", filename.c_str());
+        LOG("Couldn't save users in %s. Error: %s", filename.c_str(), PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode()));
     }
 }

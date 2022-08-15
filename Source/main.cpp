@@ -24,6 +24,9 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 
 #if PACK_ASSETS
     #include <physfs.h>
+
+    #define PHYFSPP_IMPL
+    #include "Thirdparty/physfs-hpp.h"
 #endif
 
 #include "Game.hpp"
@@ -62,12 +65,13 @@ using namespace Game;
 #endif
 
 #if PLATFORM_VITA
+#include <psp2/io/stat.h>
 
 extern "C" {
-    unsigned int _newlib_heap_size_user = 144 * 1024 * 1024;
+    unsigned int _newlib_heap_size_user = 128 * 1024 * 1024;
 
     //increase if flickering occurs
-    #define VGL_VERTEX_POOL_SIZE 32 * 1024 * 1024
+    #define VGL_VERTEX_POOL_SIZE 16 * 1024 * 1024
 }
 
 #include <vitaGL.h>
@@ -914,19 +918,64 @@ int main(int argc, char** argv){
     #endif
 
     #if PACK_ASSETS
-    if(!PHYSFS_Init(nullptr)){
+    if(!PHYSFS_init(nullptr)){
         std::cout << "Failed to initialize PhysFS\n";
         return -1;
     }
 
-    if(!PHYSFS_mount("app0:Data.zip", "/", 0)){
+    /*if(!PHYSFS_mount("app0:Data.zip", "", 0)){
         std::cout << "Failed to mount asset pack (app0:Data.zip)\n";
         return -1;
+    }*/
+
+    const char *mounts[4][2] = {
+        {"app0:Data.zip", ""},
+        {"ux0:data/lugaru/user", "/user"},
+        {"ux0:data/lugaru/home", "/home"},
+        {"ux0:data/lugaru/config", "/config"}
+    };
+
+    std::string writedir = "ux0:data/lugaru";
+    if(!PHYSFS_setWriteDir(writedir.c_str())){
+        LOG("Failed to open write directory at: %s. Error: %s", writedir.c_str(), PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode()));
     }
+
+    for(int i = 0; i < 4; i++){
+        const char *src = mounts[i][0];
+        const char *dst = mounts[i][1];
+
+        if(!PHYSFS_mount(src, dst, 0)){
+            auto ec = PHYSFS_getLastErrorCode();
+            if(ec == PHYSFS_ERR_NOT_FOUND){
+                if (sceIoMkdir(src, 0777) == -1) {
+                    std::cout
+                        << "Failed to create directory: "
+                        << src
+                        << " (" << errno << ")\n";
+                    return -1;
+                }else{
+                    std::cout << "Created missing directory: " << src << "\n";
+                    i--;
+                    continue; 
+                }
+            }
+
+            std::cout
+                << "Failed to mount "
+                << "\"" << src << "\""
+                << " to "
+                << "\"" << dst << "\""
+                << "\n\tError: "
+                << PHYSFS_getErrorByCode(ec)
+                << "\n";
+            return -1;
+        }
+    }
+
     #endif
 
-    int rc = lugaru_main(argc, argv);
-    std::cout << "Main returned with code: " << rc << std::endl;
+    int ret = lugaru_main(argc, argv);
+    std::cout << "Main returned with code: " << ret << std::endl;
 
-    return rc;
+    return ret;
 }

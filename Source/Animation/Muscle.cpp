@@ -46,12 +46,12 @@ Muscle::Muscle()
     , newrotate1(0)
     , newrotate2(0)
     , newrotate3(0)
-    , relaxlength(0)
     , strength(0)
+    , relaxlength(0)
 {
 }
 
-void Muscle::load(FILE* tfile, int vertexNum, std::vector<Joint>& joints)
+void Muscle::load(PHYSFS_File* tfile, int vertexNum, std::vector<Joint>& joints)
 {
     int numvertices, vertice, parentID;
 
@@ -73,7 +73,7 @@ void Muscle::load(FILE* tfile, int vertexNum, std::vector<Joint>& joints)
     parent2 = &joints[parentID];
 }
 
-void Muscle::loadVerticesLow(FILE* tfile, int vertexNum)
+void Muscle::loadVerticesLow(PHYSFS_File* tfile, int vertexNum)
 {
     int numvertices, vertice;
 
@@ -89,7 +89,7 @@ void Muscle::loadVerticesLow(FILE* tfile, int vertexNum)
     }
 }
 
-void Muscle::loadVerticesClothes(FILE* tfile, int vertexNum)
+void Muscle::loadVerticesClothes(PHYSFS_File* tfile, int vertexNum)
 {
     int numvertices, vertice;
 

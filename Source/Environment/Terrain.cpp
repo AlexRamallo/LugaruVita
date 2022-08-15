@@ -437,7 +437,7 @@ bool Terrain::load(const std::string& fileName)
     }
 
     if(texture.is_pvr){
-        if(texture.pvr_header.isCompressed()){
+        if(texture.info.pvr_header.isCompressed()){
             LOG("ERROR! compressed terrain texture found: %s", tname.c_str());
             ASSERT(0 && "compressed terrain texture");
         }
@@ -1006,7 +1006,7 @@ XYZ Terrain::getLighting(float pointx, float pointz)
 
 void Terrain::draw(int layer)
 {
-    if(layer >= max_terrain_layers) return;
+    //if(layer >= max_terrain_layers) return;
 
     MICROPROFILE_SCOPEI("Terrain", "draw layer", 0x50c2aa);
     static int i, j;

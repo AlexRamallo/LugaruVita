@@ -74,8 +74,8 @@ public:
     int* owner;
     XYZ* vertex;
     XYZ* normals;
-    std::vector<TexturedTriangle> Triangles;
     GLfloat* vArray;
+    std::vector<TexturedTriangle> Triangles;
     bool vgl_array;
 
     /*

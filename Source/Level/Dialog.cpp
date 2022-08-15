@@ -34,7 +34,7 @@ bool Dialog::directing;
 float Dialog::dialoguetime;
 std::vector<Dialog> Dialog::dialogs;
 
-void Dialog::loadDialogs(FILE* tfile)
+void Dialog::loadDialogs(PHYSFS_File* tfile)
 {
     int numdialogues;
     funpackf(tfile, "Bi", &numdialogues);
@@ -64,7 +64,7 @@ Dialog::Dialog(Json::Value data)
     }
 }
 
-Dialog::Dialog(FILE* tfile)
+Dialog::Dialog(PHYSFS_File* tfile)
     : gonethrough(0)
 {
     int numdialogscenes;
@@ -79,7 +79,7 @@ Dialog::Dialog(FILE* tfile)
     }
 }
 
-std::string funpackf_string(FILE* tfile, int maxlength)
+std::string funpackf_string(PHYSFS_File* tfile, int maxlength)
 {
     int templength;
     funpackf(tfile, "Bi", &templength);
@@ -100,7 +100,7 @@ std::string funpackf_string(FILE* tfile, int maxlength)
     return result;
 }
 
-void fpackf_string(FILE* tfile, std::string text)
+void fpackf_string(PHYSFS_File* tfile, std::string text)
 {
     fpackf(tfile, "Bi", text.size());
     for (unsigned i = 0; i < text.size(); i++) {
@@ -111,7 +111,7 @@ void fpackf_string(FILE* tfile, std::string text)
     }
 }
 
-DialogScene::DialogScene(FILE* tfile)
+DialogScene::DialogScene(PHYSFS_File* tfile)
 {
     funpackf(tfile, "Bi", &location);
     funpackf(tfile, "Bf", &color[0]);
@@ -157,7 +157,7 @@ DialogScene::DialogScene(Json::Value data)
 Dialog::Dialog(int type, std::string filename)
     : type(type)
 {
-    ifstream ipstream(Folders::getResourcePath(filename));
+    PhysFS::ifstream ipstream(Folders::getResourcePath(filename));
     ipstream.ignore(256, ':');
     int numscenes;
     ipstream >> numscenes;
@@ -167,10 +167,10 @@ Dialog::Dialog(int type, std::string filename)
             scenes.back().participantfacing[j] = Person::players[j]->facing;
         }
     }
-    ipstream.close();
+    //ipstream.close();
 }
 
-DialogScene::DialogScene(ifstream& ipstream)
+DialogScene::DialogScene(PhysFS::ifstream& ipstream)
 {
     ipstream.ignore(256, ':');
     ipstream.ignore(256, ':');
@@ -235,7 +235,7 @@ void Dialog::play()
     }
 }
 
-void Dialog::saveDialogs(FILE* tfile)
+void Dialog::saveDialogs(PHYSFS_File* tfile)
 {
     fpackf(tfile, "Bi", dialogs.size());
 
@@ -255,7 +255,7 @@ Json::Value Dialog::saveDialogs()
     return dialogsarray;
 }
 
-void Dialog::save(FILE* tfile)
+void Dialog::save(PHYSFS_File* tfile)
 {
     fpackf(tfile, "Bi", scenes.size());
     fpackf(tfile, "Bi", type);
@@ -285,7 +285,7 @@ Json::Value Dialog::save()
     return dialog;
 }
 
-void DialogScene::save(FILE* tfile)
+void DialogScene::save(PHYSFS_File* tfile)
 {
     fpackf(tfile, "Bi", location);
     fpackf(tfile, "Bf", color[0]);

@@ -24,6 +24,7 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 #include "Animation/Joint.hpp"
 
 #include <vector>
+#include <physfs.h>
 
 enum muscle_type
 {
@@ -55,9 +56,9 @@ public:
     float relaxlength;
 
     Muscle();
-    void load(FILE* tfile, int vertexNum, std::vector<Joint>& joints);
-    void loadVerticesLow(FILE* tfile, int vertexNum);
-    void loadVerticesClothes(FILE* tfile, int vertexNum);
+    void load(PHYSFS_File* tfile, int vertexNum, std::vector<Joint>& joints);
+    void loadVerticesLow(PHYSFS_File* tfile, int vertexNum);
+    void loadVerticesClothes(PHYSFS_File* tfile, int vertexNum);
     void DoConstraint(bool spinny);
 };
 

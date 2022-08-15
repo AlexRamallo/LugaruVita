@@ -24,6 +24,8 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 #include "Utils/Folders.hpp"
 #include "Utils/Input.hpp"
 
+#include <limits.h>
+
 using namespace Game;
 
 int max_terrain_layers;
@@ -32,7 +34,7 @@ int max_view_distance;
 void DefaultSettings()
 {
     max_terrain_layers = 1;
-    max_view_distance = 1000;
+    max_view_distance = INT_MAX;
     ismotionblur = 0;
     detail = 2;
     usermousesensitivity = 1;
@@ -43,7 +45,7 @@ void DefaultSettings()
     autoslomo = 1;
     decalstoggle = true;
     invertmouse = 0;
-    bloodtoggle = 1;
+    bloodtoggle = 2;
     foliage = 1;
     musictoggle = 1;
     trilinear = 1;

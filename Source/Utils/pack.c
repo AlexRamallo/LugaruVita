@@ -22,6 +22,7 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 #include "private.h"
 
 #include <stdlib.h>
+#include <physfs.h>
 
 struct BinIOPackContext {
     uint8_t *buffer;
@@ -123,7 +124,7 @@ extern void spackf(void *buffer, const char *format, ...)
     va_end(args);
 }
 
-extern void fpackf(FILE *file, const char *format, ...)
+extern void fpackf(PHYSFS_File *file, const char *format, ...)
 {
     va_list args;
     va_start(args, format);
@@ -146,13 +147,14 @@ extern void vspackf(void *buffer, const char *format, va_list args)
     va_end(context.args);
 }
 
-extern void vfpackf(FILE *file, const char *format, va_list args)
+extern void vfpackf(PHYSFS_File *file, const char *format, va_list args)
 {
     size_t n_bytes = BinIOFormatByteCount(format);
     void* buffer = malloc(n_bytes);
 
     vspackf(buffer, format, args);
 
-    fwrite(buffer, n_bytes, 1, file);
+    //fwrite(buffer, n_bytes, 1, file);
+    PHYSFS_writeBytes(file, buffer, n_bytes);
     free(buffer);
 }

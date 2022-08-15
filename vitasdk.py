@@ -154,10 +154,13 @@ def get_update_tasks(bld, assets = None):
 	mk_task(bld.path.find_or_declare("eboot.bin"), ["eboot.bin"])
 
 	if assets != None:
-		#asset files
-		for ass in assets.ant_glob("**/*", excl=["asset_proc.json", "wscript"], remove=False):
-			dst = '%s/%s' % (assets.name, ass.path_from(assets))
-			mk_task(ass, [dst])
+		if assets.isdir():
+			#asset files
+			for ass in assets.ant_glob("**/*", excl=["asset_proc.json", "wscript"], remove=False):
+				dst = '%s/%s' % (assets.name, ass.path_from(assets))
+				mk_task(ass, [dst])
+		else:
+			mk_task(assets, [assets.name])
 
 	return out_tasks
 

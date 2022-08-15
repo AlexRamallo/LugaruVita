@@ -33,6 +33,7 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <memory>
 #include <vector>
+#include <physfs.h>
 #include <json/value.h>
 //
 // Model Structures
@@ -95,7 +96,7 @@ public:
     static void ComputeCenter();
     static void ComputeRadius();
     static void AddObjectsToTerrain();
-    static void LoadObjectsFromFile(FILE* tfile, bool skip);
+    static void LoadObjectsFromFile(PHYSFS_File* tfile, bool skip);
     static void LoadObjectsFromJson(Json::Value);
     static void SphereCheckPossible(XYZ* p1, float radius);
     static void DeleteObject(int which);

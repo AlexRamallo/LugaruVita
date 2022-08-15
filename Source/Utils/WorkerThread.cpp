@@ -272,10 +272,10 @@ void spawnWorkers(int count){
 }
 
 void killWorkers(){
-	for(int i = 0; i < worker_threads.size(); i++){
+	for(size_t i = 0; i < worker_threads.size(); i++){
 		submitJob(WRK_DIE);
 	}
-	for(int i = 0; i < worker_threads.size(); i++){
+	for(size_t i = 0; i < worker_threads.size(); i++){
 		pthread_join(worker_threads[i], NULL);
 	}
 	worker_threads.clear();

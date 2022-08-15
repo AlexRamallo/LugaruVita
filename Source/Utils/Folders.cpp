@@ -36,6 +36,7 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 #include <shlobj.h> // to get paths related functions
 #include <windows.h>
 #endif
+#include <physfs.h>
 
 const std::string Folders::dataDir = DATA_DIR;
 
@@ -65,7 +66,7 @@ std::string Folders::getUserDataPath()
             userDataPath = std::string(homePath) + "/Library/Application Support/Lugaru";
         }
     #elif defined(PLATFORM_VITA)
-        userDataPath = std::string("ux0:data/lugaru");
+        userDataPath = std::string("/user");
     #else // Linux
         userDataPath = getGenericDirectory("XDG_DATA_HOME", ".local/share");
     #endif
@@ -79,7 +80,7 @@ std::string Folders::getConfigFilePath()
     #if defined(_WIN32) || (defined(__APPLE__) && defined(__MACH__))
         configFolder = getUserDataPath();
     #elif PLATFORM_VITA
-        configFolder = "ux0:data/lugaru";
+        configFolder = "/config";
     #else // Linux
         configFolder = getGenericDirectory("XDG_CONFIG_HOME", ".config");
         makeDirectory(configFolder);
@@ -111,7 +112,7 @@ std::string Folders::getGenericDirectory(const char* ENVVAR, const std::string& 
 const char* Folders::getHomeDirectory()
 {
     #if PLATFORM_VITA
-        return "ux0:data/lugaru";
+        return "/home";
     #else
         const char* homedir = getenv("HOME");
         if (homedir != NULL) {
@@ -157,6 +158,7 @@ FILE* Folders::openMandatoryFile(const std::string& filename, const char* mode)
 
 bool Folders::file_exists(const std::string& filepath)
 {
+    /*
     FILE* file;
     file = fopen(filepath.c_str(), "rb");
     if (file == NULL) {
@@ -165,4 +167,6 @@ bool Folders::file_exists(const std::string& filepath)
         fclose(file);
         return true;
     }
+    */
+    return PHYSFS_exists(filepath.c_str());
 }

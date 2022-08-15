@@ -22,6 +22,7 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 #include "private.h"
 
 #include <stdlib.h>
+#include <physfs.h>
 
 struct BinIOUnpackContext {
     const uint8_t *data;
@@ -82,7 +83,7 @@ void sunpackf(const void *buffer, const char *format, ...)
     va_end(args);
 }
 
-void funpackf(FILE *file, const char *format, ...)
+void funpackf(PHYSFS_File *file, const char *format, ...)
 {
     va_list args;
     va_start(args, format);
@@ -105,11 +106,12 @@ void vsunpackf(const void *buffer, const char *format, va_list args)
     va_end(context.args);
 }
 
-void vfunpackf(FILE *file, const char *format, va_list args)
+void vfunpackf(PHYSFS_File *file, const char *format, va_list args)
 {
     size_t n_bytes = BinIOFormatByteCount(format);
     void* buffer = malloc(n_bytes);
-    fread(buffer, n_bytes, 1, file);
+    //fread(buffer, n_bytes, 1, file);
+    PHYSFS_readBytes(file, buffer, n_bytes);
 
     vsunpackf(buffer, format, args);
 

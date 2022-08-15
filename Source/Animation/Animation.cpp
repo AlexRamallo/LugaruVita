@@ -22,7 +22,7 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 #include "Animation/Skeleton.hpp"
 #include "Game.hpp"
 #include "Utils/Folders.hpp"
-
+ 
 #include "Utils/Log.h"
 
 extern "C" {
@@ -35,13 +35,14 @@ void Animation::loadAll()
 {
 #define DECLARE_ANIM(id, file, height, attack, ...) \
     if (id < loadable_anim_end){                     \
+        LOG("DECLARE_ANIM(%d, %s, %d, %d)", (int)id, file, (int)height, (int)attack); \
         animations.emplace_back(file, height, attack);\
     }
 #include "Animation.def"
 #undef DECLARE_ANIM
 }
 
-void AnimationFrame::loadBaseInfo(FILE* tfile)
+void AnimationFrame::loadBaseInfo(PHYSFS_File* tfile)
 {
     // for each joint in the skeleton...
     for (unsigned j = 0; j < joints.size(); j++) {
@@ -62,19 +63,19 @@ void AnimationFrame::loadBaseInfo(FILE* tfile)
     funpackf(tfile, "Bf", &speed);
 }
 
-void AnimationFrame::loadTwist2(FILE* tfile)
+void AnimationFrame::loadTwist2(PHYSFS_File* tfile)
 {
     for (unsigned j = 0; j < joints.size(); j++) {
         funpackf(tfile, "Bf", &joints[j].twist2);
     }
 }
 
-void AnimationFrame::loadLabel(FILE* tfile)
+void AnimationFrame::loadLabel(PHYSFS_File* tfile)
 {
     funpackf(tfile, "Bf", &label);
 }
 
-void AnimationFrame::loadWeaponTarget(FILE* tfile)
+void AnimationFrame::loadWeaponTarget(PHYSFS_File* tfile)
 {
     funpackf(tfile, "Bf Bf Bf", &weapontarget.x, &weapontarget.y, &weapontarget.z);
 }
@@ -92,7 +93,7 @@ Animation::Animation()
 Animation::Animation(const std::string& filename, anim_height_type aheight, anim_attack_type aattack)
     : Animation()
 {
-    FILE* tfile;
+    PHYSFS_File* tfile;
     int numframes;
     unsigned i;
 
@@ -110,7 +111,7 @@ Animation::Animation(const std::string& filename, anim_height_type aheight, anim
     //Game::LoadingScreen();
 
     // read file in binary mode
-    tfile = Folders::openMandatoryFile(filepath, "rb");
+    tfile = PHYSFS_openRead(filepath.c_str());
 
     // read numframes, joints to know how much memory to allocate
 
@@ -151,7 +152,7 @@ Animation::Animation(const std::string& filename, anim_height_type aheight, anim
         frames[i].loadWeaponTarget(tfile);
     }
 
-    fclose(tfile);
+    PHYSFS_close(tfile);
 
     XYZ endoffset;
     endoffset = 0;

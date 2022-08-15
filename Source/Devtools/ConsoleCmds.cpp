@@ -27,6 +27,7 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 #include "Utils/Folders.hpp"
 #include <json/value.h>
 #include <json/writer.h>
+#include <physfs.h>
 
 const char* cmd_names[cmd_count] = {
 #define DECLARE_COMMAND(cmd) #cmd,
@@ -136,8 +137,7 @@ static void set_clothes(int pnum, const char* args)
     snprintf(buf, 63, "Textures/%s.png", args);
 
     const std::string file_path = Folders::getResourcePath(buf);
-    FILE* tfile;
-    tfile = fopen(file_path.c_str(), "rb");
+    PHYSFS_File *tfile = PHYSFS_openRead(file_path.c_str());
     if (tfile == NULL) {
         perror((std::string("Couldn't find file ") + file_path + " to assign as clothes").c_str());
 
@@ -283,8 +283,7 @@ void ch_save(const char* args)
 
     int mapvers = 12;
 
-    FILE* tfile;
-    tfile = fopen(map_path.c_str(), "wb");
+    PHYSFS_File *tfile = PHYSFS_openWrite(map_path.c_str());
     if (tfile == NULL) {
         perror((std::string("Couldn't open file ") + map_path + " for saving").c_str());
         return;
@@ -398,7 +397,7 @@ void ch_save(const char* args)
 
     fpackf(tfile, "Bf Bf Bf Bf", mapcenter.x, mapcenter.y, mapcenter.z, mapradius);
 
-    fclose(tfile);
+    PHYSFS_close(tfile);
 }
 
 void ch_tint(const char* args)

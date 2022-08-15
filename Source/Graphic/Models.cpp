@@ -21,7 +21,7 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 #include "Graphic/Models.hpp"
 
 #include "Game.hpp"
-#include "Thirdparty/microprofile/microprofile.h"
+#include "Thirdparty/microprofile/microprofile.h" 
 #include "Utils/Folders.hpp"
 
 #include "Thirdparty/vitagl/math_utils.h"
@@ -63,10 +63,10 @@ static void *alloc_model(size_t size){
 int Model::LineCheck(XYZ* p1, XYZ* p2, XYZ* p, XYZ* move, float* rotate)
 {
     MICROPROFILE_SCOPEI("Model", "LineCheck", 0x008fff);
-    float distance;
-    float olddistance;
-    int intersecting;
-    int firstintersecting;
+    float distance = 0;
+    float olddistance = 0;
+    int intersecting = 0;
+    int firstintersecting = 0;
     XYZ point;
 
     *p1 = *p1 - *move;
@@ -102,10 +102,10 @@ int Model::LineCheck(XYZ* p1, XYZ* p2, XYZ* p, XYZ* move, float* rotate)
 int Model::LineCheckPossible(XYZ* p1, XYZ* p2, XYZ* p, XYZ* move, float* rotate)
 {
     MICROPROFILE_SCOPEI("Model", "LineCheckPossible", 0x008fff);
-    float distance;
-    float olddistance;
-    int intersecting;
-    int firstintersecting;
+    float distance = 0;
+    float olddistance = 0;
+    int intersecting = 0;
+    int firstintersecting = 0;
     XYZ point;
 
     *p1 = *p1 - *move;
@@ -143,10 +143,10 @@ int Model::LineCheckPossible(XYZ* p1, XYZ* p2, XYZ* p, XYZ* move, float* rotate)
 int Model::LineCheckSlidePossible(XYZ* p1, XYZ* p2, XYZ* move, float* rotate)
 {
     MICROPROFILE_SCOPEI("Model", "LineCheckSlidePossible", 0x008fff);
-    float distance;
-    float olddistance;
-    int intersecting;
-    int firstintersecting;
+    float distance = 0;
+    float olddistance = 0;
+    int intersecting = 0;
+    int firstintersecting = 0;
     XYZ point;
 
     *p1 = *p1 - *move;
@@ -188,11 +188,11 @@ int Model::LineCheckSlidePossible(XYZ* p1, XYZ* p2, XYZ* move, float* rotate)
 int Model::SphereCheck(XYZ* p1, float radius, XYZ* p, XYZ* move, float* rotate)
 {
     MICROPROFILE_SCOPEI("Model", "SphereCheck", 0x008fff);
-    int i;
-    float distance;
-    float olddistance;
-    int intersecting;
-    int firstintersecting;
+    int i = 0;
+    float distance = 0;
+    float olddistance = 0;
+    int intersecting = 0;
+    int firstintersecting = 0;
     XYZ point;
     XYZ oldp1;
 
@@ -250,10 +250,10 @@ int Model::SphereCheck(XYZ* p1, float radius, XYZ* p, XYZ* move, float* rotate)
 int Model::SphereCheckPossible(XYZ* p1, float radius, XYZ* move, float* rotate)
 {
     MICROPROFILE_SCOPEI("Model", "SphereCheckPossible", 0x008fff);
-    float distance;
-    float olddistance;
-    int intersecting;
-    int firstintersecting;
+    float distance = 0;
+    float olddistance = 0;
+    int intersecting = 0;
+    int firstintersecting = 0;
     XYZ point;
     XYZ oldp1;
 
@@ -337,7 +337,7 @@ void Model::UpdateVertexArray()
             vArray[j + 16] = Triangles[i].gx[2];
             vArray[j + 17] = Triangles[i].gy[2];
             vArray[j + 18] = Triangles[i].facenormal.x * -1;
-            vArray[j + 19] = Triangles[i].facenormal.y * -1;
+            vArray[j + 19] = Triangles[i].facenormal.y * -1; 
             vArray[j + 20] = Triangles[i].facenormal.z * -1;
             vArray[j + 21] = vertex[Triangles[i].vertex[2]].x;
             vArray[j + 22] = vertex[Triangles[i].vertex[2]].y;
@@ -637,7 +637,7 @@ static bool getModelCache(Model *model, const std::string &filename){
 bool Model::loadnotex(const std::string& filename, bool use_cache)
 {
     MICROPROFILE_SCOPEI("Model", "loadnotex", 0x008fff);
-    FILE* tfile;
+    PHYSFS_File* tfile;
     long i;
     short triangleNum;
 
@@ -659,9 +659,8 @@ bool Model::loadnotex(const std::string& filename, bool use_cache)
         vgl_array = true;
     }else{
         vgl_array = false;
-        tfile = Folders::openMandatoryFile(Folders::getResourcePath(filename), "rb");
+        tfile = PHYSFS_openRead(Folders::getResourcePath(filename).c_str());
         // read model settings
-        fseek(tfile, 0, SEEK_SET);
         funpackf(tfile, "Bs Bs", &vertexNum, &triangleNum);
         // read the model data
         owner = (int*)malloc(sizeof(int) * vertexNum);
@@ -682,7 +681,7 @@ bool Model::loadnotex(const std::string& filename, bool use_cache)
             funpackf(tfile, "Bf Bf Bf", &Triangles[i].gx[0], &Triangles[i].gx[1], &Triangles[i].gx[2]);
             funpackf(tfile, "Bf Bf Bf", &Triangles[i].gy[0], &Triangles[i].gy[1], &Triangles[i].gy[2]);
         }
-        fclose(tfile);
+        PHYSFS_close(tfile);
     }
     UpdateVertexArray();
 
@@ -707,7 +706,7 @@ bool Model::loadnotex(const std::string& filename, bool use_cache)
 bool Model::load(const std::string& filename, bool use_cache)
 {
     MICROPROFILE_SCOPEI("Model", "load", 0x008fff);
-    FILE* tfile;
+    PHYSFS_File* tfile;
     long i;
     short triangleNum;
 
@@ -735,10 +734,9 @@ bool Model::load(const std::string& filename, bool use_cache)
         vgl_array = true;
     }else{
         vgl_array = false;
-        tfile = Folders::openMandatoryFile(Folders::getResourcePath(filename), "rb");
+        tfile = PHYSFS_openRead(Folders::getResourcePath(filename).c_str());
 
         // read model settings
-        fseek(tfile, 0, SEEK_SET);
         funpackf(tfile, "Bs Bs", &vertexNum, &triangleNum);
 
         {
@@ -768,7 +766,7 @@ bool Model::load(const std::string& filename, bool use_cache)
                 funpackf(tfile, "Bf Bf Bf", &Triangles[i].gy[0], &Triangles[i].gy[1], &Triangles[i].gy[2]);
             }
         }
-        fclose(tfile);
+        PHYSFS_close(tfile);
     }
     modelTexture.xsz = 0;
 
@@ -796,7 +794,7 @@ bool Model::load(const std::string& filename, bool use_cache)
 bool Model::loaddecal(const std::string& filename, bool use_cache)
 {
     MICROPROFILE_SCOPEI("Model", "loaddecal", 0x008fff);
-    FILE* tfile;
+    PHYSFS_File* tfile;
     long i, j;
     short triangleNum;
 
@@ -822,9 +820,8 @@ bool Model::loaddecal(const std::string& filename, bool use_cache)
         vgl_array = true;
     }else{
         vgl_array = false;
-        tfile = Folders::openMandatoryFile(Folders::getResourcePath(filename), "rb");
+        tfile = PHYSFS_openRead(Folders::getResourcePath(filename).c_str());
         // read model settings
-        fseek(tfile, 0, SEEK_SET);
         funpackf(tfile, "Bs Bs", &vertexNum, &triangleNum);
         // read the model data
         owner = (int*)malloc(sizeof(int) * vertexNum);
@@ -846,7 +843,7 @@ bool Model::loaddecal(const std::string& filename, bool use_cache)
             funpackf(tfile, "Bf Bf Bf", &Triangles[i].gx[0], &Triangles[i].gx[1], &Triangles[i].gx[2]);
             funpackf(tfile, "Bf Bf Bf", &Triangles[i].gy[0], &Triangles[i].gy[1], &Triangles[i].gy[2]);
         }
-        fclose(tfile);
+        PHYSFS_close(tfile);
     }
     modelTexture.xsz = 0;
 
@@ -873,7 +870,7 @@ bool Model::loaddecal(const std::string& filename, bool use_cache)
 bool Model::loadraw(const std::string& filename, bool use_cache)
 {
     MICROPROFILE_SCOPEI("Model", "loadraw", 0x008fff);
-    FILE* tfile;
+    PHYSFS_File* tfile;
     long i;
     short triangleNum;
 
@@ -898,10 +895,9 @@ bool Model::loadraw(const std::string& filename, bool use_cache)
         vgl_array = true;
     }else{
         vgl_array = false;
-        tfile = Folders::openMandatoryFile(Folders::getResourcePath(filename), "rb");
+        tfile = PHYSFS_openRead(Folders::getResourcePath(filename).c_str());
 
         // read model settings
-        fseek(tfile, 0, SEEK_SET);
         funpackf(tfile, "Bs Bs", &vertexNum, &triangleNum);
 
         owner = (int*)malloc(sizeof(int) * vertexNum);
@@ -923,7 +919,7 @@ bool Model::loadraw(const std::string& filename, bool use_cache)
             funpackf(tfile, "Bf Bf Bf", &Triangles[i].gy[0], &Triangles[i].gy[1], &Triangles[i].gy[2]);
         }
 
-        fclose(tfile);
+        PHYSFS_close(tfile);
     }
 
     for (i = 0; i < vertexNum; i++) {
@@ -1126,7 +1122,7 @@ struct NormalizeVertsJob: WorkerThread::Job {
 };
 
 struct UpdateVertexJob: WorkerThread::Job {
-    int type, start_idx, end_idx;
+    unsigned int type, start_idx, end_idx;
     Model *model;
     UpdateVertexJob(int t, int s, int e, Model *m):
         Job(),
@@ -1237,13 +1233,13 @@ void Model::submitCalculateNormalsJobs_Phase1(
     }
 
     //Phase 1 (calculate normals)
-    int numtris = Triangles.size();
-    int p1_job_size = numtris / CALCNORM_JOB_SPLIT_DENOM;
+    size_t numtris = Triangles.size();
+    size_t p1_job_size = numtris / CALCNORM_JOB_SPLIT_DENOM;
     if(p1_job_size == 0){
         p1_job_size = 1;
     }
-    for (unsigned int i = 0; i < numtris; i+=p1_job_size) {
-        int end = i + p1_job_size - 1;
+    for (size_t i = 0; i < numtris; i+=p1_job_size) {
+        size_t end = i + p1_job_size - 1;
         if(end >= numtris){
             end = numtris - 1;
         }
@@ -1257,11 +1253,11 @@ void Model::submitCalculateNormalsJobs_Phase1(
 
 void Model::submitCalculateNormalsJobs_Phase2(std::vector<WorkerThread::JobHandle> &out){
     //Phase 2 (normalize verts)
-    int p2_job_size = vertexNum / NORM_VERTS_JOB_SPLIT_DENOM;
+    size_t p2_job_size = vertexNum / NORM_VERTS_JOB_SPLIT_DENOM;
     if(p2_job_size == 0){
         p2_job_size = 1;
     }
-    for (unsigned int i = 0; i < vertexNum; i+=p2_job_size) {
+    for (int i = 0; i < vertexNum; i+=p2_job_size) {
         int end = i + p2_job_size - 1;
         if(end >= vertexNum){
             end = vertexNum - 1;
@@ -1271,13 +1267,13 @@ void Model::submitCalculateNormalsJobs_Phase2(std::vector<WorkerThread::JobHandl
 }
 
 void Model::submitCalculateNormalsJobs_Phase3(int type, std::vector<WorkerThread::JobHandle> &out){
-    int numtris = Triangles.size();
-    int job_size = numtris / UPDATE_VERT_JOB_SPLIT_DENOM;
+    size_t numtris = Triangles.size();
+    size_t job_size = numtris / UPDATE_VERT_JOB_SPLIT_DENOM;
     if(job_size == 0){
         job_size = 1;
     }
-    for (unsigned int i = 0; i < numtris; i+=job_size) {
-        int end = i + job_size - 1;
+    for (size_t i = 0; i < numtris; i+=job_size) {
+        size_t end = i + job_size - 1;
         if(end >= numtris){
             end = numtris - 1;
         }
@@ -1301,7 +1297,7 @@ void Model::CalculateNormals(bool facenormalise)
         normals[i].z = 0;
     }
 
-    for (unsigned int i = 0; i < Triangles.size(); i++) {
+    for (size_t i = 0; i < Triangles.size(); i++) {
         /*
         CrossProduct(
             vertex[Triangles[i].vertex[1]] - vertex[Triangles[i].vertex[0]],
@@ -1760,11 +1756,11 @@ Model::Model()
     , vertex(0)
     , normals(0)
     , vArray(0)
+    , vgl_array(false)
     , color(0)
     , boundingspherecenter()
     , boundingsphereradius(0)
     , flat(false)
-    , vgl_array(false)
 {
     memset(&modelTexture, 0, sizeof(modelTexture));
 }

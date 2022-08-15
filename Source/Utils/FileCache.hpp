@@ -11,5 +11,5 @@ namespace FileCache {
 
 	void InitCache();
 	void ClearCache();
-};
+}
 #endif //__FILE_CACHE__H__

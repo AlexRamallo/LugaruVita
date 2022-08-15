@@ -23,6 +23,7 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <stdarg.h>
 #include <stdio.h>
+#include <physfs.h>
 
 #if defined(__cplusplus)
 extern "C" {
@@ -97,15 +98,15 @@ extern "C" {
 
     extern void packf    (                    const char *format, ...);
     extern void spackf   (void *buffer,       const char *format, ...);
-    extern void fpackf   (FILE *file,         const char *format, ...);
+    extern void fpackf   (PHYSFS_File *file,  const char *format, ...);
     extern void vspackf  (void *buffer,       const char *format, va_list args);
-    extern void vfpackf  (FILE *file,         const char *format, va_list args);
+    extern void vfpackf  (PHYSFS_File *file,  const char *format, va_list args);
 
     extern void unpackf  (                    const char *format, ...);
     extern void sunpackf (const void *buffer, const char *format, ...);
-    extern void funpackf (FILE       *file,   const char *format, ...);
+    extern void funpackf (PHYSFS_File*file,   const char *format, ...);
     extern void vsunpackf(const void *buffer, const char *format, va_list args);
-    extern void vfunpackf(FILE       *file,   const char *format, va_list args);
+    extern void vfunpackf(PHYSFS_File*file,   const char *format, va_list args);
 
 #ifdef _MSC_VER
 #ifndef va_copy

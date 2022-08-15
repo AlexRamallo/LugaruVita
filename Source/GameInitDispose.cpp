@@ -91,6 +91,8 @@ static pthread_mutex_t mtxLog;
 static bool did_init_log = false;
 #endif
 
+#define LOG_BUF false
+
 #if LOG_BUF
 static const int log_buf_size = 1000;
 static std::vector<std::string> log_buf(log_buf_size);
@@ -135,7 +137,7 @@ void LOG(const std::string &fmt, ...)
 #endif
 
 #if !LOG_BUF
-    if(!log_enabled) return;
+    //if(!log_enabled) return;
 #endif
 
 #if LOG_MUTEX
@@ -230,7 +232,6 @@ void Game::newGame()
 
     if(!terrain.allocate()){
         LOG("Failed to allocate space for terrain");
-        exit(1);
     }
 }
 
@@ -733,6 +734,7 @@ void Game::InitGame()
     }
 
     cursortexture.load("Textures/Cursor.png", 0);
+    LOG("Loaded cursor!");
 
     Mapcircletexture.load("Textures/MapCircle.png", 0);
     Mapboxtexture.load("Textures/MapBox.png", 0);
@@ -750,6 +752,8 @@ void Game::InitGame()
     Mainmenuitems[5].load("Textures/Resume.png", 0);
     Mainmenuitems[6].load("Textures/EndGame.png", 0);
 
+    LOG("Loaded all menu textures");
+
     texdetail = temptexdetail;
 
     FadeLoadingScreen(95);
@@ -763,6 +767,8 @@ void Game::InitGame()
     newdetail = detail;
     newscreenwidth = screenwidth;
     newscreenheight = screenheight;
+
+    LOG("Menu::Load()");
 
     Menu::Load();
 
