@@ -115,7 +115,7 @@ Account::Account(PHYSFS_File* tfile)
     }
 }
 
-void Account::save(PHYSFS_File* tfile)
+void Account::save(FILE* tfile)
 {
     LOG("Account::save");
     
@@ -274,12 +274,12 @@ void Account::loadFile(string filename)
 
 void Account::saveFile(string filename)
 {
-    PHYSFS_File* tfile;
+    FILE* tfile;
     errno = 0;
 
     LOG("Account::saveFile(%s)", filename.c_str());
 
-    tfile = PHYSFS_openWrite(filename.c_str());
+    tfile = fopen(filename.c_str(), "wb");
     if (tfile) {
         fpackf(tfile, "Bi", getNbAccounts());
         fpackf(tfile, "Bi", i_active);
@@ -289,7 +289,7 @@ void Account::saveFile(string filename)
             accounts[i].save(tfile);
         }
 
-        PHYSFS_close(tfile);
+        fclose(tfile);
     } else {
         LOG("Couldn't save users in %s. Error: %s", filename.c_str(), PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode()));
     }

@@ -135,7 +135,7 @@ private:
     static std::vector<Account> accounts;
     static int i_active;
 
-    void save(PHYSFS_File* tfile);
+    void save(FILE* tfile);
 
     int difficulty;
     int progress; // progress in challenge levels

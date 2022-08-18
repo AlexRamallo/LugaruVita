@@ -21,3 +21,4 @@ Source/Version.hpp
 *.pyc
 .waf*
 .lock-waf*
+./INSTALL

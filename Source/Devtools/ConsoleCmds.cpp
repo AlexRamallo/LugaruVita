@@ -283,7 +283,7 @@ void ch_save(const char* args)
 
     int mapvers = 12;
 
-    PHYSFS_File *tfile = PHYSFS_openWrite(map_path.c_str());
+    FILE *tfile = fopen(map_path.c_str(), "wb");
     if (tfile == NULL) {
         perror((std::string("Couldn't open file ") + map_path + " for saving").c_str());
         return;
@@ -397,7 +397,7 @@ void ch_save(const char* args)
 
     fpackf(tfile, "Bf Bf Bf Bf", mapcenter.x, mapcenter.y, mapcenter.z, mapradius);
 
-    PHYSFS_close(tfile);
+    fclose(tfile);
 }
 
 void ch_tint(const char* args)

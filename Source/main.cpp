@@ -191,20 +191,34 @@ static float deltah_vel = 0.0f;
 static float deltav_vel = 0.0f;
 
 void update_analog_sticks(){
-    deltah_vel += rstick_x;
-    deltav_vel += rstick_y;
+    int mult_h, mult_v;
+    if(mainmenu){
+        //swap sticks in menus
+        analog_lh = rstick_x;
+        analog_lv = rstick_y;
+        deltah_vel += lstick_x;
+        deltav_vel += lstick_y;
 
-    deltah += deltah_vel * 350 * multiplier;
-    deltav += deltav_vel * 250 * multiplier;
+        mult_h = 350;
+        mult_v = 350;
+    }else{
+        analog_lh = lstick_x;
+        analog_lv = lstick_y;
+        deltah_vel += rstick_x;
+        deltav_vel += rstick_y;  
+
+        mult_h = 175;
+        mult_v = 90;
+    }
+
+    deltah += deltah_vel * mult_h * multiplier;
+    deltav += deltav_vel * mult_v * multiplier;
 
     deltah_vel *= 0.6f;
     deltav_vel *= 0.6f;
 
     if(fabsf(deltah_vel) < 0.15) deltah_vel = 0.0f;
     if(fabsf(deltav_vel) < 0.15) deltav_vel = 0.0f;
-
-    analog_lh = lstick_x;
-    analog_lv = lstick_y;
 }
 
 SDL_bool sdlEventProc(const SDL_Event& e)
@@ -506,9 +520,11 @@ void DoUpdate()
     static float oldmult;
 
     DoFrameRate(1);
-    //if (multiplier > .1) {
-    //    multiplier = .1;
-    //}
+
+    float multmax = sps / 4.0f;
+    if (multiplier > multmax) {
+        multiplier = multmax;
+    }
 
     if(did_just_load){
         did_just_load = false;
@@ -523,7 +539,10 @@ void DoUpdate()
         count = 2;
     }
     
-    count = 1;//Big speed up (gameplay consequences?)
+    //count = 1;//Big speed up for buggy physics
+    if(count > 4){
+        count = 4;
+    }
 
     realmultiplier = multiplier;
     multiplier *= gamespeed;
@@ -922,11 +941,6 @@ int main(int argc, char** argv){
         std::cout << "Failed to initialize PhysFS\n";
         return -1;
     }
-
-    /*if(!PHYSFS_mount("app0:Data.zip", "", 0)){
-        std::cout << "Failed to mount asset pack (app0:Data.zip)\n";
-        return -1;
-    }*/
 
     const char *mounts[4][2] = {
         {"app0:Data.zip", ""},

@@ -596,7 +596,7 @@ void Game::InitGame()
 
     numchallengelevels = 14;
 
-    Account::loadFile(Folders::getUserSavePath());
+    Account::loadFile(Folders::getUserLoadPath());
 
     std::cout << "InitGame B\n";
 

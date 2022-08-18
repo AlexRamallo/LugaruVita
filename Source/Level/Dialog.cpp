@@ -100,7 +100,7 @@ std::string funpackf_string(PHYSFS_File* tfile, int maxlength)
     return result;
 }
 
-void fpackf_string(PHYSFS_File* tfile, std::string text)
+void fpackf_string(FILE* tfile, std::string text)
 {
     fpackf(tfile, "Bi", text.size());
     for (unsigned i = 0; i < text.size(); i++) {
@@ -235,7 +235,7 @@ void Dialog::play()
     }
 }
 
-void Dialog::saveDialogs(PHYSFS_File* tfile)
+void Dialog::saveDialogs(FILE* tfile)
 {
     fpackf(tfile, "Bi", dialogs.size());
 
@@ -255,7 +255,7 @@ Json::Value Dialog::saveDialogs()
     return dialogsarray;
 }
 
-void Dialog::save(PHYSFS_File* tfile)
+void Dialog::save(FILE* tfile)
 {
     fpackf(tfile, "Bi", scenes.size());
     fpackf(tfile, "Bi", type);
@@ -285,7 +285,7 @@ Json::Value Dialog::save()
     return dialog;
 }
 
-void DialogScene::save(PHYSFS_File* tfile)
+void DialogScene::save(FILE* tfile)
 {
     fpackf(tfile, "Bi", location);
     fpackf(tfile, "Bf", color[0]);

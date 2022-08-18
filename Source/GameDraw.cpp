@@ -476,8 +476,13 @@ int Game::DrawGLScene(StereoSide side)
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
         terraintexture.bind();
         terrain.draw(0);
-        //terraintexture2.bind();
-        //terrain.draw(1);
+
+        #ifndef DRAW_SPEEDHACK
+        //multi-layer terrain rendering breaks with speedhack enabled
+        terraintexture2.bind();
+        terrain.draw(1);
+        #endif
+
         //terrain.drawdecals();
 }//MICROPROFILE
 

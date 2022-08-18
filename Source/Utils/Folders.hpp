@@ -69,9 +69,12 @@ public:
     /** Returns full path for user progress save */
     static inline std::string getUserSavePath()
     {
+        return std::string("ux0:data/lugaru/user/users");
+    }
+    static inline std::string getUserLoadPath()
+    {
         return getUserDataPath() + "/users";
     }
-
     static bool makeDirectory(const std::string& path);
 
 private:

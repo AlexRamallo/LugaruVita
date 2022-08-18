@@ -35,7 +35,7 @@ public:
     DialogScene(PHYSFS_File* tfile);
     DialogScene(Json::Value);
     DialogScene(PhysFS::ifstream& ipstream);
-    void save(PHYSFS_File* tfile);
+    void save(FILE* tfile);
     Json::Value save();
 
     int location;
@@ -60,7 +60,7 @@ public:
     Dialog(int type, std::string filename);
     void tick(int id);
     void play();
-    void save(PHYSFS_File* tfile);
+    void save(FILE* tfile);
     Json::Value save();
 
     int type;
@@ -71,7 +71,7 @@ public:
 
     static void loadDialogs(PHYSFS_File*);
     static void loadDialogs(Json::Value);
-    static void saveDialogs(PHYSFS_File*);
+    static void saveDialogs(FILE*);
     static Json::Value saveDialogs();
 
     static bool inDialog() { return (indialogue != -1); }

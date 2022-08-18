@@ -98,9 +98,9 @@ extern "C" {
 
     extern void packf    (                    const char *format, ...);
     extern void spackf   (void *buffer,       const char *format, ...);
-    extern void fpackf   (PHYSFS_File *file,  const char *format, ...);
+    extern void fpackf   (FILE *file,         const char *format, ...);
     extern void vspackf  (void *buffer,       const char *format, va_list args);
-    extern void vfpackf  (PHYSFS_File *file,  const char *format, va_list args);
+    extern void vfpackf  (FILE *file,         const char *format, va_list args);
 
     extern void unpackf  (                    const char *format, ...);
     extern void sunpackf (const void *buffer, const char *format, ...);

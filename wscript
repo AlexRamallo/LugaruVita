@@ -101,7 +101,7 @@ def configure(conf):
 		"-ffast-math",
 		"-mtune=cortex-a9",
 		"-mfpu=neon",
-		'-ftree-vectorize'
+		'-ftree-vectorize',
 	]
 	
 	conf.env.append_unique('CXXFLAGS', "--std=gnu++11")
