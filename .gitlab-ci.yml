@@ -27,7 +27,7 @@ upload-job:
     - if: '$CI_COMMIT_TAG =~ /^release-.*$/'
   image: curlimages/curl:latest
   needs:
-    - job: build-html5-job
+    - job: build-job
       artifacts: true
   script:
     - |
