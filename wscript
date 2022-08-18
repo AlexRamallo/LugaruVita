@@ -91,7 +91,7 @@ def configure(conf):
 
 	conf.env.DESTDIR = "./INSTALL"
 	conf.env.PROJECT_TITLEID = "LUGARU069"
-	conf.env.PROJECT_NAME = "LugaruVita"
+	conf.env.PROJECT_NAME = "Lugaru"
 	
 	conf.env.CFLAGS = [
 		"-Wall",
@@ -161,7 +161,7 @@ def build(bld):
 		major = 1,
 		minor = 3,
 		patch = 0,
-		suffix = "-dev",
+		suffix = "-beta",
 		release = "Vita Homebrew"
 	)
 

@@ -936,6 +936,16 @@ int main(int argc, char** argv){
     //*/
     #endif
 
+    //ensure `ux0:data/lugaru` exists
+    SceIoStat stat;
+    if(sceIoGetstat("ux0:data/lugaru", &stat) < 0){
+        if(sceIoMkdir("ux0:data/lugaru", 0777) == -1){
+            std::cout << "Failed to create Lugaru data directory\n";
+            return -1;
+        }
+    }
+
+
     #if PACK_ASSETS
     if(!PHYSFS_init(nullptr)){
         std::cout << "Failed to initialize PhysFS\n";

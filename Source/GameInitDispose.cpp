@@ -91,7 +91,7 @@ static pthread_mutex_t mtxLog;
 static bool did_init_log = false;
 #endif
 
-#define LOG_BUF false
+//#define LOG_BUF false
 
 #if LOG_BUF
 static const int log_buf_size = 1000;
@@ -137,7 +137,7 @@ void LOG(const std::string &fmt, ...)
 #endif
 
 #if !LOG_BUF
-    //if(!log_enabled) return;
+    if(!log_enabled) return;
 #endif
 
 #if LOG_MUTEX
