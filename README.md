@@ -54,11 +54,38 @@ Builds tested on Ubuntu only, but it might still work on Windows/Mac with minor 
 
 ## Dependencies
 
-* Python 3.5+
-* [PVRTexTool from Imagination Technologies](https://developer.imaginationtech.com/pvrtextool/) (must be in your PATH)
+* Python 3.7+ and Pip
+* "Pillow" library from Pip
+* [PVRTexTool from Imagination Technologies](https://developer.imaginationtech.com/pvrtextool/). You can create a free account to download it. (make sure `PVRTexToolCLI` is in your PATH)
 * [VitaSDK](https://vitasdk.org) (make sure the `VITASDK` environment variable is present)
+* [SDL2 VitaGL library by NorthFear](https://github.com/Northfear/SDL/tree/vitagl)
+
+## Installing Pillow
+
+Depending on how pip is installed, you may need one of the following variations:
+
+```
+pip install pillow
+#or
+python3 -m pip install pillow
+#or
+pip3 install pillow
+#or...
+```
+
+## Building SDL2-VitaGL
+
+```
+git clone https://github.com/Northfear/SDL sdl2-vita --branch vitagl
+cd sdl2-vita
+mkdir build && cd build
+cmake .. -DCMAKE_TOOLCHAIN_FILE=$VITASDK/share/vita.toolchain.cmake -DBUILD_TYPE=Release
+make install
+```
 
 ## Building a release VPK
+
+NOTE: `waf` is a Python script which requires Python 3.7 or later. You might have to use `python3 ./waf` instead, depending on how your system is configured.
 
 ```
 ./waf configure_release
