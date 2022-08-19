@@ -140,8 +140,6 @@ def build(bld):
 	#Data folder processing (see below)
 	build_assets(bld)
 
-	bld.add_group()
-
 	bld.recurse("vitagl")
 
 	defs = [
@@ -262,7 +260,7 @@ def build_assets(bld):
 
 	#convert images
 	for img in images:
-		tg = bld(rule = do_encode_pvr, source = img, rename = False)
+		tg = bld(rule = do_encode_pvr, source = img, target = img.get_bld(), rename = False)
 		#Ensure files are reprocessed if we modify the rules file
 		tg.post()
 		for task in tg.tasks:
@@ -270,7 +268,7 @@ def build_assets(bld):
 	
 	#Copy other assets
 	for ass in other:
-		tg = bld(rule = do_copy, source = ass)
+		tg = bld(rule = do_copy, source = ass, target = ass.get_bld())
 		#Ensure files are reprocessed if we modify the rules file
 		tg.post()
 		for task in tg.tasks:
