@@ -283,7 +283,7 @@ def build_assets(bld):
 		def write_file_to_package(task):
 			task.no_errcheck_out = True
 			with ziplock:
-				task.exec_command(task.env.ZIP + ['-0ur', task.generator.datazip.abspath(), task.inputs[0].path_from(task.generator.datazip.parent)])
+				task.exec_command(task.env.ZIP + ['-ur', task.generator.datazip.abspath(), task.inputs[0].path_from(task.generator.datazip.parent)])
 		#zip each file individually for fast partial rebuilds
 		for file in datafiles:
 			bld(

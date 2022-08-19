@@ -319,6 +319,14 @@ void Menu::updateSettingsMenu()
     if (bloodtoggle == 2) {
         setText(2, "Blood: On, high detail (slower)");
     }
+
+    switch(phys_quality){
+        default: setText(7, "Simulation Quality: Low"); break;
+        case 1: setText(7, "Simulation Quality: Medium (default)"); break;
+        case 2: setText(7, "Simulation Quality: High"); break;
+        case 3: setText(7, "Simulation Quality: Ultra"); break;
+    }
+
     setText(4, ismotionblur ? "Blur Effects: Enabled (less compatible)" : "Blur Effects: Disabled (more compatible)");
     setText(5, decalstoggle ? "Decals: Enabled (slower)" : "Decals: Disabled");
     setText(6, musictoggle ? "Music: Enabled" : "Music: Disabled");
@@ -400,9 +408,10 @@ void Menu::Load()
             addButton(10, "", 20, 195); //mouse speed
             addButton(11, "", 10 + 60, 160); //volume
             addButton(13, "", 30, 335); //damage bar
+            addButton(7, "", 30, 125); //simulation quality
             //addButton(7, "-Configure Controls-", 10 + 15, 90);
             //addButton(4, "", 10, 90); //blur effects
-            addButton(12, "-Configure Stereo -", 10 + 15, 125);
+            addButton(12, "-Configure Stereo -", 10 + 15, 90);
             addButton(8, "Back", 10, 10);
             updateSettingsMenu();
             break;
@@ -708,10 +717,16 @@ void Menu::Tick()
                         }
                         break;
                     case 7: // controls
+                        /*
                         flash();
                         mainmenu = 4;
                         selected = -1;
                         keyselect = -1;
+                        */
+                        phys_quality++;
+                        if(phys_quality > 3){
+                            phys_quality = 0;
+                        }
                         break;
                     case 8:
                         flash();

@@ -38,6 +38,7 @@ void DefaultSettings()
     ismotionblur = 0;
     detail = 2;
     usermousesensitivity = 1;
+    phys_quality = 1;
     newscreenwidth = kContextWidth = 960;
     newscreenheight = kContextHeight = 544;
     fullscreen = 0;
@@ -107,6 +108,8 @@ void SaveSettings()
     opstream << fullscreen;
     opstream << "\nMouse sensitivity:\n";
     opstream << usermousesensitivity;
+    opstream << "\nSimulation Quality:\n";
+    opstream << phys_quality;
     opstream << "\nBlur(0,1):\n";
     opstream << ismotionblur;
     opstream << "\nOverall Detail(0,1,2) higher=better:\n";
@@ -224,6 +227,8 @@ bool LoadSettings()
             ipstream >> fullscreen;
         } else if (!strncmp(setting, "Mouse sensitivity", 17)) {
             ipstream >> usermousesensitivity;
+        } else if (!strncmp(setting, "Simulation Quality", 18)) {
+            ipstream >> phys_quality;
         } else if (!strncmp(setting, "Blur", 4)) {
             ipstream >> ismotionblur;
         } else if (!strncmp(setting, "Overall Detail", 14)) {
@@ -328,10 +333,10 @@ bool LoadSettings()
         detail = 0;
     }
     if (screenwidth < minscreenwidth || screenwidth > maxscreenwidth) {
-        screenwidth = 1024;
+        screenwidth = 960;
     }
     if (screenheight < minscreenheight || screenheight > maxscreenheight) {
-        screenheight = 768;
+        screenheight = 544;
     }
 
     newdetail = detail;

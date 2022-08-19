@@ -23,6 +23,7 @@ along with Lugaru.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "Game.hpp"
 
+extern int phys_quality;
 extern float usermousesensitivity;
 extern bool ismotionblur;
 extern bool floatjump;

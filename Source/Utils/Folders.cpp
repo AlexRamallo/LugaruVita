@@ -80,7 +80,7 @@ std::string Folders::getConfigFilePath()
     #if defined(_WIN32) || (defined(__APPLE__) && defined(__MACH__))
         configFolder = getUserDataPath();
     #elif PLATFORM_VITA
-        configFolder = "/config";
+        configFolder = "ux0:data/lugaru";
     #else // Linux
         configFolder = getGenericDirectory("XDG_CONFIG_HOME", ".config");
         makeDirectory(configFolder);

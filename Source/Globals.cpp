@@ -30,6 +30,7 @@ bool visibleloading = false;
 float volume = 0;
 bool ismotionblur = false;
 float usermousesensitivity = 0;
+int phys_quality = 1;
 bool floatjump = false;
 bool cellophane = false;
 bool autoslomo = false;

@@ -521,7 +521,8 @@ void DoUpdate()
 
     DoFrameRate(1);
 
-    float multmax = sps / 4.0f;
+    float multmax = 0.2;
+
     if (multiplier > multmax) {
         multiplier = multmax;
     }
@@ -535,13 +536,23 @@ void DoUpdate()
     fps = 1 / multiplier;
 
     count = multiplier * sps;
-    if (count < 2) {
-        count = 2;
+    if (count < 1) {
+        count = 1;
     }
     
-    //count = 1;//Big speed up for buggy physics
-    if(count > 4){
-        count = 4;
+    int max_count;
+    if(phys_quality == 0){
+        max_count = 1;
+    }else if(phys_quality == 1){
+        max_count = 2;
+    }else if(phys_quality == 2){
+        max_count = 4;
+    }else{
+        max_count = 8;
+    }
+
+    if(count > max_count){
+        count = max_count;
     }
 
     realmultiplier = multiplier;
