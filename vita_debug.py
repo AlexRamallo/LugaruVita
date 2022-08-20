@@ -14,8 +14,8 @@ outdmp = "debug.psp2dmp"
 outlog = "lugaru_runlog.txt"
 
 logfile = "lugaru_runlog.txt"
-elf = "build/Lugaru.elf"
-#elf = "build/release/Lugaru.elf"
+#elf = "build/Lugaru.elf"
+elf = "build/release/Lugaru.elf"
 
 #logfile = "SharkServer.log"
 #elf = "build/tool_vita_shark_eboot_debug/tool/shark_server/VitaShaRK Server.elf"

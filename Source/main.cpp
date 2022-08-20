@@ -548,7 +548,7 @@ void DoUpdate()
     }else if(phys_quality == 2){
         max_count = 4;
     }else{
-        max_count = 8;
+        max_count = 8; 
     }
 
     if(count > max_count){

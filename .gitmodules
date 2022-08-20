@@ -1,3 +1,6 @@
 [submodule "vitagl"]
 	path = vitagl
 	url = ../vitagl-lugaru
+[submodule "sdl2-vitagl-lugaru"]
+	path = sdl2-vitagl-lugaru
+	url = ../sdl2-vitagl-lugaru

@@ -14,6 +14,10 @@ build-job:
   rules:
     - if: '$CI_COMMIT_TAG =~ /^release-.*$/'
   script:
+    - cd sdl2-vitagl-lugaru && mkdir -p build && cd build
+    - cmake .. -DCMAKE_TOOLCHAIN_FILE=$VITASDK/share/vita.toolchain.cmake -DCMAKE_BUILD_TYPE=Release -DVIDEO_VITA_VGL=TRUE -DVIDEO_VITA_PVR=FALSE
+    - make install -j`nproc`
+    - cd ../../
     - python3 ./waf configure_release
     - python3 ./waf build_release --tex-quality=pvrtcbest
     - mv build/release/Lugaru.vpk ./Lugaru.vpk
