@@ -140,6 +140,8 @@ def build(bld):
 	#Data folder processing (see below)
 	build_assets(bld)
 
+	bld.add_group();
+
 	bld.recurse("vitagl")
 
 	defs = [

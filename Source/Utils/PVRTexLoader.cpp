@@ -230,7 +230,6 @@ bool PVRTexLoader::loadTexture(const char *filename, uint8_t **data, PVRHeader *
 	}
 
 	PHYSFS_close(fd);
-	ASSERT(0);
 	return true;
 }
 /**
