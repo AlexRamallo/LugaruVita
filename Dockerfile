@@ -33,10 +33,3 @@ RUN git clone https://github.com/vitasdk/vdpm && \
 	cd vdpm && \
 	./bootstrap-vitasdk.sh && \
 	./install-all.sh
-
-#Build and install SDL2-VitaGL port
-RUN git clone https://github.com/Northfear/SDL --branch=vitagl && \
-	cd SDL && mkdir build && cd build && \
-	cmake .. -DCMAKE_TOOLCHAIN_FILE=$VITASDK/share/vita.toolchain.cmake -DCMAKE_BUILD_TYPE=Release -DVIDEO_VITA_VGL=TRUE -DVIDEO_VITA_PVR=FALSE && \
-	make install
-

@@ -1,113 +1,89 @@
-# Compiling
+# Building LugaruVita
 
-As it stands, the version of Lugaru in this repository supports Linux, OSX
-and Windows. Not all toolchains are tested, thus we would welcome help from
-new contributors especially regarding MSVC and OSX support.
+The original build system was replaced with waf in order to more easily support inclusion of an asset processor (for transcoding textures). Waf is included in the repo (it's a Python script), so there's no need to download it.
 
-## Common dependencies
+Builds tested on Ubuntu only, but it might still work on Windows/Mac with minor modifications to the instructions below.
 
-You will need the following development libraries and tools, usually
-available via your package manager (dnf, urpmi, apt, brew, etc.):
+**NOTE:** There's a Dockerfile that you can use to build, or as a reference for setting up your environment.
 
-- CMake
-- SDL2
-- Mesa OpenGL Utility library (GLU)
-- LibJPEG (TurboJPEG)
-- LibPNG
-- OpenAL Soft
-- Ogg, Vorbis and Vorbisfile
+## Dependencies
 
-## GNU/Linux
+You need to obtain these dependencies yourself
 
-Both GCC and Clang are supported as compilers. Define the `CC` and `CXX` env
-variables according to the compiler you want to use, if not the default one.
-Then build with:
+* Python 3.7+ and Pip
+* "Pillow" library from Pip
+* [PVRTexTool from Imagination Technologies](https://developer.imaginationtech.com/pvrtextool/). You can create a free account to download it. (make sure `PVRTexToolCLI` is in your PATH)
+* [VitaSDK](https://vitasdk.org) (make sure the `VITASDK` environment variable is present)
+
+## Installing Pillow
+
+Depending on how pip is installed, you may need one of the following variations:
 
 ```
+pip install pillow
+#or
+python3 -m pip install pillow
+#or
+pip3 install pillow
+#or...
+```
+
+## Building SDL2-VitaGL
+
+TODO: improve this
+
+```
+git clone https://gitlab.com/alexramallo/lugaruvita && cd lugaruvita
+git submodule --init --recursive
+
+cd sdl2-vitagl-lugaru
 mkdir build && cd build
-cmake ..
-make
+cmake .. -DCMAKE_TOOLCHAIN_FILE=$VITASDK/share/vita.toolchain.cmake -DCMAKE_BUILD_TYPE=Release -DVIDEO_VITA_VGL=TRUE -DVIDEO_VITA_PVR=FALSE
+make install -j8
 ```
 
-The resulting `lugaru` binary will expect to find the `Data/` folder next to
-it, so either copy `build/lugaru` in the main directory, or create a symbolic
-link to run the game.
+## Building a release VPK
 
-### Packaging
-
-If you want to package Lugaru for a GNU/Linux distribution, or if you want to
-install it system-wide locally, you need to set the `SYSTEM_INSTALL` CMake
-option, and (optionally) define the CMAKE_INSTALL_BINDIR and _DATADIR if they
-differ from the default ones (`bin` and `share` appended to the prefix).
-Example:
+NOTE: `waf` is a Python script and this project requires Python 3.7 or later. You might have to use `python3 ./waf` instead, depending on how your system is configured.
 
 ```
-mkdir build && cd build
-cmake -DSYSTEM_INSTALL=ON \
-      -DCMAKE_INSTALL_BINDIR=games \
-      -DCMAKE_INSTALL_DATADIR=share/games \
-      ..
-make
-sudo make install
+./waf configure_release
+./waf build_release --tex-quality=pvrtcbest
+
+#Alternatively (only if you have VitaCompanion installed on your Vita/VitaTV)
+
+./waf install_release --tex-quality=pvrtcbest --PSVITAIP=<ipaddress>:<port> --destdir=./INSTALL
 ```
 
-## Mac OSX
+Output will be at `build/release/LugaruVita.vpk`. If you used the `install_release` command instead, then the VPK will also be uploaded to your Vita/VitaTV at `ux0:data/LugaruVita.vpk`, so that it can be installed with VitaShell.
 
-The instructions are similar to the GNU/Linux ones, provided you have
-installed Xcode and the required dependencies (e.g. via homebrew).
+Note: Transcoding textures can take a very long time (multiple hours), so for testing purposes it's best to use `--tex-quality=pvrtcnormal` or `--tex-quality=pvrtcfastest` (which is default if you omit the option)
 
-## Windows
-
-As of now, only MinGW32 and MinGW64 are supported, and were only tested by
-cross-compiling from Linux.
-
-### MSVC
-
-Help needed :)
-
-### MinGW on Windows
-
-Help needed :)
-
-### Cross-compiling from Linux
-
-Cross-compiling for Windows using MinGW32 and MinGW64 was tested on Fedora
-and Mageia. The instructions may vary for other distros, do not hesitate to
-send a merge request to update them if need be.
-
-You will need to install the `mingw32-` or `mingw64-` variants of the
-dependencies listed above.
-
-#### MinGW32
-
-First you will need to setup some environment variables:
-```
-export PKG_CONFIG_LIBDIR="/usr/i686-w64-mingw32/sys-root/mingw/lib/pkgconfig:/usr/i686-w64-mingw32/sys-root/mingw/share/pkgconfig"
-export PATH=/usr/i686-w64-mingw32/bin:$PATH
-```
-
-Then build:
-```
-mkdir build-mingw32 && cd build-mingw32
-cmake .. -DCMAKE_TOOLCHAIN_FILE=/usr/share/mingw/toolchain-mingw32.cmake -DCMAKE_INSTALL_PREFIX=install
-make
-make install
-```
-
-The `make install` step should copy the `Data/` and required DLLs from the
-system to `build-mingw32/install`.
-
-#### MinGW64
-
-The instructions are similar to those for MinGW32:
+## Debug/incremental builds (for development)
 
 ```
-export PKG_CONFIG_LIBDIR="/usr/x86_64-w64-mingw32/sys-root/mingw/lib/pkgconfig:/usr/x86_64-w64-mingw32/sys-root/mingw/share/pkgconfig"
-export PATH=/usr/x86_64-w64-mingw32/bin:$PATH
+./waf configure --no-audio --profiling
+./waf build --no-vpk
 ```
+
+This will build the assets `build/Data.zip` and the application `build/eboot.bin`.
+
+If using [VitaCompanion](https://github.com/devnoname120/vitacompanion), you can automatically **build + install + launch** the game on your Vita/VitaTV with the following command:
+
 ```
-mkdir build-mingw64 && cd build-mingw64
-cmake .. -DCMAKE_TOOLCHAIN_FILE=/usr/share/mingw/toolchain-mingw64.cmake -DCMAKE_INSTALL_PREFIX=install
-make
-make install
+./waf install --PSVITAIP=<ipaddress>:<port> --destdir=./INSTALL --no-vpk --vclaunch=1
 ```
+
+This gives you a fast edit-run loop with a single command (as long as your FTP connection is fast). 
+
+That will ONLY work if you've installed the VPK manually through VitaShell at least once. This command also works for release builds by replacing `install` with `install_release`
+
+(also note the --destdir flag is a lazy hack, don't think about it too much...)
+
+### Debug/development tools
+
+Note that LugaruOSS has its own runtime development tools, but I have not tested to see if they work.
+
+* If you configured your debug build with the `--profiling` flag, you can press **Left Shoulder + Triangle** to dump the last 100 frames of profiling data to `ux0:data/microprofile_dump.html` as well as the last couple thousand lines of logs to `ux0:data/lugaru_runlog.txt`.
+
+* `vita_debug.py` is a simple script that will automatically download the last core dump and lugaru_runlog.txt, and display them with vitaparsecore and a konsole window using lnav. This is highly specific to my workflow, but it can be trivially modified if you want. It requires you to manually change the ip address of your vita before running.
